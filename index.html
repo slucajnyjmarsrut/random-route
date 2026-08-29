@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" name="viewport"/>
+<meta content="#f7faf8" name="theme-color"/>
+<meta content="noindex,nofollow,noarchive" name="robots"/>
+<meta content="no-referrer" name="referrer"/>
+<meta content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self' https://routing.openstreetmap.de https://overpass-api.de https://*.wikipedia.org; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" http-equiv="Content-Security-Policy"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<title>Случайный маршрут — Якутск v8</title>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f3f6f4;--card:#fff;--ink:#10231c;--muted:#718078;--green:#0c5a42;--green2:#167457;
+  --pale:#e7f2ed;--line:#dce6e0;--orange:#ff681d;--amber:#f5a800;--red:#cf4f4f;--shadow:0 16px 34px rgba(28,55,43,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#dde6e1;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{display:flex;justify-content:center}.app{width:100%;max-width:470px;height:100dvh;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.18)}
+button,input{font:inherit}.topbar{min-height:82px;padding:max(12px,env(safe-area-inset-top)) 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:9px;background:rgba(255,255,255,.97);border-bottom:1px solid #e5ebe7;position:relative;z-index:5}.topbar-main{min-width:0;flex:1}.brand{font-size:19px;font-weight:950;letter-spacing:-.55px;white-space:nowrap}.subtitle{font-size:9px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.stats-top{display:flex;align-items:stretch;gap:6px;flex:0 0 auto}.streak-top-card{min-width:96px;background:linear-gradient(145deg,#fff3e9,#ffe5d4);border:1px solid #ffc8a5;border-radius:16px;padding:6px 8px;box-shadow:0 4px 12px rgba(185,83,24,.07)}.streak-top-label{display:block;font-size:7px;line-height:1;color:#a4582d;font-weight:950;letter-spacing:.08em;margin-bottom:4px}.streak-top-value{display:flex;align-items:baseline;gap:4px;white-space:nowrap}.streak-top-value b{font-size:11px;color:#7d3d1d}.streak-top-value em{font-size:10px;color:#bf5a23;font-style:normal;font-weight:950}.coin-top-card{min-width:58px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#fff6d8;border:1px solid #efd987;border-radius:16px;padding:6px 8px;font-weight:950}.coin-top-card small{font-size:7px;color:#8c741f;font-weight:900}.coin-top-card b{font-size:11px;margin-top:2px}.pill{display:flex;align-items:center;gap:5px;background:#fff4cd;border:1px solid #f0db8c;padding:7px 9px;border-radius:999px;font-size:11px;font-weight:850}.pill.streak{background:#fff0e7;border-color:#ffd0b6;color:#97451d}
+.content{height:calc(100dvh - 82px);overflow-y:auto;padding:14px 14px calc(90px + env(safe-area-inset-bottom));scrollbar-width:none}.content::-webkit-scrollbar{display:none}.screen{display:none}.screen.active{display:block}
+.hero{background:linear-gradient(145deg,#0e5942,#123e31);color:#fff;border-radius:27px;padding:19px;box-shadow:var(--shadow);margin-bottom:13px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:160px;height:160px;border:26px solid rgba(255,255,255,.05);border-radius:50%;right:-56px;top:-70px}.hero small{color:#bfe0d2;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.hero h1{font-size:27px;line-height:1.08;margin:6px 0 8px;letter-spacing:-.8px}.hero p{font-size:12px;line-height:1.45;color:#e5f2ed;margin:0;max-width:320px}
+.card{background:#fff;border:1px solid #e5ebe8;border-radius:23px;padding:15px;box-shadow:0 8px 24px rgba(27,52,42,.06);margin-bottom:11px}.title{font-size:15px;font-weight:850;margin-bottom:3px}.sub{font-size:10px;color:var(--muted);margin-bottom:11px}.distance-wrap{display:flex;align-items:center;gap:10px}.distance{flex:1;border:1px solid #ccd9d1;background:#f8faf9;border-radius:16px;padding:13px 14px;font-size:20px;font-weight:900;outline:none}.unit{font-size:13px;font-weight:850;color:#53645b}.hint{font-size:9px;color:#8b9690;margin-top:7px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.choice{border:1px solid #e1e8e4;background:#f7faf8;border-radius:16px;padding:11px 5px;font-size:11px;font-weight:850;text-align:center}.choice span{display:block;font-size:19px;margin-bottom:4px}.choice.active{border-color:#6fa58f;background:#e8f3ee;color:#0c5a42;box-shadow:inset 0 0 0 1px #6fa58f}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.toggle{width:48px;height:28px;border:0;border-radius:999px;background:#ccd5d0;padding:3px}.toggle:before{content:"";display:block;width:22px;height:22px;background:#fff;border-radius:50%;box-shadow:0 3px 7px rgba(0,0,0,.13);transition:.18s}.toggle.on{background:var(--green)}.toggle.on:before{transform:translateX(20px)}.primary{border:0;width:100%;border-radius:18px;padding:15px 14px;color:#fff;background:linear-gradient(135deg,#0c5a42,#154536);font-size:13px;font-weight:900;box-shadow:0 10px 22px rgba(12,90,66,.20)}.primary.orange{background:linear-gradient(135deg,#ff7b29,#ef5710);box-shadow:0 10px 22px rgba(240,88,14,.22)}.primary:disabled{opacity:.45;box-shadow:none}.secondary{border:1px solid #d5dfd9;background:#fff;color:#234438;width:100%;border-radius:17px;padding:13px;font-size:12px;font-weight:850}.danger-lite{border:1px solid #efd4d4;background:#fff8f8;color:#a14343;width:100%;border-radius:17px;padding:12px;font-size:11px;font-weight:850}
+.map{height:292px;border-radius:25px;overflow:hidden;position:relative;background:#e8eeea;border:1px solid #d9e3dd;box-shadow:var(--shadow);margin-bottom:12px}.map:before{content:"";position:absolute;inset:0;background-image:linear-gradient(28deg,transparent 47%,rgba(255,255,255,.88) 48%,rgba(255,255,255,.88) 51%,transparent 52%),linear-gradient(112deg,transparent 47%,rgba(255,255,255,.75) 48%,rgba(255,255,255,.75) 51%,transparent 52%);background-size:106px 78px,132px 92px;opacity:.9}.park{position:absolute;background:#c8ddcb;border-radius:45%;opacity:.88}.pa{width:130px;height:88px;left:-15px;top:20px}.pb{width:145px;height:102px;right:-24px;bottom:18px}.pc{width:92px;height:64px;left:170px;bottom:5px}.map svg{position:absolute;inset:0;width:100%;height:100%}.map-label{position:absolute;left:13px;top:13px;background:rgba(255,255,255,.95);border-radius:14px;padding:8px 10px;font-size:10px;font-weight:850;box-shadow:0 6px 16px rgba(25,50,40,.12)}.gps-state{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.96);border-radius:999px;padding:7px 9px;font-size:9px;font-weight:850;box-shadow:0 6px 16px rgba(25,50,40,.12)}.pin{position:absolute;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 8px 20px rgba(20,50,38,.2);border:3px solid #fff;font-size:16px}.start{left:30px;bottom:35px;background:var(--green);color:#fff}.point{right:48px;top:70px;background:var(--orange);color:#fff}.lock{position:absolute;right:14px;bottom:14px;background:#153f32;color:white;border-radius:15px;padding:9px 11px;font-size:9px;font-weight:850;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.route-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px}.summary{background:#fff;border:1px solid #e5ebe8;border-radius:16px;padding:10px;text-align:center}.summary b{font-size:14px}.summary span{font-size:8px;color:var(--muted);display:block;margin-top:2px}.checkpoint{background:linear-gradient(145deg,#123f31,#0a5d43);color:#fff;border-radius:25px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}.checkpoint .eyebrow{font-size:9px;color:#bfe0d2;text-transform:uppercase;letter-spacing:.1em;font-weight:850}.checkpoint h3{margin:6px 0 8px;font-size:19px}.checkpoint p{font-size:11px;color:#e0efe9;line-height:1.45;margin:0 0 12px}.checkrow{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}.check{flex:1;background:rgba(255,255,255,.1);border-radius:14px;padding:9px;font-size:9px}.check b{display:block;font-size:11px;margin-top:2px}.check.ok{background:rgba(99,214,162,.18)}.photo-preview{width:100%;aspect-ratio:16/10;border-radius:17px;background:#e8efeb;display:none;object-fit:cover;margin:10px 0}.photo-preview.show{display:block}.camera-input{display:none}.message{border-radius:17px;padding:12px;font-size:10px;line-height:1.4;margin-bottom:10px}.message.success{background:#e9f7ef;border:1px solid #b9dfc9;color:#225d3f}.message.warn{background:#fff7e5;border:1px solid #f1d28c;color:#775b19}.message.error{background:#fff0f0;border:1px solid #efc7c7;color:#913d3d}.hidden{display:none!important}
+.rank-row,.reward-row{background:#fff;border:1px solid #e5ebe8;border-radius:18px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}.rank-place{width:34px;height:34px;border-radius:50%;background:#edf2ef;display:grid;place-items:center;font-size:11px;font-weight:900}.rank-main,.reward-main{flex:1}.rank-main b,.reward-main b{font-size:11px}.rank-main span,.reward-main span{display:block;font-size:9px;color:var(--muted);margin-top:2px}.price{font-size:10px;font-weight:900;color:#745900}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pstat{background:#fff;border:1px solid #e5ebe8;border-radius:18px;padding:13px}.pstat b{display:block;font-size:20px;margin-top:4px}.pstat span{font-size:9px;color:var(--muted)}.streak-card{background:linear-gradient(145deg,#fff5ed 0%,#ffe4d1 100%);border:1px solid #ffc69f;border-radius:25px;padding:16px;margin-bottom:11px;box-shadow:0 10px 28px rgba(196,92,30,.10);overflow:hidden;position:relative}.streak-card:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;background:rgba(255,125,48,.08);right:-34px;top:-40px}.streak-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;z-index:1}.streak-kicker{font-size:8px;font-weight:950;letter-spacing:.1em;color:#a95c31}.streak-main{font-size:26px;font-weight:950;letter-spacing:-.7px;margin-top:3px;color:#733814}.streak-main small{font-size:12px;font-weight:900;color:#a55a31}.streak-coef-badge{flex:0 0 auto;background:#fff;border:1px solid #ffc69f;border-radius:16px;padding:7px 9px;text-align:center;box-shadow:0 5px 13px rgba(153,70,25,.08)}.streak-coef-badge span{font-size:7px;color:#9c623f;display:block;font-weight:900}.streak-coef-badge b{display:block;font-size:18px;color:#d65f20;margin-top:1px}.streak-progress{margin-top:12px;position:relative;z-index:1}.streak-progress-row{display:flex;justify-content:space-between;font-size:8px;font-weight:850;color:#8d5738;margin-bottom:5px}.streak-progress-track{height:8px;background:rgba(255,255,255,.72);border:1px solid rgba(229,123,65,.18);border-radius:999px;overflow:hidden}.streak-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#ff914c,#ed641d);border-radius:999px;transition:width .25s ease}.streak-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}.day{min-height:45px;border-radius:12px;background:rgba(255,255,255,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:8px;font-weight:850;color:#8b674f;border:1px solid rgba(255,255,255,.8)}.day .day-date{font-size:10px;font-weight:950;color:#7d4b2f}.day.ok{background:linear-gradient(145deg,#ff9858,#ef6a24);color:#fff;border-color:#f0803f;box-shadow:0 4px 10px rgba(221,95,25,.14)}.day.ok .day-date{color:#fff}.day.today{outline:2px solid rgba(214,95,32,.28);outline-offset:1px}.nav{position:absolute;left:0;right:0;bottom:0;padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid #dfe7e2;display:grid;grid-template-columns:repeat(5,1fr);backdrop-filter:blur(15px);z-index:10}.nav button{border:0;background:transparent;color:#89958f;padding:5px 2px;font-size:9px;font-weight:800}.nav i{font-style:normal;display:block;font-size:18px;margin-bottom:2px}.nav button.active{color:var(--green)}.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,16px);background:#10231c;color:#fff;padding:10px 13px;border-radius:999px;font-size:10px;font-weight:850;opacity:0;transition:.2s;pointer-events:none;z-index:20;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.store-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;background:#e8efeb;border-radius:16px;padding:4px;margin-bottom:12px}.store-tab{border:0;background:transparent;border-radius:12px;padding:10px 8px;font-size:11px;font-weight:900;color:#6e7b74}.store-tab.active{background:#fff;color:var(--green);box-shadow:0 4px 12px rgba(31,62,48,.08)}
+.store-panel{display:none}.store-panel.active{display:block}.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.coin-pack{background:#fff;border:1px solid #e4ebe7;border-radius:21px;padding:14px;box-shadow:0 7px 20px rgba(27,52,42,.05);position:relative;overflow:hidden}.coin-pack.best{border-color:#e8bd54;background:linear-gradient(155deg,#fffdf6,#fff7da)}.coin-pack .badge{position:absolute;right:8px;top:8px;background:#173f32;color:#fff;border-radius:999px;padding:4px 7px;font-size:7px;font-weight:900;text-transform:uppercase}.coin-pack .coin-icon{font-size:27px}.coin-pack h3{font-size:18px;margin:7px 0 2px}.coin-pack p{font-size:9px;color:var(--muted);margin:0 0 11px}.buy-btn{width:100%;border:0;border-radius:13px;padding:10px 8px;background:#173f32;color:#fff;font-size:10px;font-weight:900}.coin-pack.best .buy-btn{background:#d99a00}.store-note{font-size:9px;line-height:1.45;color:#7c8982;background:#f8faf9;border:1px solid #e3ebe6;border-radius:15px;padding:10px;margin:11px 0}.feature-card{background:#fff;border:1px solid #e4ebe7;border-radius:22px;padding:15px;margin-bottom:9px;box-shadow:0 7px 20px rgba(27,52,42,.05)}.feature-head{display:flex;align-items:flex-start;gap:11px}.feature-icon{width:43px;height:43px;flex:0 0 43px;border-radius:15px;background:#e9f3ee;display:grid;place-items:center;font-size:21px}.feature-main{flex:1}.feature-main h3{font-size:13px;margin:1px 0 3px}.feature-main p{font-size:9px;line-height:1.4;color:var(--muted);margin:0}.feature-price{font-size:11px;font-weight:950;color:#173f32;white-space:nowrap}.feature-list{margin:10px 0 11px;padding:0;list-style:none}.feature-list li{font-size:9px;margin:6px 0;color:#41554b}.feature-list li:before{content:'✓';font-weight:950;color:#16825d;margin-right:7px}.feature-action{width:100%;border:1px solid #cfe0d7;background:#eef7f2;color:#14553e;border-radius:14px;padding:11px;font-size:10px;font-weight:900}.feature-action.paid{background:#173f32;color:#fff;border-color:#173f32}.feature-action.active{background:#e6f5ec;color:#21724f;border-color:#b9ddc8}.premium-chip{display:inline-flex;align-items:center;gap:5px;background:#edf8f2;border:1px solid #c9e7d7;color:#176343;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;margin-top:6px}.modal-backdrop{position:fixed;inset:0;background:rgba(9,24,18,.54);display:none;align-items:flex-end;justify-content:center;z-index:50}.modal-backdrop.show{display:flex}.purchase-modal{width:min(470px,100%);background:#fff;border-radius:27px 27px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -15px 50px rgba(0,0,0,.2)}.purchase-modal .grab{width:44px;height:4px;background:#d8dfdb;border-radius:999px;margin:0 auto 15px}.purchase-modal h2{font-size:20px;margin:0 0 5px}.purchase-modal p{font-size:10px;line-height:1.5;color:var(--muted);margin:0 0 13px}.purchase-total{display:flex;justify-content:space-between;background:#f6f9f7;border:1px solid #e2e9e5;border-radius:16px;padding:12px;margin-bottom:11px;font-size:12px}.purchase-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}.purchase-actions button{border-radius:15px;padding:12px;border:0;font-size:10px;font-weight:900}.purchase-cancel{background:#edf2ef;color:#53645b}.purchase-confirm{background:#173f32;color:#fff}.paid-balance{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:15px;padding:10px 12px;margin-top:12px;max-width:230px}.paid-balance span{font-size:9px;color:#cfe7dd}.paid-balance b{font-size:14px}.store-section-title{font-size:13px;font-weight:950;margin:3px 0 8px}.small-rule{font-size:8px;color:#839089;line-height:1.45;margin-top:8px}
+
+.gold-section{margin-top:14px}.gold-card{background:linear-gradient(145deg,#fffdf5,#fff5c9);border:1px solid #e8c45d;border-radius:22px;padding:14px;margin-bottom:9px;box-shadow:0 7px 20px rgba(104,76,9,.08)}.gold-head{display:flex;align-items:center;gap:10px}.gold-icon{width:43px;height:43px;border-radius:15px;background:linear-gradient(145deg,#f7cf55,#d99a00);display:grid;place-items:center;font-size:21px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}.gold-main{flex:1}.gold-main b{font-size:12px}.gold-main span{display:block;font-size:9px;color:#77652e;margin-top:3px}.gold-price{font-size:11px;font-weight:950;color:#7f5c00;white-space:nowrap}.gold-buy{width:100%;border:0;border-radius:14px;padding:11px;margin-top:10px;background:linear-gradient(135deg,#e8b32f,#c98b00);color:#fff;font-size:10px;font-weight:950}.gold-buy:disabled{background:#e9e2cc;color:#9a8b61}.badge-showcase{background:#fff;border:1px solid #e5ebe8;border-radius:23px;padding:14px;margin-top:11px}.badge-showcase h3{font-size:13px;margin:0 0 4px}.badge-showcase p{font-size:9px;color:var(--muted);line-height:1.4;margin:0 0 11px}.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.slot{min-height:104px;border-radius:18px;border:1px dashed #c9d4ce;background:#f8faf9;padding:10px;display:flex;flex-direction:column;justify-content:space-between}.slot.gold{border-style:solid;border-color:#e3bc45;background:linear-gradient(145deg,#fffef8,#fff5c9)}.slot.locked{filter:saturate(.55);opacity:.72}.slot .slot-title{font-size:9px;font-weight:950;color:#66551f}.slot .slot-badge{font-size:22px;margin:6px 0 2px}.slot .slot-name{font-size:10px;font-weight:900}.slot .slot-perk{font-size:8px;color:#6d756f;line-height:1.35;margin-top:3px}.slot button{border:0;border-radius:10px;padding:7px;background:#173f32;color:#fff;font-size:8px;font-weight:900;margin-top:7px}.slot.gold button{background:#bd8600}.badge-list{display:grid;grid-template-columns:1fr;gap:7px;margin-top:10px}.badge-item{display:flex;align-items:center;gap:9px;background:#f8faf9;border:1px solid #e3ebe6;border-radius:15px;padding:9px}.badge-item .ico{font-size:22px}.badge-item .bm{flex:1}.badge-item b{font-size:10px}.badge-item span{display:block;font-size:8px;color:var(--muted);margin-top:2px}.badge-item button{border:1px solid #d2dfd8;background:#fff;border-radius:10px;padding:7px 8px;font-size:8px;font-weight:900;color:#174d3a}.level-chip{display:inline-flex;background:#edf4f0;border:1px solid #d6e3dc;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;color:#245a47;margin-top:7px}
+
+
+#realMap{position:absolute;inset:0;z-index:1}.map .map-label,.map .gps-state,.map .lock{z-index:800}.map .leaflet-control-attribution{display:none!important}.map .leaflet-control-zoom{display:none}.city-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;background:#e8f3ee;border:1px solid #c9dfd4;border-radius:999px;font-size:10px;font-weight:900;color:#0c5a42;margin-bottom:9px}.location-status{font-size:10px;color:var(--muted);line-height:1.4;margin-top:8px}.location-status.ok{color:#215f43}.location-status.warn{color:#8b5e12}.location-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.history-card{background:#fff;border:1px solid #dfe9e3;border-radius:20px;padding:13px;margin:10px 0;color:#173b2f}.history-card h4{margin:0 0 6px;font-size:14px}.history-card p{margin:0;font-size:10px;line-height:1.5;color:#5f7068}.history-source{font-size:8px;color:#8a9690;margin-top:6px}.quest{background:#f6faf8;border:1px solid #dce8e1;border-radius:17px;padding:11px;margin-top:10px}.quest b{font-size:11px}.quest-options{display:grid;gap:6px;margin-top:8px}.quest-option{border:1px solid #d8e3dd;background:white;border-radius:13px;padding:9px;text-align:left;font-size:10px;font-weight:800}.quest-option.correct{background:#e9f7ef;border-color:#9bd0b2;color:#195a3b}.quest-option.wrong{background:#fff0f0;border-color:#efbdbd;color:#913d3d}.discoveries{margin-top:12px}.discovery-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e5ebe8;border-radius:16px;padding:10px;margin-bottom:7px}.discovery-item .di{font-size:23px}.discovery-item b{font-size:10px;display:block}.discovery-item span{font-size:8px;color:var(--muted)}.route-live-note{font-size:8px;color:#7b8982;margin:8px 2px 0;line-height:1.4}.map-credit{font-size:7px;color:#96a19b;text-align:right;margin:-5px 4px 9px}.map-credit a{color:inherit;text-decoration:none}.leaflet-top,.leaflet-bottom{z-index:700}
+
+
+/* v5: mobile + live map optimization */
+.app{max-width:520px}
+button,.choice,.toggle,.feature-action,.buy-btn,.gold-buy,.quest-option{touch-action:manipulation}
+button{min-height:44px}
+#homeMap{height:245px;border-radius:20px;overflow:hidden;border:1px solid #d9e3dd;background:#e8eeea;margin:10px 0 9px;position:relative}
+#homeMap .leaflet-control-attribution{display:none!important}
+.map{height:clamp(330px,46vh,470px);min-height:330px}
+.map-follow{position:absolute;right:12px;bottom:52px;z-index:850;width:44px;height:44px;min-height:44px;border:0;border-radius:50%;background:#fff;color:#0c5a42;font-size:20px;font-weight:900;box-shadow:0 8px 22px rgba(18,55,42,.24)}
+.location-actions .secondary{min-height:44px}
+.gps-auto{display:flex;align-items:center;gap:7px;color:#215f43;font-size:10px;font-weight:800;margin:7px 0 1px}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:#1f9d63;box-shadow:0 0 0 4px rgba(31,157,99,.12)}
+.leaflet-container{font:inherit}
+.route-line-shadow{filter:drop-shadow(0 2px 2px rgba(0,0,0,.16))}
+@media(max-width:520px){
+  body{background:var(--bg)}.app{max-width:none;box-shadow:none}.topbar{height:auto;min-height:80px;padding-left:10px;padding-right:10px}.brand{font-size:17px}.subtitle{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stats-top{gap:4px}.streak-top-card{min-width:88px;padding:6px 7px}.coin-top-card{min-width:52px;padding:6px}.pill{padding:6px 7px;font-size:10px}.content{height:calc(100dvh - 80px);padding:10px 10px calc(86px + env(safe-area-inset-bottom))}.hero{border-radius:22px;padding:16px}.hero h1{font-size:24px}.card{border-radius:20px;padding:13px}.map{border-radius:20px;margin-left:-2px;margin-right:-2px}.checkpoint{border-radius:21px;padding:14px}.nav{padding-left:3px;padding-right:3px}.nav button{min-height:52px;font-size:9px}.nav i{font-size:17px}.pack-grid{gap:7px}.coin-pack{padding:12px 8px}.profile-grid{gap:7px}
+}
+@media(max-width:360px){.topbar{gap:5px;padding-left:8px;padding-right:8px}.brand{font-size:15px}.subtitle{max-width:125px;font-size:8px}.streak-top-card{min-width:82px;padding:5px 6px}.streak-top-value b{font-size:10px}.streak-top-value em{font-size:9px}.coin-top-card{min-width:48px;padding:5px}.coin-top-card b{font-size:10px}.hero h1{font-size:22px}.grid3{gap:5px}.choice{padding-left:3px;padding-right:3px}.route-summary{gap:5px}.summary{padding:8px 4px}}
+
+
+/* Temporary pilot access gate. This is only a client-side deterrent, not server-grade auth. */
+body:not(.pilot-unlocked) .app{visibility:hidden}
+.access-gate{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0d3f31,#0a251e);display:flex;align-items:center;justify-content:center;padding:22px;color:#fff}
+body.pilot-unlocked .access-gate{display:none}
+.access-box{width:min(390px,100%);background:rgba(255,255,255,.98);color:#15352b;border-radius:28px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.32)}
+.access-mark{width:52px;height:52px;border-radius:18px;background:#e6f2ec;display:grid;place-items:center;font-size:25px;margin-bottom:14px}
+.access-box h2{margin:0 0 7px;font-size:24px;letter-spacing:-.6px}.access-box p{margin:0 0 16px;color:#6d7c75;font-size:12px;line-height:1.45}
+.access-input{width:100%;border:1px solid #cbd8d1;background:#f7faf8;border-radius:16px;padding:14px 15px;font-size:18px;font-weight:900;letter-spacing:.08em;outline:none;text-transform:uppercase}
+.access-input:focus{border-color:#3b8d6e;box-shadow:0 0 0 3px rgba(59,141,110,.12)}
+.access-error{min-height:19px;margin:8px 2px 0;font-size:10px;color:#a13f3f}
+.access-note{margin-top:12px!important;font-size:9px!important;color:#8b9690!important}
+.gps-quality{display:flex;align-items:center;gap:6px;margin-top:7px;font-size:9px;color:#63736b}.gps-quality b{color:#245342}.gps-quality.bad b{color:#9a5b20}
+.streak-next{margin-top:8px;background:rgba(255,255,255,.62);border:1px solid rgba(255,138,66,.25);border-radius:13px;padding:9px 10px;font-size:10px;font-weight:800;color:#7e4b2a}
+
+
+.nav button{min-width:0}.nav i{font-size:20px;line-height:1.1}.nav button.active i{transform:translateY(-1px)}
+</style>
+<script>
+try {
+  if (localStorage.getItem('rr_v8_reset_done') !== '1') {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+    keys.filter(k => k && k.startsWith('rr_')).forEach(k => localStorage.removeItem(k));
+    sessionStorage.clear();
+    localStorage.setItem('rr_v8_reset_done','1');
+  }
+} catch(e) {}
+</script></head>
+<body>
+<div class="access-gate" id="accessGate">
+<div class="access-box">
+<div class="access-mark">⌖</div>
+<h2>Пилот · Якутск</h2>
+<p>Тестовая версия «Случайного маршрута». Введите временный код доступа.</p>
+<form id="accessForm">
+<input autocapitalize="characters" autocomplete="off" class="access-input" id="accessCode" inputmode="text" maxlength="20" placeholder="Код доступа" type="password"/>
+<button class="primary" style="margin-top:10px" type="submit">Войти в приложение</button>
+</form>
+<div class="access-error" id="accessError"></div>
+<p class="access-note">Пока это базовая защита прототипа. Для публичного размещения подключим серверную авторизацию.</p>
+</div>
+</div>
+<div class="app">
+<header class="topbar">
+<div class="topbar-main"><div class="brand">Случайный маршрут</div><div class="subtitle">Якутск · APK pilot · GPS + фотоконтроль</div></div>
+<div class="stats-top">
+<div aria-label="Текущий страйк" class="streak-top-card"><span class="streak-top-label">🔥 СТРАЙК</span><div class="streak-top-value"><b><span id="streakTop">0</span> дн.</b><em>×<span id="coefTop">1.0</span></em></div></div>
+<div aria-label="Баланс RouteCoin" class="coin-top-card"><small>ROUTECOIN</small><b>🪙 <span id="coinsTop">420</span></b></div>
+</div>
+</header>
+<main class="content">
+<section class="screen active" id="home">
+<div class="hero"><small>Пилотный город · Якутск</small><h1>Исследуем весь Якутск</h1><p>Стартуем с реальной карты города. Кольцевой маршрут строится по пешеходным улицам и раскрывается только после GPS и фотоконтроля.</p></div>
+<div class="card">
+<div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
+<div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
+<div class="hint">Рабочий диапазон прототипа: 1–50 км.</div>
+</div>
+<div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
+<button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
+<button class="choice" data-type="city"><span>⌂</span>Город</button>
+<button class="choice" data-type="nature"><span>🌿</span>Природа</button>
+</div></div>
+<div class="card"><div class="row"><div><div class="title" style="margin:0">Кофейня или ресторан</div><div class="sub" style="margin:3px 0 0">Добавить заведение по пути</div></div><button aria-label="Добавить заведение" class="toggle on" id="partnerToggle"></button></div></div>
+<div class="card">
+<div class="city-chip">Якутск · тестовая зона</div>
+<div class="title">Вы на карте</div><div class="sub">При запуске приложение само определяет GPS и ставит старт в вашем текущем месте</div>
+<div aria-label="Карта с текущим положением пользователя" id="homeMap"></div><div class="map-credit">© OpenStreetMap contributors</div>
+<div class="gps-auto"><span class="gps-dot"></span>Автоматическое определение местоположения включено</div>
+<div class="location-actions" style="grid-template-columns:1fr"><button class="secondary" id="locateYakutskBtn">Обновить GPS</button><button class="secondary hidden" id="demoYakutskBtn">Тест: центр Якутска</button></div>
+<div class="location-status warn" id="yakutskLocationStatus">Определяем ваше местоположение…</div>
+<div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
+</div>
+<button class="primary orange" id="buildBtn">✦ Построить маршрут по Якутску</button>
+<div class="route-live-note">Тестовая версия использует OpenStreetMap и публичный пешеходный маршрутизатор. Для промышленного запуска потребуется собственный или коммерческий routing-backend.</div>
+</section>
+<section class="screen" id="route">
+<div class="map">
+<div aria-label="Карта Якутска с текущим открытым участком маршрута" id="realMap"></div>
+<div class="map-label">Точка <span id="pointNumber">1</span> из <span id="pointTotal">5</span> · <span id="pointDistance">—</span></div>
+<div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Показать меня на карте" class="map-follow" id="mapFollowBtn">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
+</div>
+<div class="map-credit">© OpenStreetMap contributors</div>
+<div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
+<div class="checkpoint">
+<div class="eyebrow">Текущая контрольная точка</div><h3 id="checkpointTitle">Найдите объект рядом</h3><p id="checkpointText">Когда подойдёте к точке, приложение проверит GPS и откроет фотозадание.</p>
+<div class="checkrow"><div class="check" id="gpsCheck"><span>GPS</span><b>Не подтверждён</b></div><div class="check" id="photoCheck"><span>Фото</span><b>Ожидается</b></div></div>
+<button class="primary" id="gpsBtn">◎ Проверить местоположение</button>
+<button class="secondary hidden" id="demoGpsBtn" style="margin-top:8px">Демо: считать, что я у точки</button>
+<div class="hidden" id="photoBlock" style="margin-top:11px">
+<div class="message warn" id="taskMessage">📷 Фотозадание: сфотографируйте заметный объект поблизости.</div>
+<label class="secondary" for="cameraInput" style="display:block;text-align:center">Открыть камеру</label>
+<input accept="image/*" capture="environment" class="camera-input" id="cameraInput" type="file"/>
+<img alt="Сделанное фото" class="photo-preview" id="photoPreview"/>
+<button class="primary hidden" id="verifyBtn">Проверить фото + GPS</button>
+</div>
+<div class="hidden" id="verificationMessage"></div>
+<div class="history-card hidden" id="historyBlock"><h4 id="historyTitle">История места</h4><p id="historyText"></p><div class="history-source" id="historySource"></div><div class="quest hidden" id="questBlock"><b id="questQuestion">Мини-квест</b><div class="quest-options" id="questOptions"></div><div class="hint" id="questResult"></div></div></div>
+<button class="primary hidden" id="nextBtn">Продолжить — открыть следующий участок</button>
+<button class="danger-lite hidden" id="replacePointBtn" style="margin-top:8px">Не могу пройти точку — заменить её</button>
+</div>
+</section>
+<section class="screen" id="shop">
+<div class="hero"><small>Магазин</small><h1>RouteCoin и функции</h1><p>Покупайте RouteCoin для косметики и открывайте дополнительные функции. Платные функции не увеличивают коэффициент страйка и не дают преимуществ в рейтинге.</p><div class="paid-balance"><span>Ваш баланс</span><b>🪙 <span id="coinsShop">420</span> RC</b></div><div class="premium-chip hidden" id="premiumChip">✦ Route+ активен</div></div>
+<div class="store-tabs"><button class="store-tab active" data-store-tab="coins">RouteCoin</button><button class="store-tab" data-store-tab="features">Функции</button></div>
+<div class="store-panel active" id="storeCoins">
+<div class="store-section-title">Пополнить RouteCoin</div>
+<div class="pack-grid">
+<div class="coin-pack"><div class="coin-icon">🪙</div><h3>500 RC</h3><p>Небольшой набор</p><button class="buy-btn" data-buy-type="coins" data-coins="500" data-price="99 ₽" data-title="500 RouteCoin">99 ₽</button></div>
+<div class="coin-pack best"><span class="badge">Популярно</span><div class="coin-icon">🪙</div><h3>1 200 RC</h3><p>+200 RC бонусом</p><button class="buy-btn" data-buy-type="coins" data-coins="1200" data-price="199 ₽" data-title="1 200 RouteCoin">199 ₽</button></div>
+<div class="coin-pack"><div class="coin-icon">🪙</div><h3>3 000 RC</h3><p>Для магазина наград</p><button class="buy-btn" data-buy-type="coins" data-coins="3000" data-price="399 ₽" data-title="3 000 RouteCoin">399 ₽</button></div>
+<div class="coin-pack"><div class="coin-icon">💰</div><h3>8 000 RC</h3><p>Максимальный набор</p><button class="buy-btn" data-buy-type="coins" data-coins="8000" data-price="799 ₽" data-title="8 000 RouteCoin">799 ₽</button></div>
+</div>
+<div class="store-note"><b>Важно:</b> RouteCoin из магазина используются для косметики и дополнительных предметов. Их покупка сама по себе не добавляет километры и не влияет на место в рейтинге.</div>
+<div class="store-section-title">Потратить RouteCoin</div>
+<div class="reward-row"><div style="font-size:25px">🧢</div><div class="reward-main"><b>Скин исследователя</b><span>Для персонажа на карте</span></div><button class="feature-action" data-rc-item="Скин исследователя" data-rc-price="250" style="width:auto;padding:8px 10px">250 RC</button></div>
+<div class="reward-row"><div style="font-size:25px">🖼️</div><div class="reward-main"><b>Редкая рамка профиля</b><span>Косметическая награда</span></div><button class="feature-action" data-rc-item="Редкая рамка профиля" data-rc-price="700" style="width:auto;padding:8px 10px">700 RC</button></div>
+<div class="gold-section">
+<div class="store-section-title">Золотые слоты профиля</div>
+<div class="store-note"><b>Как работают:</b> значки за квесты нельзя купить. Золотой слот активирует способность закреплённого значка на маршрутах. Бонусы не добавляют километры и не повышают место в рейтинге.</div>
+<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅰ</div><div class="gold-main"><b>Золотой слот №1</b><span>Требуется уровень 10</span></div><div class="gold-price">15 000 RC</div></div><button class="gold-buy" data-gold-price="15000" data-gold-slot="1" data-level="10">Открыть за 15 000 RC</button></div>
+<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅱ</div><div class="gold-main"><b>Золотой слот №2</b><span>Требуется уровень 25</span></div><div class="gold-price">50 000 RC</div></div><button class="gold-buy" data-gold-price="50000" data-gold-slot="2" data-level="25">Открыть за 50 000 RC</button></div>
+<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅲ</div><div class="gold-main"><b>Золотой слот №3</b><span>Требуется уровень 50</span></div><div class="gold-price">120 000 RC</div></div><button class="gold-buy" data-gold-price="120000" data-gold-slot="3" data-level="50">Открыть за 120 000 RC</button></div>
+</div>
+</div>
+<div class="store-panel" id="storeFeatures">
+<div class="feature-card">
+<div class="feature-head"><div class="feature-icon">✦</div><div class="feature-main"><h3>Route+</h3><p>Подписка для тех, кто гуляет регулярно.</p></div><div class="feature-price">199 ₽/мес</div></div>
+<ul class="feature-list"><li>Без рекламных баннеров</li><li>Расширенные фильтры маршрутов</li><li>История прогулок за 90 дней</li><li>Расширенная статистика</li></ul>
+<button class="feature-action paid" data-buy-type="feature" data-feature="routeplus" data-price="199 ₽" data-title="Route+ на 1 месяц" id="routePlusBtn">Подключить Route+</button>
+</div>
+<div class="feature-card">
+<div class="feature-head"><div class="feature-icon">🎨</div><div class="feature-main"><h3>Тематические маршруты</h3><p>Дополнительные темы для генерации прогулок.</p></div><div class="feature-price">149 ₽</div></div>
+<ul class="feature-list"><li>Архитектура</li><li>Стрит-арт</li><li>Набережные и видовые точки</li></ul>
+<button class="feature-action paid" data-buy-type="feature" data-feature="themes" data-price="149 ₽" data-title="Тематические маршруты" id="themesBtn">Открыть навсегда</button>
+</div>
+<div class="feature-card">
+<div class="feature-head"><div class="feature-icon">👥</div><div class="feature-main"><h3>Маршрут для компании</h3><p>Совместный квест с одним маршрутом для нескольких участников.</p></div><div class="feature-price">99 ₽</div></div>
+<ul class="feature-list"><li>До 6 участников</li><li>Общие контрольные точки</li><li>Общий итог прогулки</li></ul>
+<button class="feature-action paid" data-buy-type="feature" data-feature="group" data-price="99 ₽" data-title="Маршрут для компании" id="groupBtn">Открыть функцию</button>
+</div>
+<div class="small-rule">В этой версии покупка работает в демонстрационном режиме. Для настоящей оплаты в Android-приложении нужно подключить платёжную систему/Google Play Billing и серверную проверку покупки.</div>
+</div>
+</section>
+<section class="screen" id="rating">
+<div class="hero"><small>Рейтинг августа</small><h1>#18</h1><p>В рейтинг идут только подтверждённые километры по завершённым маршрутам.</p></div>
+<div class="rank-row"><div class="rank-place">1</div><div class="rank-main"><b>Анна</b><span>128 км · 22 маршрута</span></div><div class="price">128 км</div></div>
+<div class="rank-row"><div class="rank-place">2</div><div class="rank-main"><b>Максим</b><span>117 км · 20 маршрутов</span></div><div class="price">117 км</div></div>
+<div class="rank-row"><div class="rank-place">3</div><div class="rank-main"><b>София</b><span>103 км · 18 маршрутов</span></div><div class="price">103 км</div></div>
+<div class="rank-row"><div class="rank-place">18</div><div class="rank-main"><b>Вы</b><span>42,6 км · 9 маршрутов</span></div><div class="price">42,6 км</div></div>
+</section>
+<section class="screen" id="badges"><div class="hero"><small>Коллекция достижений</small><h1>Значки</h1><p>Получайте значки за достопримечательности и квесты, а золотые слоты превращают их в активные способности.</p></div><div class="badge-showcase">
+<h3>Значки и активные способности</h3>
+<p>Значки выдаются только за реальные достопримечательности и квесты. Обычный слот показывает достижение, золотые слоты включают способности.</p>
+<div class="level-chip">Уровень <span id="levelProfile">12</span></div>
+<div class="slots" style="margin-top:10px">
+<div class="slot"><div><div class="slot-title">ОБЫЧНЫЙ СЛОТ</div><div class="slot-badge">🏛️</div><div class="slot-name">Историк</div><div class="slot-perk">Показывается в профиле. Способность не активна.</div></div></div>
+<div class="slot gold locked" id="goldSlot1"><div><div class="slot-title">ЗОЛОТОЙ СЛОТ Ⅰ</div><div class="slot-badge">🔒</div><div class="slot-name">Закрыт</div><div class="slot-perk">Откройте в магазине за 15 000 RC.</div></div></div>
+<div class="slot gold locked" id="goldSlot2"><div><div class="slot-title">ЗОЛОТОЙ СЛОТ Ⅱ</div><div class="slot-badge">🔒</div><div class="slot-name">Закрыт</div><div class="slot-perk">Откройте в магазине за 50 000 RC.</div></div></div>
+<div class="slot gold locked" id="goldSlot3"><div><div class="slot-title">ЗОЛОТОЙ СЛОТ Ⅲ</div><div class="slot-badge">🔒</div><div class="slot-name">Закрыт</div><div class="slot-perk">Откройте в магазине за 120 000 RC.</div></div></div>
+</div>
+<div class="store-section-title" style="margin-top:13px">Полученные значки</div>
+<div class="badge-list">
+<div class="badge-item"><div class="ico">🏛️</div><div class="bm"><b>Историк</b><span>В золотом слоте: +1 подсказка в историческом квесте.</span></div><button data-equip-badge="historian">В золотой слот</button></div>
+<div class="badge-item"><div class="ico">📸</div><div class="bm"><b>Фотограф</b><span>В золотом слоте: дополнительная подсказка при фотоконтроле.</span></div><button data-equip-badge="photographer">В золотой слот</button></div>
+<div class="badge-item"><div class="ico">🧭</div><div class="bm"><b>Следопыт</b><span>В золотом слоте: 1 дополнительная замена контрольной точки за маршрут.</span></div><button data-equip-badge="pathfinder">В золотой слот</button></div>
+</div>
+<div class="discoveries"><div class="store-section-title">Открытия Якутска</div><div id="yakutskDiscoveries"><div class="hint">Пройдите фотоконтроль у достопримечательности и выполните мини-квест — значок появится здесь.</div></div></div>
+</div></section><section class="screen" id="profile">
+<div class="hero"><small>Ваш профиль</small><h1>Прогресс</h1><p>Страйк, подтверждённые километры, маршруты и RouteCoin.</p></div><div class="streak-card">
+<div class="streak-head">
+<div><div class="streak-kicker">СЕРИЯ ПРОГУЛОК</div><div class="streak-main">🔥 <span id="streakProfile">0</span> <small>дней подряд</small></div></div>
+<div class="streak-coef-badge"><span>КОЭФФИЦИЕНТ</span><b>×<span id="coefProfile">1.0</span></b></div>
+</div>
+<div class="streak-progress"><div class="streak-progress-row"><span id="streakTargetLabel">До следующего бонуса</span><span id="streakTargetCount">0 / 2</span></div><div class="streak-progress-track"><div class="streak-progress-fill" id="streakProgressFill"></div></div></div>
+<div class="streak-next" id="streakNext">Завершите маршрут сегодня, чтобы начать страйк.</div>
+<div class="streak-days" id="streakDays"></div>
+<div class="hint" style="color:#91532f;margin-top:9px">Один завершённый GPS-маршрут = максимум +1 день к серии. Пропуск дня сбрасывает текущую серию.</div>
+</div>
+<div class="profile-grid"><div class="pstat">👟<b>42,6 км</b><span>подтверждено</span></div><div class="pstat">↻<b>9</b><span>маршрутов</span></div><div class="pstat">📷<b id="profilePoints">34</b><span>фотоконтроля</span></div><div class="pstat">🪙<b id="coinsProfile">420</b><span>RouteCoin</span></div></div>
+
+</section>
+</main>
+<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Карта</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
+<div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите тестовую покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
+<div class="toast" id="toast">Готово</div>
+</div>
+<script>
+(() => {
+  const HASH='28a147099b7e324d0dcb695aba95b5e25648df225c9f88b7064244116ecc4e43'; // SHA-256 of temporary pilot code
+  const form=document.getElementById('accessForm'),input=document.getElementById('accessCode'),err=document.getElementById('accessError');
+  const key='rr_pilot_unlocked_v1',failKey='rr_pilot_fail_v1',lockKey='rr_pilot_lock_v1';
+  if(sessionStorage.getItem(key)==='1'){document.body.classList.add('pilot-unlocked');setTimeout(()=>window.dispatchEvent(new Event('pilot-unlocked')),0);return;}
+  const hex=buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  async function digest(text){
+    if(window.crypto?.subtle){return hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))}
+    // Compatibility fallback for older WebViews; not cryptographic protection.
+    return text.trim().toUpperCase()==='YKT2026'?HASH:'';
+  }
+  function lockedFor(){return Math.max(0,+localStorage.getItem(lockKey)||0-Date.now())}
+  function renderLock(){const until=+localStorage.getItem(lockKey)||0,ms=until-Date.now();if(ms>0){err.textContent='Слишком много попыток. Повторите через '+Math.ceil(ms/1000)+' сек.';input.disabled=true;setTimeout(()=>{input.disabled=false;err.textContent='';},ms+50);return true}return false}
+  form.addEventListener('submit',async e=>{e.preventDefault();if(renderLock())return;const h=await digest(input.value.trim().toUpperCase());if(h===HASH){sessionStorage.setItem(key,'1');localStorage.removeItem(failKey);localStorage.removeItem(lockKey);document.body.classList.add('pilot-unlocked');window.dispatchEvent(new Event('pilot-unlocked'));setTimeout(()=>window.dispatchEvent(new Event('resize')),50);return}
+    let fails=(+localStorage.getItem(failKey)||0)+1;localStorage.setItem(failKey,fails);err.textContent='Неверный код доступа.';input.value='';if(fails>=5){localStorage.setItem(failKey,0);localStorage.setItem(lockKey,Date.now()+30000);renderLock()}});
+  renderLock();setTimeout(()=>input.focus(),150);
+})();
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const state = window.state = {distance:+(localStorage.getItem('rr_distance')||6.5),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')!=='0',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||420),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||12),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
+  const tasks = {
+    parks:['Сфотографируйте вход в парк или сквер','Найдите заметное дерево или зелёный объект','Сфотографируйте лавочку или элемент благоустройства'],
+    city:['Сфотографируйте заметную вывеску','Найдите необычный фасад или архитектурную деталь','Сфотографируйте городской арт-объект'],
+    nature:['Сфотографируйте природный объект рядом','Найдите воду, камень или необычное дерево','Сфотографируйте заметный элемент ландшафта']
+  };
+  const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600)};
+  const dateKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
+  const dayDiff=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000);
+  function streakCoef(days){if(days>=14)return 2.0;if(days>=7)return 1.6;if(days>=5)return 1.4;if(days>=3)return 1.2;if(days>=2)return 1.1;return 1.0}
+  function normalizeStreak(){const today=dateKey(new Date());if(!state.lastStreakDate){state.streak=0}else if(dayDiff(state.lastStreakDate,today)>1){state.streak=0;state.lastStreakDate=''}state.coef=streakCoef(state.streak);state.streakHistory=[...new Set(state.streakHistory)].slice(-60)}
+  function renderStreak(){
+    const today=dateKey(new Date()), labels=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], box=$('#streakDays');
+    if(box){
+      box.innerHTML='';
+      for(let i=6;i>=0;i--){
+        const d=new Date();d.setDate(d.getDate()-i);const k=dateKey(d),el=document.createElement('div');
+        el.className='day'+(state.streakHistory.includes(k)?' ok':'')+(k===today?' today':'');
+        el.innerHTML=`<span>${labels[d.getDay()]}</span><span class="day-date">${d.getDate()}</span>`;box.appendChild(el);
+      }
+    }
+    const tiers=[[2,1.1],[3,1.2],[5,1.4],[7,1.6],[14,2.0]], nextTier=tiers.find(x=>state.streak<x[0]);
+    const next=$('#streakNext');
+    if(next){
+      if(state.lastStreakDate===today) next.textContent='✓ Сегодня маршрут уже засчитан. Серия продолжится после маршрута завтра.';
+      else if(nextTier) next.textContent=`Пройдите подтверждённый маршрут сегодня — до ×${nextTier[1].toFixed(1)} осталось ${Math.max(1,nextTier[0]-state.streak)} дн.`;
+      else next.textContent='🔥 Максимальный коэффициент ×2.0 активен. Продолжайте серию.';
+    }
+    const label=$('#streakTargetLabel'), count=$('#streakTargetCount'), fill=$('#streakProgressFill');
+    if(nextTier){
+      const prevTier=[...tiers].reverse().find(x=>x[0]<=state.streak);const base=prevTier?prevTier[0]:0;
+      const span=Math.max(1,nextTier[0]-base), done=Math.max(0,state.streak-base), pct=Math.max(0,Math.min(100,done/span*100));
+      if(label)label.textContent=`Следующий бонус ×${nextTier[1].toFixed(1)}`;if(count)count.textContent=`${state.streak} / ${nextTier[0]} дней`;if(fill)fill.style.width=pct+'%';
+    }else{if(label)label.textContent='Максимальный бонус';if(count)count.textContent='×2.0';if(fill)fill.style.width='100%'}
+  }
+  function completeStreakDay(){
+    const today=dateKey(new Date());if(state.lastStreakDate===today){state.coef=streakCoef(state.streak);renderStreak();return {changed:false,text:'Страйк за сегодня уже был засчитан.'}}
+    if(state.lastStreakDate&&dayDiff(state.lastStreakDate,today)===1)state.streak+=1;else state.streak=1;state.lastStreakDate=today;state.streakHistory=[...new Set([...state.streakHistory,today])].slice(-60);state.coef=streakCoef(state.streak);sync();return {changed:true,text:`Страйк: ${state.streak} дн. · ×${state.coef.toFixed(1)}`};
+  }
+  window.__completeStreakDay=completeStreakDay;window.__streakCoef=streakCoef;normalizeStreak();
+  function sync(){state.coef=streakCoef(state.streak);['#coinsTop','#coinsShop','#coinsProfile'].forEach(s=>{const e=$(s);if(e)e.textContent=state.coins});$('#streakTop').textContent=$('#streakProfile').textContent=state.streak;$('#coefTop').textContent=$('#coefProfile').textContent=$('#sumCoef').textContent=state.coef.toFixed(1);const lvl=$('#levelProfile');if(lvl)lvl.textContent=state.level;localStorage.setItem('rr_coins',state.coins);localStorage.setItem('rr_level',state.level);localStorage.setItem('rr_streak',state.streak);localStorage.setItem('rr_coef',state.coef);localStorage.setItem('rr_last_streak_date',state.lastStreakDate||'');localStorage.setItem('rr_streak_history',JSON.stringify(state.streakHistory||[]));localStorage.setItem('rr_distance',state.distance);localStorage.setItem('rr_type',state.type);localStorage.setItem('rr_partner',state.partner?'1':'0');for(let i=1;i<=3;i++)localStorage.setItem('rr_gold_'+i,state.goldSlots[i]?'1':'0');localStorage.setItem('rr_equipped',JSON.stringify(state.equipped));localStorage.setItem('rr_routeplus',state.routeplus?'1':'0');localStorage.setItem('rr_themes',state.themes?'1':'0');localStorage.setItem('rr_group',state.group?'1':'0');renderStreak();syncStore();syncGoldSlots()}
+  function show(id){$$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));$('.content').scrollTo(0,0)}
+  $$('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.screen));
+  let pendingPurchase=null;
+  function syncStore(){
+    const chip=$('#premiumChip');if(chip)chip.classList.toggle('hidden',!state.routeplus);
+    const map=[['#routePlusBtn','routeplus','Route+ активен'],['#themesBtn','themes','Куплено'],['#groupBtn','group','Куплено']];
+    map.forEach(([sel,key,label])=>{const b=$(sel);if(!b)return;const on=!!state[key];b.classList.toggle('active',on);b.classList.toggle('paid',!on);if(on){b.textContent='✓ '+label;b.disabled=true}})
+  }
+  const badges={historian:{icon:'🏛️',name:'Историк',perk:'+1 подсказка в историческом квесте'},photographer:{icon:'📸',name:'Фотограф',perk:'Дополнительная подсказка при фотоконтроле'},pathfinder:{icon:'🧭',name:'Следопыт',perk:'+1 замена контрольной точки за маршрут'}};
+  function syncGoldSlots(){
+    $$('[data-gold-slot]').forEach(b=>{const i=+b.dataset.goldSlot,need=+b.dataset.level;if(state.goldSlots[i]){b.textContent='✓ Слот открыт';b.disabled=true}else if(state.level<need){b.textContent='Нужен уровень '+need;b.disabled=true}else{b.textContent='Открыть за '+Number(b.dataset.goldPrice).toLocaleString('ru-RU')+' RC';b.disabled=false}});
+    for(let i=1;i<=3;i++){const el=$('#goldSlot'+i);if(!el)continue;if(!state.goldSlots[i]){el.className='slot gold locked';el.innerHTML='<div><div class="slot-title">ЗОЛОТОЙ СЛОТ '+['','Ⅰ','Ⅱ','Ⅲ'][i]+'</div><div class="slot-badge">🔒</div><div class="slot-name">Закрыт</div><div class="slot-perk">Откройте слот в магазине.</div></div>';continue}const b=badges[state.equipped[i]];el.className='slot gold';el.innerHTML=b?'<div><div class="slot-title">ЗОЛОТОЙ СЛОТ '+['','Ⅰ','Ⅱ','Ⅲ'][i]+'</div><div class="slot-badge">'+b.icon+'</div><div class="slot-name">'+b.name+'</div><div class="slot-perk">'+b.perk+'</div></div><button data-clear-slot="'+i+'">Снять значок</button>':'<div><div class="slot-title">ЗОЛОТОЙ СЛОТ '+['','Ⅰ','Ⅱ','Ⅲ'][i]+'</div><div class="slot-badge">✨</div><div class="slot-name">Свободен</div><div class="slot-perk">Закрепите заработанный значок, чтобы активировать его способность.</div></div>'}
+    $$('[data-clear-slot]').forEach(b=>b.onclick=()=>{state.equipped[+b.dataset.clearSlot]=null;sync();toast('Значок снят')});
+  }
+  $$('[data-gold-slot]').forEach(b=>b.onclick=()=>{const i=+b.dataset.goldSlot,price=+b.dataset.goldPrice,need=+b.dataset.level;if(state.level<need){toast('Нужен уровень '+need);return}if(state.coins<price){toast('Недостаточно RouteCoin');return}state.coins-=price;state.goldSlots[i]=true;sync();toast('Золотой слот №'+i+' открыт')});
+  $$('[data-equip-badge]').forEach(btn=>btn.onclick=()=>{const free=[1,2,3].find(i=>state.goldSlots[i]&&!state.equipped[i]);if(!free){toast(state.goldSlots.some(Boolean)?'Нет свободного золотого слота':'Сначала откройте золотой слот');return}state.equipped[free]=btn.dataset.equipBadge;sync();toast('Значок закреплён в слот '+free)});
+  $$('.store-tab').forEach(b=>b.onclick=()=>{ $$('.store-tab').forEach(x=>x.classList.toggle('active',x===b)); $('#storeCoins').classList.toggle('active',b.dataset.storeTab==='coins'); $('#storeFeatures').classList.toggle('active',b.dataset.storeTab==='features'); });
+  $$('[data-buy-type]').forEach(b=>b.onclick=()=>{if(b.disabled)return;pendingPurchase={type:b.dataset.buyType,title:b.dataset.title,price:b.dataset.price,coins:+(b.dataset.coins||0),feature:b.dataset.feature||''};$('#purchaseTitle').textContent=pendingPurchase.title;$('#purchasePrice').textContent=pendingPurchase.price;$('#purchaseDescription').textContent=pendingPurchase.type==='coins'?'После подтверждения RouteCoin будут добавлены на баланс. Сейчас это тестовая покупка без реального списания денег.':'Функция будет отмечена как купленная на этом устройстве. Сейчас это тестовая покупка без реального списания денег.';$('#purchaseModal').classList.add('show')});
+  $('#purchaseCancel').onclick=()=>{$('#purchaseModal').classList.remove('show');pendingPurchase=null};
+  $('#purchaseModal').onclick=e=>{if(e.target===$('#purchaseModal'))$('#purchaseCancel').click()};
+  $('#purchaseConfirm').onclick=()=>{if(!pendingPurchase)return;if(pendingPurchase.type==='coins'){state.coins+=pendingPurchase.coins;toast('+'+pendingPurchase.coins+' RouteCoin')}else if(pendingPurchase.feature){state[pendingPurchase.feature]=true;toast('Функция открыта')}$('#purchaseModal').classList.remove('show');pendingPurchase=null;sync()};
+  $$('[data-rc-price]').forEach(b=>b.onclick=()=>{const price=+b.dataset.rcPrice;if(state.coins<price){toast('Недостаточно RouteCoin');return}state.coins-=price;sync();b.textContent='✓ Куплено';b.disabled=true;b.classList.add('active');toast('Предмет куплен')});
+  $$('#typeChoices .choice').forEach(b=>b.onclick=()=>{state.type=b.dataset.type;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x===b))});
+  $('#partnerToggle').onclick=()=>{state.partner=!state.partner;$('#partnerToggle').classList.toggle('on',state.partner)};
+  function pointsFor(km){return Math.max(2,Math.min(12,Math.round(km/1.25)))}
+  $('#buildBtn').onclick=()=>{
+    const v=parseFloat($('#distanceInput').value.replace(',','.'));
+    if(!v || v<1 || v>50){toast('Введите дистанцию от 1 до 50 км');return}
+    state.distance=Math.round(v*10)/10;state.points=pointsFor(state.distance);state.current=1;state.gps=false;state.photo=false;state.verified=false;
+    $('#sumDistance').textContent=state.distance.toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=state.points;resetCheckpoint();show('route');toast('Кольцевой маршрут построен');
+  };
+  function resetCheckpoint(){
+    state.gps=false;state.photo=false;state.verified=false;$('#pointNumber').textContent=state.current;$('#pointDistance').textContent=(520+state.current*130)+' м';$('#gpsBadge').textContent='GPS: ожидается';$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Не подтверждён';$('#photoCheck').className='check';$('#photoCheck b').textContent='Ожидается';$('#photoBlock').classList.add('hidden');$('#verifyBtn').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#verificationMessage').className='hidden';$('#photoPreview').classList.remove('show');$('#photoPreview').src='';$('#lockLabel').textContent='🔒 Дальше скрыто';$('#nextPath').setAttribute('opacity','0');$('#checkpointTitle').textContent='Контрольная точка '+state.current;$('#checkpointText').textContent='Дойдите до точки. После GPS-проверки появится фотозадание.';
+  }
+  function gpsSuccess(real){state.gps=true;$('#gpsBadge').textContent=real?'GPS: подтверждён':'GPS: демо';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Подтверждён';$('#photoBlock').classList.remove('hidden');$('#replacePointBtn').classList.remove('hidden');const arr=tasks[state.type];const task=arr[(state.current-1)%arr.length];$('#taskMessage').textContent='📷 Фотозадание: '+task+'. Следующий участок откроется только после проверки.';$('#checkpointText').textContent='Вы в зоне точки. Выполните фотозадание.';toast('GPS подтверждён')}
+  $('#gpsBtn').onclick=()=>{
+    if(!navigator.geolocation){toast('GPS недоступен — используйте демо');return}
+    $('#gpsBadge').textContent='GPS: проверяем…';navigator.geolocation.getCurrentPosition(()=>gpsSuccess(true),()=>{ $('#gpsBadge').textContent='GPS: нет доступа';toast('Нет доступа к GPS — можно включить демо')},{enableHighAccuracy:true,timeout:8000,maximumAge:0});
+  };
+  $('#demoGpsBtn').onclick=()=>gpsSuccess(false);
+  $('#cameraInput').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');state.photo=true;$('#photoCheck').className='check';$('#photoCheck b').textContent='Фото сделано';$('#verifyBtn').classList.remove('hidden')};
+  $('#verifyBtn').onclick=()=>{
+    if(!state.gps||!state.photo)return;
+    $('#verificationMessage').className='message warn';$('#verificationMessage').textContent='Проверяем GPS и фотографию…';
+    setTimeout(()=>{
+      // В прототипе AI-проверка имитируется. В рабочей версии этот вызов заменяется серверной моделью компьютерного зрения.
+      state.verified=true;$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='✓ GPS совпал. ✓ Фото принято. Контрольная точка подтверждена.';const base=25;const earned=Math.round(base*state.coef);state.coins+=earned;sync();$('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#lockLabel').textContent='✓ Следующий участок готов';toast('+'+earned+' RouteCoin');
+    },950)
+  };
+  $('#nextBtn').onclick=()=>{
+    if(state.current>=state.points){const finish=Math.round(60*state.coef);state.coins+=finish;const st=completeStreakDay();sync();$('#verificationMessage').className='message success';$('#verificationMessage').textContent='🎉 Кольцевой маршрут завершён. Финальный бонус: +'+finish+' RC. '+st.text;$('#nextBtn').classList.add('hidden');$('#lockLabel').textContent='F Маршрут завершён';toast('Маршрут завершён');return}
+    $('#nextPath').setAttribute('opacity','1');setTimeout(()=>{state.current++;resetCheckpoint();toast('Открыт участок до точки '+state.current)},650)
+  };
+  $('#replacePointBtn').onclick=()=>{toast('Контрольная точка заменена');$('#pointDistance').textContent=(430+Math.round(Math.random()*500))+' м';const arr=tasks[state.type];$('#taskMessage').textContent='📷 Новое фотозадание: '+arr[Math.floor(Math.random()*arr.length)]+'.';};
+  sync();
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
+</script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  if (!window.L) return;
+  const YAKUTSK = {lat:62.0274,lng:129.7320};
+  const pilotBounds = {south:61.85,north:62.20,west:129.30,east:130.20};
+  const SESSION_KEY='rr_yakutsk_session_v8';
+  const saved=(()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}})();
+  const rr = window.__yakutskRR = {
+    start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
+    legs:saved?.legs||[], checkpoints:saved?.checkpoints||[], current:saved?.current||1,
+    routeDistance:saved?.routeDistance||0, stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
+    currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null,
+    discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
+    liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
+    watchId:null, activeScreen:saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home',
+    scrolls:saved?.scrolls||{}, gpsAccuracy:saved?.gpsAccuracy||null, lastGpsAt:saved?.lastGpsAt||0, lastGpsPos:saved?.lastGpsPos||null, suspiciousGps:false, autoGpsBusy:false, gpsFresh:false
+  };
+
+  const map = window.__yakutskMap = L.map('realMap',{zoomControl:false,attributionControl:false,preferCanvas:true}).setView([rr.start.lat,rr.start.lng],15);
+  const homeMap = window.__yakutskHomeMap = L.map('homeMap',{zoomControl:false,attributionControl:false,dragging:true,tap:true,preferCanvas:true}).setView([rr.start.lat,rr.start.lng],15);
+  const tileOpts={maxZoom:19,attribution:'',updateWhenIdle:true,keepBuffer:3};
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',tileOpts).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',tileOpts).addTo(homeMap);
+
+  const markerIcon=(label,bg,size=38)=>L.divIcon({className:'',html:`<div style="width:${size}px;height:${size}px;border-radius:50%;display:grid;place-items:center;background:${bg};color:#fff;border:3px solid #fff;box-shadow:0 7px 18px rgba(0,0,0,.22);font:900 14px/1 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${label}</div>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  const userIcon=markerIcon('●','#0c5a42',32), pointIcon=markerIcon('1','#ff681d',38), finishIcon=markerIcon('F','#173f34',38);
+
+  const saveSession=()=>{
+    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,stage:rr.stage,currentPoi:rr.currentPoi?{tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps};
+    try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
+  };
+  const insidePilot=p=>p.lat>=pilotBounds.south&&p.lat<=pilotBounds.north&&p.lng>=pilotBounds.west&&p.lng<=pilotBounds.east;
+  function distMeters(a,b){const R=6371000,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lng-a.lng);const q=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q))}
+  function toast(t){const el=$('#toast');if(!el)return;el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
+  function status(text,ok=false){const el=$('#yakutskLocationStatus');if(!el)return;el.textContent=text;el.className='location-status '+(ok?'ok':'warn')}
+  function showGpsQuality(acc){rr.gpsAccuracy=Number.isFinite(acc)?Math.round(acc):null;const el=$('#gpsQualityHome');if(!el)return;const good=rr.gpsAccuracy!==null&&rr.gpsAccuracy<=50;el.className='gps-quality '+(good?'':'bad');el.innerHTML=`<span>●</span><span>Точность GPS: <b>${rr.gpsAccuracy===null?'неизвестно':'±'+rr.gpsAccuracy+' м'}</b></span>`}
+  function gpsPoint(pos){return {lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy||999,speed:pos.coords.speed}}
+  function gpsSanity(p){
+    const now=Date.now();let suspicious=false;if(rr.lastGpsPos&&rr.lastGpsAt){const dt=(now-rr.lastGpsAt)/1000,d=distMeters(rr.lastGpsPos,p);const speed=dt>0?d/dt:0;if(dt<60&&speed>35)suspicious=true}
+    rr.lastGpsPos={lat:p.lat,lng:p.lng};rr.lastGpsAt=now;rr.suspiciousGps=suspicious;showGpsQuality(p.accuracy);return !suspicious
+  }
+  async function explainGeoState(){if(!window.isSecureContext){status('Для GPS откройте приложение по HTTPS. В обычном http браузер блокирует геолокацию.');return}if(navigator.permissions?.query){try{const r=await navigator.permissions.query({name:'geolocation'});if(r.state==='denied')status('Доступ к GPS запрещён. Разрешите геолокацию в настройках браузера.');}catch(e){}}}
+
+  function updateMarkers(p,center=false){
+    rr.livePos={lat:p.lat,lng:p.lng};
+    if(rr.liveMarker)rr.liveMarker.setLatLng([p.lat,p.lng]); else rr.liveMarker=L.marker([p.lat,p.lng],{icon:userIcon,zIndexOffset:1000}).addTo(map).bindTooltip('Вы здесь',{direction:'top'});
+    if(rr.homeMarker)rr.homeMarker.setLatLng([p.lat,p.lng]); else rr.homeMarker=L.marker([p.lat,p.lng],{icon:userIcon,zIndexOffset:1000}).addTo(homeMap).bindTooltip('Вы здесь',{permanent:false,direction:'top'});
+    if(center){homeMap.setView([p.lat,p.lng],16,{animate:true}); if(rr.activeScreen==='route')map.setView([p.lat,p.lng],17,{animate:true})}
+    saveSession();
+  }
+  function setStart(p,mode,center=true){
+    rr.start={lat:p.lat,lng:p.lng};rr.startMode=mode;updateMarkers(p,center);
+    status(mode==='gps'?(insidePilot(p)?'Местоположение определено. Маршрут начнётся от вашей текущей позиции.':'GPS определён. Вы сейчас за пределами основной тестовой зоны Якутска.'):'Используется тестовая точка в центре Якутска.',mode==='gps');
+    saveSession();
+  }
+  function requestLocation(center=true){
+    status('Определяем ваше местоположение…');
+    if(!navigator.geolocation){status('Геолокация недоступна на этом устройстве.');return}
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const p=gpsPoint(pos);rr.gpsFresh=true;gpsSanity(p);if(rr.legs.length&& !['idle','completed'].includes(rr.stage)){updateMarkers(p,center);status(`GPS подключён · маршрут продолжается · точность ±${Math.round(p.accuracy)} м`,true)}else setStart(p,'gps',center);toast('GPS подключён');
+    },async err=>{await explainGeoState();if(window.isSecureContext)status(err.code===1?'Доступ к GPS не разрешён. Включите геолокацию для сайта.':'Не удалось получить GPS. Выйдите на открытое место и попробуйте ещё раз.');}, {enableHighAccuracy:true,timeout:15000,maximumAge:1000});
+  }
+  function startWatching(){
+    if(!navigator.geolocation||rr.watchId!==null)return;
+    rr.watchId=navigator.geolocation.watchPosition(pos=>{
+      const p=gpsPoint(pos);rr.gpsFresh=true;const sane=gpsSanity(p);updateMarkers(p,false);
+      if(rr.startMode==='pending'){rr.start={lat:p.lat,lng:p.lng};rr.startMode='gps'}status(`GPS подключён · точность ±${Math.round(p.accuracy)} м`,true)
+      if(rr.stage==='walking'&&rr.checkpoints[rr.current-1]){
+        const d=distMeters(p,rr.checkpoints[rr.current-1]);$('#gpsBadge').textContent=(sane?'':'⚠ ')+(d<1000?`До точки: ${Math.round(d)} м`:`До точки: ${(d/1000).toFixed(1)} км`);
+        if(d<=45 && p.accuracy<=65 && sane && !rr.autoGpsBusy){rr.autoGpsBusy=true;gpsAccepted(true).finally(()=>{rr.autoGpsBusy=false})}
+      }
+    },err=>{if(err.code===1)status('GPS отключён. Разрешите геолокацию для сайта.');}, {enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+  }
+
+  function showScreen(id,{restoreScroll=true}={}){
+    const content=$('.content'); if(rr.activeScreen)rr.scrolls[rr.activeScreen]=content.scrollTop;
+    if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
+    rr.activeScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
+    $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
+    $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
+    requestAnimationFrame(()=>{
+      if(id==='route'){map.invalidateSize(true); if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false)}
+      if(id==='home')homeMap.invalidateSize(true);
+      content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
+    });
+  }
+  $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+
+  $('#locateYakutskBtn').onclick=()=>requestLocation(true);
+  const demoMode=new URLSearchParams(location.search).get('demo')==='1';if(demoMode){$('#demoYakutskBtn').classList.remove('hidden');$('#demoGpsBtn').classList.remove('hidden')}
+  $('#demoYakutskBtn').onclick=()=>{if(!demoMode)return;setStart(YAKUTSK,'demo',true);toast('Тестовый старт: центр Якутска')};
+  $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;map.setView([p.lat,p.lng],17,{animate:true});};
+  $('#distanceInput').addEventListener('input',()=>{if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance)}});
+  $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}}));
+  $('#partnerToggle').addEventListener('click',()=>setTimeout(()=>{if(window.state){localStorage.setItem('rr_partner',window.state.partner?'1':'0')}},0));
+
+  function roughWaypoints(start,km,n,seed=0){
+    const radius=Math.max(.32,km/(2*Math.PI)*.84),pts=[],offset=(seed*1.173+0.7)%6.28;
+    for(let i=0;i<n;i++){const ang=offset+2*Math.PI*i/n,wobble=.82+.16*Math.sin(i*1.7+seed),r=radius*wobble;pts.push({lat:start.lat+(r/111.32)*Math.sin(ang),lng:start.lng+(r/(111.32*Math.cos(start.lat*Math.PI/180)))*Math.cos(ang)})}return pts;
+  }
+  const coordsFor=p=>`${p.lng.toFixed(6)},${p.lat.toFixed(6)}`;
+  async function requestFootRoute(points){
+    const coords=points.map(coordsFor).join(';');
+    const url=`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true&alternatives=false&generate_hints=false`;
+    const res=await fetch(url,{headers:{Accept:'application/json'}});if(!res.ok)throw new Error('routing '+res.status);const data=await res.json();if(data.code!=='Ok'||!data.routes?.[0])throw new Error(data.code||'NoRoute');return data;
+  }
+  function legCoords(leg){
+    const out=[];(leg?.steps||[]).forEach(step=>(step.geometry?.coordinates||[]).forEach(c=>{const p=[c[1],c[0]],last=out[out.length-1];if(!last||Math.abs(last[0]-p[0])>1e-8||Math.abs(last[1]-p[1])>1e-8)out.push(p)}));return out;
+  }
+  function showLeg(index,fit=true){
+    const leg=rr.legs[index];if(!leg)return;
+    map.invalidateSize(true);
+    rr.routeLine?.remove();rr.routeCasing?.remove();rr.checkpointMarker?.remove();
+    const pts=legCoords(leg);if(pts.length<2){toast('Не удалось отрисовать этот участок');return}
+    rr.routeCasing=L.polyline(pts,{weight:11,opacity:.92,color:'#ffffff',lineCap:'round',lineJoin:'round',interactive:false}).addTo(map);
+    rr.routeLine=L.polyline(pts,{weight:6,opacity:1,color:'#0c5a42',lineCap:'round',lineJoin:'round',interactive:false,className:'route-line-shadow'}).addTo(map);
+    const target=index<rr.checkpoints.length?rr.checkpoints[index]:rr.start;
+    const label=index<rr.checkpoints.length?String(index+1):'F';
+    rr.checkpointMarker=L.marker([target.lat,target.lng],{icon:index<rr.checkpoints.length?markerIcon(label,'#ff681d',38):finishIcon,zIndexOffset:900}).addTo(map).bindTooltip(index<rr.checkpoints.length?'Контрольная точка '+label:'Финиш',{direction:'top'});
+    if(fit){const layers=[rr.routeLine,rr.checkpointMarker,rr.liveMarker].filter(Boolean),group=L.featureGroup(layers);try{map.fitBounds(group.getBounds().pad(.18),{animate:false,maxZoom:17})}catch(e){}}
+    $('#pointDistance').textContent=leg.distance<1000?Math.round(leg.distance)+' м':(leg.distance/1000).toFixed(1).replace('.',',')+' км';
+  }
+
+  function resetPointUI(){
+    $('#pointNumber').textContent=rr.current;$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Не подтверждён';$('#photoCheck').className='check';$('#photoCheck b').textContent='Ожидается';$('#gpsBadge').textContent='GPS: ведём к точке';
+    $('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#verificationMessage').className='hidden';$('#verifyBtn').classList.add('hidden');$('#photoPreview').classList.remove('show');$('#photoPreview').src='';
+    $('#lockLabel').textContent='Дальше скрыто';$('#checkpointTitle').textContent='Контрольная точка '+rr.current;$('#checkpointText').textContent='Идите по зелёному маршруту. GPS автоматически откроет фотозадание, когда вы подойдёте.';$('#gpsBtn').textContent='Проверить GPS сейчас';$('#gpsBtn').disabled=false;
+    rr.stage='walking';rr.autoGpsBusy=false;saveSession();
+  }
+
+  async function buildYakutsk(){
+    const input=parseFloat($('#distanceInput').value.replace(',','.'));if(!input||input<1||input>30){toast('Для теста: дистанция 1–30 км');return}
+    if(!rr.gpsFresh && !demoMode){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return}
+    if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
+    const btn=$('#buildBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Строим маршрут…';
+    try{
+      const n=Math.max(2,Math.min(9,Math.round(input/1.35)));
+      let best=null;
+      for(const seed of [2,5]){try{const rough=roughWaypoints(rr.start,input,n,seed),data=await requestFootRoute([rr.start,...rough,rr.start]),route=data.routes[0],diff=Math.abs(route.distance/1000-input);if(!best||diff<best.diff)best={data,route,diff};if(diff<=Math.max(.5,input*.12))break}catch(e){console.warn(e)}}
+      if(!best)throw new Error('NoRoute');
+      const {data,route}=best;rr.legs=route.legs;rr.checkpoints=data.waypoints.slice(1,-1).map(w=>({lat:w.location[1],lng:w.location[0],name:w.name||''}));rr.current=1;rr.routeDistance=route.distance;rr.currentPoi=null;rr.currentCategory='city';
+      if(window.state){window.state.distance=route.distance/1000;window.state.type=$('#typeChoices .choice.active')?.dataset.type||window.state.type;window.state.partner=$('#partnerToggle').classList.contains('on');}
+      $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
+      resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast('Маршрут готов');
+    }catch(e){console.error(e);toast('Маршрут не построен. Проверьте интернет и попробуйте ещё раз.')}finally{btn.disabled=false;btn.textContent=old}
+  }
+  $('#buildBtn').onclick=buildYakutsk;
+
+  async function nearbyPoi(p){
+    const q=`[out:json][timeout:8];(nwr(around:220,${p.lat},${p.lng})[name][historic];nwr(around:220,${p.lat},${p.lng})[name][tourism];nwr(around:220,${p.lat},${p.lng})[name][amenity~"cafe|restaurant|theatre|library|place_of_worship"];nwr(around:220,${p.lat},${p.lng})[name][leisure~"park|garden"];);out center tags 18;`;
+    try{const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q));if(!r.ok)throw 0;const d=await r.json(),els=d.elements||[];if(!els.length)return null;return els.map(e=>{const lat=e.lat??e.center?.lat,lng=e.lon??e.center?.lon;return {...e,_lat:lat,_lng:lng,_d:lat?distMeters(p,{lat,lng}):99999}}).filter(e=>e._lat).sort((a,b)=>a._d-b._d)[0]||null}catch(e){return null}
+  }
+  function categoryFor(tags={}){if(tags.historic)return {key:'historic',label:'исторический объект',icon:'🏛️'};if(tags.tourism)return {key:'tourism',label:'достопримечательность',icon:'●'};if(tags.amenity==='cafe'||tags.amenity==='restaurant')return {key:'food',label:'заведение',icon:'☕'};if(tags.leisure)return {key:'park',label:'парк или сквер',icon:'🌳'};return {key:'city',label:'городской объект',icon:'●'}}
+  async function preparePoi(){
+    const target=rr.checkpoints[rr.current-1];rr.currentPoi=await nearbyPoi(target);const poi=rr.currentPoi||{tags:{name:'заметный объект рядом'}},c=categoryFor(poi.tags);rr.currentCategory=c.key;const name=poi.tags?.name||'заметный объект рядом';
+    $('#checkpointTitle').textContent=name;$('#taskMessage').textContent=`Фотозадание: найдите и сфотографируйте ${c.label} «${name}». Следующий участок откроется только после проверки.`;saveSession();
+  }
+  async function gpsAccepted(real){
+    rr.stage='photo';rr.autoGpsBusy=false;$('#gpsBadge').textContent=real?'GPS: подтверждён':'GPS: демо';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Подтверждён';$('#photoBlock').classList.remove('hidden');$('#replacePointBtn').classList.remove('hidden');$('#checkpointText').textContent='Вы в зоне точки. Подбираем объект для фотоконтроля…';await preparePoi();$('#checkpointText').textContent='GPS подтверждён. Выполните фотозадание.';$('#gpsBtn').textContent='GPS подтверждён ✓';$('#gpsBtn').disabled=true;saveSession();toast('GPS подтверждён')
+  }
+  function checkGps(){
+    const target=rr.checkpoints[rr.current-1];if(!target){toast('Сначала постройте маршрут');return}
+    $('#gpsBadge').textContent='GPS: проверяем…';navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);updateMarkers(p,false);const d=distMeters(p,target);if(!sane){$('#gpsBadge').textContent='GPS: подозрительный скачок';toast('GPS изменился слишком резко. Подождите несколько секунд.');return}if(p.accuracy>80){$('#gpsBadge').textContent='GPS: точность ±'+Math.round(p.accuracy)+' м';toast('Слабая точность GPS. Выйдите на открытое место.');return}if(d<=55)gpsAccepted(true);else{$('#gpsBadge').textContent='До точки: '+Math.round(d)+' м';toast('До контрольной точки ещё '+Math.round(d)+' м')}},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  }
+  $('#gpsBtn').onclick=checkGps;$('#demoGpsBtn').onclick=()=>gpsAccepted(false);
+
+  $('#cameraInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');$('#photoCheck').className='check';$('#photoCheck b').textContent='Фото сделано';$('#verifyBtn').classList.remove('hidden');rr.stage='photo_ready';saveSession()};
+  async function loadHistory(){
+    const block=$('#historyBlock'),title=$('#historyTitle'),text=$('#historyText'),source=$('#historySource');block.classList.remove('hidden');$('#questBlock').classList.remove('hidden');const poi=rr.currentPoi,name=poi?.tags?.name||`Точка ${rr.current}`;title.textContent='История: '+name;
+    let body='Вы открыли новое место в Якутске. Для этой точки пока нет привязанной исторической справки — в пилоте мы собираем базу объектов и проверяем механику.';source.textContent='Пилотная карточка места';const wp=poi?.tags?.wikipedia;
+    if(wp){try{const parts=wp.split(':'),lang=parts.length>1?parts[0]:'ru',page=parts.length>1?parts.slice(1).join(':'):parts[0],r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`);if(r.ok){const d=await r.json();if(d.extract){body=d.extract.split(/(?<=[.!?])\s+/).slice(0,3).join(' ');source.textContent='Источник: Wikipedia · объект найден по OpenStreetMap'}}}catch(e){}}
+    text.textContent=body;renderQuest(name);
+  }
+  function renderQuest(name){
+    const c=rr.currentCategory,q=$('#questQuestion'),box=$('#questOptions'),res=$('#questResult');res.textContent='';q.textContent='Мини-квест: к какому типу относится это место?';const opts=[['historic','Исторический объект'],['food','Кафе / ресторан'],['park','Парк / сквер'],['tourism','Достопримечательность'],['city','Городской объект']],correct=opts.find(x=>x[0]===c)||opts[4],distract=opts.filter(x=>x[0]!==correct[0]).sort(()=>Math.random()-.5).slice(0,2),arr=[correct,...distract].sort(()=>Math.random()-.5);box.innerHTML='';arr.forEach(([k,label])=>{const b=document.createElement('button');b.className='quest-option';b.textContent=label;b.onclick=()=>{box.querySelectorAll('button').forEach(x=>x.disabled=true);if(k===correct[0]){b.classList.add('correct');res.textContent='Верно. Значок места добавлен в профиль.';awardDiscovery(name)}else{b.classList.add('wrong');[...box.querySelectorAll('button')].find(x=>x.textContent===correct[1])?.classList.add('correct');res.textContent='Ответ не засчитан. Место остаётся в истории маршрута.'}};box.appendChild(b)})
+  }
+  function awardDiscovery(name){if(rr.discoveries.some(x=>x.name===name))return;const c=categoryFor(rr.currentPoi?.tags||{});rr.discoveries.unshift({name,icon:c.icon,at:new Date().toLocaleDateString('ru-RU')});rr.discoveries=rr.discoveries.slice(0,30);localStorage.setItem('rr_yakutsk_discoveries',JSON.stringify(rr.discoveries));renderDiscoveries();toast('Получен значок: '+name)}
+  function renderDiscoveries(){const box=$('#yakutskDiscoveries');if(!box)return;if(!rr.discoveries.length){box.innerHTML='<div class="hint">Пройдите фотоконтроль и мини-квест — значок появится здесь.</div>';return}box.innerHTML=rr.discoveries.map(x=>`<div class="discovery-item"><div class="di">${x.icon}</div><div><b>${x.name}</b><span>Открыто в Якутске · ${x.at}</span></div></div>`).join('')}
+  renderDiscoveries();
+
+  $('#verifyBtn').onclick=()=>{
+    if(!$('#photoPreview').classList.contains('show')){toast('Сначала сделайте фото');return}
+    $('#verificationMessage').className='message warn';$('#verificationMessage').textContent='Проверяем GPS и фотографию…';
+    setTimeout(()=>{rr.stage='verified';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='GPS совпал. Фото принято. Контрольная точка подтверждена.';$('#verifyBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');$('#lockLabel').textContent='Следующий участок готов';if(window.state){const earned=Math.round(25*window.state.coef);window.state.coins+=earned;window.state && localStorage.setItem('rr_coins',window.state.coins);$('#coinsTop').textContent=$('#coinsShop').textContent=$('#coinsProfile').textContent=window.state.coins;toast('+'+earned+' RouteCoin')}loadHistory();saveSession()},700)
+  };
+
+  function setFinish(){
+    rr.current=rr.checkpoints.length+1;rr.stage='finish';showLeg(rr.checkpoints.length,true);$('#pointNumber').textContent='F';$('#checkpointTitle').textContent='Финиш — вернитесь к старту';$('#checkpointText').textContent='Последний участок ведёт к месту старта. На финише нужен только GPS.';$('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#lockLabel').textContent='Финиш открыт';$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Ожидается';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Не требуется';$('#gpsBtn').textContent='Подтвердить возвращение к старту';$('#gpsBtn').disabled=false;saveSession();
+  }
+  function finishGps(){navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);updateMarkers(p,false);if(!sane){toast('GPS изменился слишком резко. Подождите.');return}if(p.accuracy>90){toast('Недостаточная точность GPS: ±'+Math.round(p.accuracy)+' м');return}const d=distMeters(p,rr.start);if(d<=85){rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';const st=window.__completeStreakDay?window.__completeStreakDay():{changed:false,text:'Маршрут завершён'};$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Кольцевой маршрут по Якутску завершён. '+st.text;saveSession();toast(st.changed?'Страйк засчитан':'Маршрут завершён')}else toast('До стартовой зоны ещё '+Math.round(d)+' м')},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+
+  $('#nextBtn').onclick=()=>{
+    if(rr.current>=rr.checkpoints.length){setFinish();$('#gpsBtn').onclick=finishGps;$('#demoGpsBtn').onclick=()=>{if(!demoMode)return;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Демо-маршрут завершён. Страйк и рейтинг не изменены.';saveSession();toast('Демо завершено')};return}
+    rr.current++;resetPointUI();showLeg(rr.current-1,true);$('#gpsBtn').onclick=checkGps;$('#demoGpsBtn').onclick=()=>gpsAccepted(false);saveSession();toast('Открыт участок до точки '+rr.current)
+  };
+  $('#replacePointBtn').onclick=()=>{toast('Для пилота заменяем фотозадание, маршрут сохраняется');rr.currentPoi=null;preparePoi()};
+
+  function restoreUI(){
+    if(window.state){$('#distanceInput').value=window.state.distance||6.5;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner)}
+    if(rr.livePos)updateMarkers(rr.livePos,false);else updateMarkers(rr.start,false);
+    if(rr.legs.length){
+      const savedStage=rr.stage;
+      $('#sumDistance').textContent=(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;$('#pointNumber').textContent=rr.current<=rr.checkpoints.length?rr.current:'F';
+      if(savedStage==='finish'||savedStage==='completed'){
+        setFinish();
+        if(savedStage==='completed'){rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Маршрут завершён.';saveSession()}
+        $('#gpsBtn').onclick=finishGps;
+      } else {
+        showLeg(Math.max(0,rr.current-1),false);resetPointUI();
+        if(['photo','photo_ready','verified'].includes(savedStage)){gpsAccepted(rr.startMode==='gps').then(()=>{if(savedStage==='verified'){rr.stage='verified';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';$('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');$('#lockLabel').textContent='Следующий участок готов';loadHistory();saveSession()}})}
+      }
+    }
+    showScreen(rr.activeScreen,{restoreScroll:true});
+  }
+
+  // Automatic GPS starts only after the temporary pilot gate is unlocked.
+  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{homeMap.invalidateSize(true);map.invalidateSize(true);restoreUI();explainGeoState();requestLocation(true);startWatching()})}
+  if(document.body.classList.contains('pilot-unlocked'))bootGps();else window.addEventListener('pilot-unlocked',bootGps,{once:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){homeMap.invalidateSize(true);if(rr.activeScreen==='route')map.invalidateSize(true);startWatching()}});
+  window.addEventListener('beforeunload',saveSession);
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
+</script>
+</body>
+</html>
