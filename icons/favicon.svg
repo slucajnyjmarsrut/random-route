@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Маршик">
+<rect width="64" height="64" rx="17" fill="#0976ab"/>
+<path d="M7 39L16 23L26 29L37 18L55 40" fill="#b5e9e5" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M6 52Q26 33 58 53V64H6Z" fill="#059b96"/>
+<path d="M11 29Q11 9 29 10Q49 9 52 28L47 41Q31 55 17 42Z" fill="#faf3e1" stroke="#213958" stroke-width="3"/>
+<path d="M10 27Q10 12 23 7Q42 4 53 24L51 29Q32 19 12 32Z" fill="#ffbd39" stroke="#253754" stroke-width="3"/>
+<path d="M23 32q4-4 8 0M38 32q4-4 7 0" fill="none" stroke="#28384f" stroke-width="3" stroke-linecap="round"/>
+<path d="M30 38q2-4 4 0l-2 3Z" fill="#28384f"/>
+<path d="M25 44q8 8 16 0" fill="none" stroke="#e56d70" stroke-width="3" stroke-linecap="round"/>
+</svg>
