@@ -8,7 +8,7 @@
 .tap-whole-card .buy-btn,.tap-whole-card .feature-action{border-radius:13px}
 .tap-whole-card .buy-btn:after,.tap-whole-card .feature-action:after{content:"  ›";font-weight:950;font-size:16px;vertical-align:middle}
 #quickInfoGrid .tap-info-card{min-height:108px}
-:is(.primary,.secondary,.danger-lite,.feature-action,.gold-buy,.buy-btn,.quest-option,.store-tab,.choice,.schat-send,.sra-btn,.rdq-route-button,.devdiag-actions button,.route-control-grid button,.route-exit-btn){min-height:44px;touch-action:manipulation}
+button:is(.primary,.secondary,.danger-lite,.feature-action,.gold-buy,.buy-btn,.quest-option,.store-tab,.choice,.schat-send,.sra-btn,.rdq-route-button,.devdiag-actions button,.route-control-grid button,.route-exit-btn){min-height:44px;touch-action:manipulation}
 .nav button{min-height:52px;touch-action:manipulation}
 button:focus-visible{outline:3px solid #0f7dbb;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#quickInfoGrid .tap-info-card,.tap-whole-card,.tap-detail-card{transition:none}}
