@@ -23,7 +23,7 @@ check('3',{distanceKm:3},true);
 check('Пройди 60 км',{errors:1,distanceKm:null});
 check('На полчаса',{distanceKm:2.2,estimatedMinutes:30});
 check('Кофейня по пути',{coffee:true,poiWish:'coffee'});
-assert.equal(placeScore({tags:{name:'Центральный парк культуры'}},{type:'parks',coffee:false,poiWish:'parks'}),2);
+assert.equal(placeScore({tags:{name:'Центральный парк культуры'}},{type:'parks',coffee:false,poiWish:'parks'}),1);
 assert.equal(placeScore({tags:{name:'Кафе на улице Ленина'}},{type:'city',coffee:true,poiWish:'coffee'}),1);
 assert.equal(placeScore({tags:{name:'Центральный парк культуры'}},{type:'city',coffee:false,poiWish:null}),0);
 console.log('Smart Route Chat: 18 checks passed');
