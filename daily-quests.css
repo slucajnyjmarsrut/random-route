@@ -25,9 +25,21 @@
 .marshik-strip div{display:grid;gap:5px;min-width:0}
 .marshik-strip strong{color:#0a5f68;font-size:17px;line-height:1.23;font-weight:950;letter-spacing:-.25px}
 .marshik-strip span{color:#405e62;font-size:11px;line-height:1.42}
-.rdq-start{flex:0 0 auto;border:1px solid #edd59a;background:#fff0c4;color:#81500b;padding:10px 8px;border-radius:11px;font-size:11px;font-weight:950;min-width:69px;white-space:nowrap}
-.rdq-start:disabled{opacity:.66;cursor:default}
+
+/* Daily-route cards are the whole touch target, not just their RouteCoin number. */
+.rdq-route-button{display:flex;align-items:center;width:100%;min-height:78px;appearance:none;-webkit-appearance:none;
+ text-align:left;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;
+ transition:background .16s ease,border-color .16s ease,transform .13s ease,box-shadow .16s ease}
+.rdq-route-button:not(:disabled):hover{background:#e6f6ef;border-color:#58aa91;box-shadow:0 5px 14px rgba(10,102,76,.12)}
+.rdq-route-button:not(:disabled):active{transform:scale(.987);background:#d7efe5}
+.rdq-route-button:focus-visible{outline:3px solid #117cba;outline-offset:3px;border-color:#117cba}
+.rdq-route-button:disabled{cursor:default;opacity:1}
+.rdq-route-button:disabled:not(.rdq-done){background:#f3f6f4;color:#687b72}
+.rdq-reward{flex:0 0 auto;min-width:65px;text-align:center;font-size:11px;font-weight:950}
+.rdq-arrow{flex:0 0 auto;font-size:24px;font-weight:900;line-height:1;color:#146d5c;margin-left:1px}
+.rdq-route-button:disabled .rdq-arrow{color:#58917e}
+
 .rdq-task.rdq-done{background:#eaf8f6;border-color:#9fd3c9}
 .rdq-count{white-space:nowrap;max-width:145px;overflow:hidden;text-overflow:ellipsis}
 .rdq-desc{font-size:12px}
-@media(max-width:370px){.marshik-strip img{width:62px;height:82px;flex-basis:62px}.marshik-strip strong{font-size:15px}.rdq-task{gap:6px;padding:8px 6px}.rdq-icon{flex-basis:20px;width:20px;font-size:16px}.rdq-start{min-width:60px}}
+@media(max-width:370px){.marshik-strip img{width:62px;height:82px;flex-basis:62px}.marshik-strip strong{font-size:15px}.rdq-task{gap:6px;padding:8px 6px}.rdq-icon{flex-basis:20px;width:20px;font-size:16px}.rdq-reward{min-width:54px;padding:7px 6px}.rdq-arrow{font-size:19px}}

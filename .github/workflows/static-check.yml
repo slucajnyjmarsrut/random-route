@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026, fix/daily-route-full-card-click-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -25,6 +25,7 @@ jobs:
           node tests/street-audit.test.cjs
           node --check daily-quests.js
           node tests/daily-quests.test.cjs
+          node tests/daily-route-card.test.cjs
           node --check sw.js
           node - <<'NODE'
           const fs=require('fs');
@@ -41,6 +42,10 @@ jobs:
           if(!html.includes('daily-quests.js') || !html.includes('daily-quests.css'))throw new Error('Daily quests UI missing');
           if(!html.includes('dailyOfferId:rr.dailyOfferId||null'))throw new Error('Daily route ID missing from verified completion event');
           if(!html.includes('window.__buildDailyRoute'))throw new Error('Daily route generator binding missing');
+          if(!html.includes('daily-quests.js?v=2.1'))throw new Error('New daily route card version missing');
+          const dailyJS=fs.readFileSync('daily-quests.js','utf8');
+          if(!dailyJS.includes('doc.createElement("button");item.type="button"') || !dailyJS.includes('item.addEventListener("click"'))throw new Error('Daily card must be one clickable button');
+          if(dailyJS.includes('action.addEventListener("click"'))throw new Error('Old reward-only click target still exists');
           if(!html.includes('icons/mascot-marshik.svg'))throw new Error('Mascot missing from home page');
           if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
           if(!html.includes('smart-route-chat.js?v=1.1'))throw new Error('Chat regression fix version missing');
