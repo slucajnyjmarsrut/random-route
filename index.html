@@ -159,10 +159,16 @@ try {
 <div aria-label="Текущий страйк" class="streak-top-card"><span class="streak-top-label">🔥 СТРАЙК</span><div class="streak-top-value"><b><span id="streakTop">0</span> дн.</b><em>×<span id="coefTop">1.0</span></em></div></div>
 <div aria-label="Баланс RouteCoin" class="coin-top-card"><small>ROUTECOIN</small><b>🪙 <span id="coinsTop">0</span></b></div>
 </div>
+<button type="button" class="rr-settings-trigger" data-open-screen="settings" aria-label="Открыть настройки" title="Настройки">⚙️</button>
 </header>
 <main class="content">
 <section class="screen active" id="home">
 <div class="hero"><h1>Исследуем весь Якутск</h1><p>Расскажите, куда и насколько хотите погулять: помощник настроит маршрут по пешеходным дорогам.</p></div>
+<div class="rr-home-links" aria-label="Другие разделы">
+<button type="button" data-open-screen="settings">⚙️ Настройки маршрута</button>
+<button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button>
+<button type="button" data-open-screen="help">ℹ️ О приложении</button>
+</div>
 <section class="schat-card" id="smartChat" aria-label="Чат для создания прогулки">
  <div class="schat-heading"><h2>💬 Куда пойдём?</h2><span>Работает без AI API</span></div>
  <p class="schat-description">Опишите прогулку обычными словами: «Построй 3 км через парки, без дворов» или «Хочу погулять 40 минут».</p>
@@ -175,39 +181,9 @@ try {
    <button class="schat-send" type="submit">✦ Отправить пожелание</button>
  </form>
  <p class="schat-summary" id="smartChatSummary">Настройки маршрута загружаются…</p>
- <button id="smartChatSettings" type="button" class="schat-settings" aria-expanded="false">Показать ручные настройки</button>
+ <button id="smartChatSettings" type="button" class="schat-settings">⚙️ Открыть настройки маршрута</button>
  <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
 </section>
-<aside class="marshik-strip" aria-label="Маршик — помощник исследователя">
- <img src="icons/mascot-marshik.svg" width="100" height="106" alt="Маршик с картой в зимней одежде" loading="lazy"/>
- <div><strong>Каждый день — новый путь!</strong><span>Маршик поможет выбрать прогулку и открыть новые места Якутска.</span></div>
-</aside>
-<div class="quick-info-grid" id="quickInfoGrid">
-  <div class="quick-info-card" data-info-title="Как работает маршрут" data-info-icon="🧭" data-info-text="Вы задаёте дистанцию и тип прогулки. Приложение строит кольцевой маршрут, но показывает его по частям: следующий участок открывается только после прохождения текущей контрольной точки.">
-    <div><div class="quick-info-icon">🧭</div><b>Как работает</b><p>Кольцевой маршрут открывается поэтапно.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
-  </div>
-  <div class="quick-info-card" data-info-title="Фотоконтроль" data-info-icon="📷" data-info-text="У контрольной точки приложение сверяет ваше местоположение по GPS и просит сфотографировать именно нужный объект рядом. Только после успешной проверки открывается следующий участок маршрута.">
-    <div><div class="quick-info-icon">📷</div><b>Фотоконтроль</b><p>GPS + фото нужного объекта.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
-  </div>
-  <div class="quick-info-card" data-info-title="Зоны, куда не идти" data-info-icon="🚫" data-info-text="Можно отметить на карте районы и участки, куда вы не хотите идти. При генерации и перестроении приложение постарается не прокладывать маршрут через выбранные зоны.">
-    <div><div class="quick-info-icon">🚫</div><b>Не хочу идти туда</b><p>Отметьте нежелательные зоны на карте.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
-  </div>
-  <div class="quick-info-card" data-info-title="Истории и квесты" data-info-icon="🏛️" data-info-text="На интересных точках открывается краткая история места. После неё можно пройти мини-квест и получить уникальный значок, который затем закрепляется в профиле или активируется через золотой слот.">
-    <div><div class="quick-info-icon">🏛️</div><b>Истории и квесты</b><p>Узнавайте город и собирайте значки.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
-  </div>
-</div>
-<div class="card">
-<div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
-<div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
-<div class="hint">Дистанция маршрута: от 1 до 50 км.</div>
-<div class="hint" style="margin-top:9px;padding:9px 11px;border-radius:12px;background:#e7f2ed;color:#0b5a42;font-weight:800;line-height:1.45">🚶 Только пешком: приоритет тротуаров и пешеходных дорожек. Узкие проезды и дворы по возможности обходим.</div>
-</div>
-<div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
-<button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
-<button class="choice" data-type="city"><span>⌂</span>Город</button>
-<button class="choice" data-type="nature"><span>🌿</span>Природа</button>
-</div></div>
-<div class="card"><div class="row"><div><div class="title" style="margin:0">Кофейня или ресторан</div><div class="sub" style="margin:3px 0 0">Добавить заведение по пути</div></div><button aria-label="Добавить заведение" class="toggle on" id="partnerToggle"></button></div></div>
 <div class="card">
 <div class="city-chip">Якутск</div>
 <div class="title">Вы на карте</div><div class="sub">При запуске приложение само определяет GPS и ставит старт в вашем текущем месте</div>
@@ -390,6 +366,58 @@ try {
 </div>
 <div class="profile-grid"><div class="pstat">👟<b id="profileKm">0,0 км</b><span>подтверждено</span></div><div class="pstat">↻<b id="profileRoutes">0</b><span>маршрутов</span></div><div class="pstat">📷<b id="profilePoints">0</b><span>фотоконтроля</span></div><div class="pstat">🪙<b id="coinsProfile">0</b><span>RouteCoin</span></div></div>
 
+</section>
+
+<section class="screen" id="settings" aria-label="Настройки приложения">
+<div class="hero"><small>Управление приложением</small><h1>⚙️ Настройки</h1><p>Ваши предпочтения сохраняются на этом устройстве. Для прогулки используйте карту на главной.</p></div>
+<h2 class="rr-section-heading">Параметры маршрута</h2>
+<div class="card">
+<div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
+<div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
+<div class="hint">Дистанция маршрута: от 1 до 50 км.</div>
+<div class="hint" style="margin-top:9px;padding:9px 11px;border-radius:12px;background:#e7f2ed;color:#0b5a42;font-weight:800;line-height:1.45">🚶 Только пешком: приоритет тротуаров и пешеходных дорожек. Узкие проезды и дворы по возможности обходим.</div>
+</div>
+<div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
+<button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
+<button class="choice" data-type="city"><span>⌂</span>Город</button>
+<button class="choice" data-type="nature"><span>🌿</span>Природа</button>
+</div></div>
+<div class="card"><div class="row"><div><div class="title" style="margin:0">Кофейня или ресторан</div><div class="sub" style="margin:3px 0 0">Добавить заведение по пути</div></div><button aria-label="Добавить заведение" class="toggle on" id="partnerToggle"></button></div></div>
+
+<div class="card rr-settings-options"><div class="title">Уведомления и оформление</div><div class="sub">Погода относится к Якутску в целом, а не к конкретной улице.</div>
+<label><input type="checkbox" data-srs-pref="weather"/> Погодные предупреждения</label>
+<label><input type="checkbox" data-srs-pref="darkness"/> Предупреждать о темноте</label>
+<label><input type="checkbox" data-srs-pref="animatedBackground"/> Движущийся погодный фон</label>
+</div>
+<div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button></div>
+<button class="primary" type="button" data-open-screen="home">Вернуться к построению маршрута</button>
+</section>
+<section class="screen" id="safety" aria-label="Безопасность прогулки">
+<div class="hero"><small>Перед выходом</small><h1>🛡️ Безопасная прогулка</h1><p>Прогноз, предупреждения и дополнительные сведения. Реальные условия на улицах проверяйте самостоятельно.</p></div>
+<div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ На главную</button><button type="button" data-open-screen="settings">⚙️ Настройки</button></div>
+</section>
+<section class="screen" id="help" aria-label="Как работает приложение">
+<div class="hero"><small>Справка</small><h1>ℹ️ О приложении</h1><p>Как устроены маршруты, фотоконтроль и городские открытия.</p></div>
+<aside class="marshik-strip" aria-label="Маршик — помощник исследователя">
+ <img src="icons/mascot-marshik.svg" width="100" height="106" alt="Маршик с картой в зимней одежде" loading="lazy"/>
+ <div><strong>Каждый день — новый путь!</strong><span>Маршик поможет выбрать прогулку и открыть новые места Якутска.</span></div>
+</aside>
+<div class="quick-info-grid" id="quickInfoGrid">
+  <div class="quick-info-card" data-info-title="Как работает маршрут" data-info-icon="🧭" data-info-text="Вы задаёте дистанцию и тип прогулки. Приложение строит кольцевой маршрут, но показывает его по частям: следующий участок открывается только после прохождения текущей контрольной точки.">
+    <div><div class="quick-info-icon">🧭</div><b>Как работает</b><p>Кольцевой маршрут открывается поэтапно.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
+  </div>
+  <div class="quick-info-card" data-info-title="Фотоконтроль" data-info-icon="📷" data-info-text="У контрольной точки приложение сверяет ваше местоположение по GPS и просит сфотографировать именно нужный объект рядом. Только после успешной проверки открывается следующий участок маршрута.">
+    <div><div class="quick-info-icon">📷</div><b>Фотоконтроль</b><p>GPS + фото нужного объекта.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
+  </div>
+  <div class="quick-info-card" data-info-title="Зоны, куда не идти" data-info-icon="🚫" data-info-text="Можно отметить на карте районы и участки, куда вы не хотите идти. При генерации и перестроении приложение постарается не прокладывать маршрут через выбранные зоны.">
+    <div><div class="quick-info-icon">🚫</div><b>Не хочу идти туда</b><p>Отметьте нежелательные зоны на карте.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
+  </div>
+  <div class="quick-info-card" data-info-title="Истории и квесты" data-info-icon="🏛️" data-info-text="На интересных точках открывается краткая история места. После неё можно пройти мини-квест и получить уникальный значок, который затем закрепляется в профиле или активируется через золотой слот.">
+    <div><div class="quick-info-icon">🏛️</div><b>Истории и квесты</b><p>Узнавайте город и собирайте значки.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
+  </div>
+</div>
+
+<div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ Построить маршрут</button><button type="button" data-open-screen="settings">⚙️ Настройки</button></div>
 </section>
 </main>
 <nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Карта</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
@@ -909,7 +937,9 @@ try {
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
-  $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+  $('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+  window.__rrOpenScreen=showScreen;
+  $('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.openScreen,{restoreScroll:false})));
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
