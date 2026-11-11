@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" name="viewport"/>
 <meta content="#f7faf8" name="theme-color"/>
-<meta content="noindex,nofollow,noarchive" name="robots"/>
+<meta content="index,follow" name="robots"/>
 <meta content="strict-origin-when-cross-origin" name="referrer"/>
 <meta content="default-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; connect-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" http-equiv="Content-Security-Policy"/>
 <link href="manifest.webmanifest" rel="manifest"/>
@@ -139,7 +139,8 @@ try {
     localStorage.setItem('rr_v8_reset_done','1');
   }
 } catch(e) {}
-</script></head>
+</script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
+</head>
 <body>
 <div class="app">
 <header class="topbar">
@@ -601,10 +602,8 @@ try {
     }catch(e){
       console.warn('Yandex maps',e);
       const reason=(e&&e.message)?(' Причина: '+e.message+'.'):'';const msg='Яндекс Карты не загрузились.'+reason+' Проверьте статус JavaScript API и HTTP Referer slucajnyjmarsrut.github.io, затем перезагрузите страницу.';
-      [$('#realMap'),$('#homeMap')].forEach(parent=>{
-        if(!parent)return;
-        const d=document.createElement('div');d.className='yandex-map-error';d.innerHTML='<div><b>Не удалось загрузить Яндекс Карты</b>'+msg+'</div>';parent.appendChild(d);
-      });
+      console.info('Подключаем резервную карту OpenStreetMap');
+      document.dispatchEvent(new Event('rr-map-failed'));
     }
   }
   function updateYandexUser(p,center=false){
@@ -850,9 +849,18 @@ try {
   }
   $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
 
-  $('#locateYakutskBtn').onclick=()=>requestLocation(true);
-  const demoMode=new URLSearchParams(location.search).get('demo')==='1';if(demoMode){$('#demoYakutskBtn').classList.remove('hidden');$('#demoGpsBtn').classList.remove('hidden')}
-  $('#demoYakutskBtn').onclick=()=>{if(!demoMode)return;setStart(YAKUTSK,'demo',true);toast('Старт: центр Якутска')};
+  $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
+  let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
+  $('#demoYakutskBtn').classList.remove('hidden');
+  $('#demoYakutskBtn').textContent='🧪 Пробный маршрут без GPS';
+  if(demoMode){$('#demoGpsBtn').classList.remove('hidden');$('#demoGpsBtn').textContent='Тест: имитировать прибытие (без реального GPS)';}
+  $('#demoYakutskBtn').onclick=()=>{demoMode=true;localStorage.setItem('rr_preview_city_mode','1');$('#demoGpsBtn').classList.remove('hidden');$('#demoGpsBtn').textContent='Тест: имитировать прибытие (без реального GPS)';setStart(YAKUTSK,'demo',true);updateDemoBanner();toast('Демо из центра Якутска: координаты тестовые, GPS не подтверждён');};
+  function updateDemoBanner(){
+    let badge=document.getElementById('rrDemoNotice');
+    if(!badge){badge=document.createElement('div');badge.id='rrDemoNotice';badge.style.cssText='padding:10px 12px;background:#fff3dc;border:1px solid #edc786;color:#6d4912;border-radius:14px;font-size:12px;font-weight:800;line-height:1.4;margin-bottom:8px';document.getElementById('buildBtn').before(badge);}
+    badge.textContent=demoMode?'🧪 ДЕМОНСТРАЦИЯ: маршрут строится из центра Якутска, реальное местоположение не подтверждено.':'📍 Для настоящей прогулки разрешите GPS. Можно также открыть пробный маршрут.';
+  }
+  updateDemoBanner();
   $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;if(yMap)yMap.setCenter([p.lat,p.lng],17,{duration:220});};
   $('#distanceInput').addEventListener('input',()=>{if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance)}});
   $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}}));
@@ -929,7 +937,11 @@ try {
       directions_options:{units:'kilometers',language:'ru-RU'}
     };
     const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
-    const res=await fetch(url,{headers:{Accept:'application/json'}});
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
+    let res;
+    try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
+    finally {clearTimeout(timer);}
+
     if(!res.ok)throw new Error('Valhalla '+res.status);
     const data=await res.json(),trip=data?.trip;
     if(!trip?.legs?.length||Number(trip.status||0)!==0)throw new Error(trip?.status_message||data?.error||'NoRoute');
@@ -2198,13 +2210,17 @@ try {
   }
 
   // v9.3: вход без кода, GPS запускается сразу после загрузки интерфейса.
-  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else{explainGeoState();requestLocation(true);startWatching()}})}
+  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');}})}
+  window.__routeSave=saveSession;
+  window.__routeRenderZones=renderNoGoZones;
   renderNoGoZones();
   bootGps();
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}startWatching()}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}if(!demoMode)startWatching()}});
   window.addEventListener('beforeunload',saveSession);
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 })();
 </script>
+<script src="smart-safety.js?v=1.0"></script>
+<script src="map-fallback.js?v=1.1"></script>
 </body>
 </html>
