@@ -849,12 +849,18 @@ try {
   }
   $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
 
-  $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');requestLocation(true)};
+  $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
   $('#demoYakutskBtn').classList.remove('hidden');
   $('#demoYakutskBtn').textContent='🧪 Пробный маршрут без GPS';
   if(demoMode){$('#demoGpsBtn').classList.remove('hidden');$('#demoGpsBtn').textContent='Тест: имитировать прибытие (без реального GPS)';}
-  $('#demoYakutskBtn').onclick=()=>{demoMode=true;localStorage.setItem('rr_preview_city_mode','1');$('#demoGpsBtn').classList.remove('hidden');$('#demoGpsBtn').textContent='Тест: имитировать прибытие (без реального GPS)';setStart(YAKUTSK,'demo',true);toast('Демо из центра Якутска: координаты тестовые, GPS не подтверждён');};
+  $('#demoYakutskBtn').onclick=()=>{demoMode=true;localStorage.setItem('rr_preview_city_mode','1');$('#demoGpsBtn').classList.remove('hidden');$('#demoGpsBtn').textContent='Тест: имитировать прибытие (без реального GPS)';setStart(YAKUTSK,'demo',true);updateDemoBanner();toast('Демо из центра Якутска: координаты тестовые, GPS не подтверждён');};
+  function updateDemoBanner(){
+    let badge=document.getElementById('rrDemoNotice');
+    if(!badge){badge=document.createElement('div');badge.id='rrDemoNotice';badge.style.cssText='padding:10px 12px;background:#fff3dc;border:1px solid #edc786;color:#6d4912;border-radius:14px;font-size:12px;font-weight:800;line-height:1.4;margin-bottom:8px';document.getElementById('buildBtn').before(badge);}
+    badge.textContent=demoMode?'🧪 ДЕМОНСТРАЦИЯ: маршрут строится из центра Якутска, реальное местоположение не подтверждено.':'📍 Для настоящей прогулки разрешите GPS. Можно также открыть пробный маршрут.';
+  }
+  updateDemoBanner();
   $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;if(yMap)yMap.setCenter([p.lat,p.lng],17,{duration:220});};
   $('#distanceInput').addEventListener('input',()=>{if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance)}});
   $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}}));
@@ -933,7 +939,7 @@ try {
     const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
     let res;
-    try {res=await fetch(url,{headers:{Accept:'application/json','X-Client-Id':'slucajnyjmarsrut-random-route'},signal:controller.signal});}
+    try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
     finally {clearTimeout(timer);}
 
     if(!res.ok)throw new Error('Valhalla '+res.status);
