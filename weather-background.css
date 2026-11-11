@@ -1,0 +1,57 @@
+/* Scenic Yakutsk weather, presentational only. Real weather data comes from Open-Meteo.
+ * Content is always above the background; no element intercepts taps.
+ */
+.app{isolation:isolate;--rr-sky-a:#d6e9e2;--rr-sky-b:#f3f6f4;--rr-hill-a:#d6e6dd;--rr-hill-b:#bcd7c6;--rr-hero-a:#085d55;--rr-hero-b:#0e493f}
+.app>.rr-weather-scene{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;background:linear-gradient(180deg,var(--rr-sky-a) 0%,var(--rr-sky-b) 74%);transition:background-color .4s ease}
+.app>.topbar,.app>.content,.app>.nav{position:relative;z-index:1}
+.app>.content{background:transparent}
+.rr-wb-sun,.rr-wb-moon,.rr-wb-cloud,.rr-wb-hill,.rr-wb-grass,.rr-wb-particles{position:absolute;pointer-events:none}
+.rr-wb-sun{top:15%;right:8%;width:108px;height:108px;border-radius:50%;background:#ffda58;box-shadow:0 0 0 18px #fffbd551,0 0 60px #fff5b8a0;opacity:0;transition:opacity .5s ease}
+.rr-wb-moon{top:17%;right:11%;width:80px;height:80px;border-radius:50%;background:#fcf5c8;box-shadow:0 0 45px #f5f2d677;opacity:0;transition:opacity .5s ease}
+.rr-wb-moon:after{content:"";position:absolute;top:-7px;right:-12px;width:73px;height:72px;border-radius:50%;background:var(--rr-sky-a)}
+.rr-wb-cloud{width:185px;height:47px;background:#f9ffffad;border-radius:60px;box-shadow:0 14px 22px #5d889219;transition:opacity .4s ease}
+.rr-wb-cloud:before,.rr-wb-cloud:after{content:"";position:absolute;border-radius:50%;background:inherit}
+.rr-wb-cloud:before{width:83px;height:81px;left:33px;bottom:11px}.rr-wb-cloud:after{width:95px;height:93px;right:20px;bottom:3px}
+.rr-wb-cloud-a{top:24%;left:-30px;animation:rr-wb-float 28s ease-in-out infinite alternate}
+.rr-wb-cloud-b{top:39%;right:-85px;transform:scale(.72);animation:rr-wb-float 35s ease-in-out infinite alternate-reverse}
+.rr-wb-cloud-c{top:11%;left:32%;transform:scale(.48);animation:rr-wb-float 42s ease-in-out infinite alternate}
+.rr-wb-hill{left:-24%;bottom:-18%;width:140%;height:43%;background:var(--rr-hill-a);border-radius:58% 58% 0 0}
+.rr-wb-hill-near{left:21%;bottom:-17%;width:115%;height:35%;background:var(--rr-hill-b);transform:rotate(-6deg)}
+.rr-wb-grass{left:0;right:0;bottom:0;height:12%;background:repeating-linear-gradient(105deg,#3f986b24 0px,#3f986b24 2px,transparent 2px,transparent 10px);opacity:0;transition:opacity .4s}
+.rr-wb-particles{inset:0;overflow:hidden}
+.rr-wb-particles i{position:absolute;left:var(--x);top:-14px;width:6px;height:6px;opacity:0;border-radius:50%;animation:rr-wb-fall var(--dur) linear var(--delay) infinite;will-change:transform}
+.app[data-weather-mode="unknown"]{--rr-sky-a:#ddebe4;--rr-sky-b:#f3f6f4;--rr-hill-a:#dae9df;--rr-hill-b:#c6ded0}
+.app[data-weather-mode="sun"]{--rr-sky-a:#8edaf8;--rr-sky-b:#e3f9e6;--rr-hill-a:#c2e8a2;--rr-hill-b:#77c78a;--rr-hero-a:#08767b;--rr-hero-b:#145a46}
+.app[data-weather-mode="sun"] .rr-wb-sun{opacity:1}
+.app[data-weather-mode="sun"] .rr-wb-grass{opacity:1}
+.app[data-weather-mode="cloud"]{--rr-sky-a:#b4d0d9;--rr-sky-b:#e8efe9;--rr-hill-a:#c1dccc;--rr-hill-b:#a5cbb6;--rr-hero-a:#2e6a72;--rr-hero-b:#255458}
+.app[data-weather-mode="cloud"] .rr-wb-grass{opacity:.8}
+.app[data-weather-mode="rain"]{--rr-sky-a:#8eaebd;--rr-sky-b:#d7e6df;--rr-hill-a:#9ac4aa;--rr-hill-b:#6da584;--rr-hero-a:#205567;--rr-hero-b:#294a55}
+.app[data-weather-mode="rain"] .rr-wb-grass{opacity:.9}
+.app[data-weather-mode="rain"] .rr-wb-particles i{opacity:.65;width:2px;height:25px;border-radius:2px;background:#307caf;transform:rotate(15deg)}
+.app[data-weather-mode="snow"],.app[data-weather-mode="winter"]{--rr-sky-a:#bbd9ee;--rr-sky-b:#eff8ff;--rr-hill-a:#fff;--rr-hill-b:#d1e5f2;--rr-hero-a:#306787;--rr-hero-b:#143d62}
+.app[data-weather-mode="snow"] .rr-wb-particles i{opacity:.93;background:#fff;box-shadow:0 0 2px #ffffff}
+.app[data-weather-mode="winter"] .rr-wb-cloud-b,.app[data-weather-mode="sun"] .rr-wb-cloud-b{opacity:.4}
+.app[data-weather-night="true"]{--rr-sky-a:#173c68;--rr-sky-b:#6a8fa0;--rr-hero-a:#123556;--rr-hero-b:#092c43}
+.app[data-weather-night="true"] .rr-wb-sun{opacity:0}
+.app[data-weather-night="true"] .rr-wb-moon{opacity:1}
+.app[data-weather-night="true"] .rr-wb-cloud{background:#dbe5f2a0}
+.app[data-weather-night="true"] .rr-wb-hill{filter:brightness(.79)}
+.app[data-weather-night="true"] .rr-wb-grass{opacity:.5}
+.app[data-weather-mode="unknown"] .rr-wb-sun,.app[data-weather-mode="unknown"] .rr-wb-moon{opacity:0}
+/* High-contrast scenic hero; readable headings and links remain above scenery. */
+#home .hero{background:linear-gradient(117deg,var(--rr-hero-a),var(--rr-hero-b));min-height:142px;padding-bottom:42px}
+#home .hero:before{content:"";position:absolute;right:13px;top:13px;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle,#ffe37d 0 43%,#fff5b552 46% 71%,transparent 73%);opacity:0;transition:opacity .4s ease}
+.app[data-weather-mode="sun"] #home .hero:before{opacity:.95}
+.app[data-weather-night="true"] #home .hero:before{opacity:.9;background:radial-gradient(circle,#fff6d5 0 45%,#c3e4e552 47% 70%,transparent 73%)}
+#home .hero:after{content:"";position:absolute;left:-12%;right:-12%;width:130%;height:80px;bottom:-64px;top:auto;background:var(--rr-hill-b);border:0;border-radius:50% 50% 0 0;opacity:.37}
+#home .hero>*{position:relative;z-index:1}
+#home .hero .rr-weather-label{position:absolute;z-index:3;bottom:9px;left:16px;max-width:calc(100% - 32px);border-radius:999px;padding:5px 9px;background:#052c3480;border:1px solid #ffffff55;color:#fff;font-size:10px;line-height:1.25;font-weight:800;white-space:normal;backdrop-filter:blur(4px)}
+/* Even on a bright sky, panels and labels use their original legible surfaces. */
+.app .card,.app .rdq-card,.app .schat-card,.app .srs-card,.app .checkpoint{position:relative}
+@keyframes rr-wb-fall{from{transform:translate3d(0,-25px,0)}to{transform:translate3d(-30px,110dvh,0)}}
+@keyframes rr-wb-float{0%{translate:-7px 0}100%{translate:18px 4px}}
+.app[data-weather-animation="off"] .rr-wb-particles i,.app[data-weather-animation="off"] .rr-wb-cloud{animation:none!important}
+.app[data-weather-animation="off"] .rr-wb-particles i{opacity:0!important}
+@media(prefers-reduced-motion:reduce){.rr-wb-particles i,.rr-wb-cloud{animation:none!important}.rr-wb-particles i{opacity:0!important} .rr-weather-scene *{transition:none!important}}
+@media(max-width:365px){#home .hero{padding-bottom:40px}.rr-wb-sun{width:84px;height:84px}}
