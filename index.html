@@ -171,6 +171,7 @@ try {
 <div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
 <div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
 <div class="hint">Дистанция маршрута: от 1 до 50 км.</div>
+<div class="hint" style="margin-top:9px;padding:9px 11px;border-radius:12px;background:#e7f2ed;color:#0b5a42;font-weight:800;line-height:1.45">🚶 Только пешком: приоритет тротуаров и пешеходных дорожек. Узкие проезды и дворы по возможности обходим.</div>
 </div>
 <div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
 <button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
@@ -204,6 +205,7 @@ try {
 <div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Показать меня на карте" class="map-follow" id="mapFollowBtn">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
+<div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
@@ -932,7 +934,24 @@ try {
         type:(opts.allBreak||i===0||i===points.length-1)?'break':'via',
         radius:(i===0||i===points.length-1)?90:(opts.radius||140)
       })),
+      // Strictly request pedestrian routing, not an automobile profile.
+      // Prefer tagged pedestrian paths and sidewalks; discourage alleys,
+      // service roads and driveways (often used inside residential yards).
+      // Valhalla can only honor restrictions present in its OSM graph.
       costing:'pedestrian',
+      costing_options:{
+        pedestrian:{
+          walkway_factor:0.65,
+          sidewalk_factor:0.70,
+          alley_factor:6.0,
+          driveway_factor:9.0,
+          service_factor:3.0,
+          service_penalty:12,
+          use_tracks:0,
+          use_ferry:0,
+          max_hiking_difficulty:0
+        }
+      },
       shape_format:'polyline6',
       directions_options:{units:'kilometers',language:'ru-RU'}
     };

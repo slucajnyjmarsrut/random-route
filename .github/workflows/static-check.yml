@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -27,6 +27,8 @@ jobs:
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
           if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
+          const expected = ["costing:'pedestrian'","walkway_factor:0.65","sidewalk_factor:0.70","alley_factor:6.0","driveway_factor:9.0"];
+          expected.forEach(value => { if (!html.includes(value)) throw new Error('Pedestrian preference missing: '+value); });
           JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
           console.log('Static checks passed');
           NODE
