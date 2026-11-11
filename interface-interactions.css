@@ -1,0 +1,59 @@
+/* Shared button feedback and the educational graph lab.
+ * Pointer/keyboard affordances without relying on animation for functionality.
+ */
+.app button:not(:disabled){
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease,
+    background-color .18s ease,border-color .18s ease,color .18s ease;
+}
+.app button:focus-visible{outline:3px solid #18a472;outline-offset:3px;position:relative;z-index:2}
+.app button:disabled{cursor:not-allowed;opacity:.55}
+@media (hover:hover) and (pointer:fine){
+  .app button:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.045);box-shadow:0 8px 18px rgba(10,64,43,.13)}
+  .app .nav button:not(:disabled):hover{background:#ecf6f0;border-radius:13px}
+}
+.app button:not(:disabled):active{transform:scale(.965);filter:brightness(.965);box-shadow:0 2px 8px rgba(10,64,43,.12)}
+.app .nav button.active{color:#0a6647;background:#eaf6ef;border-radius:13px}
+.app .screen.active{animation:rr-screen-enter .22s ease-out both}
+@keyframes rr-screen-enter{from{opacity:.45;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#laboratory .lab-intro{font-size:13px;line-height:1.55;color:#486356;margin:0 0 14px}
+#laboratory .lab-card{padding:16px;background:#fff;border:1px solid #dce9e0;border-radius:22px;margin-bottom:14px;box-shadow:0 7px 18px rgba(26,65,43,.05)}
+#laboratory .lab-card h2{font-size:18px;color:#124c37;margin:0 0 8px}
+#laboratory .lab-selector-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}
+#laboratory .lab-selector-row label{font-size:12px;font-weight:800;color:#36594a}
+#laboratory .lab-selector-row select{display:block;width:100%;font:inherit;color:#143e30;border:1px solid #a8cbb9;border-radius:12px;background:#f6fcf8;padding:10px;margin-top:6px;min-height:43px}
+#laboratory .lab-svg-wrap{background:linear-gradient(155deg,#edf7f1,#f8fcf9);border-radius:16px;border:1px solid #e0ede5;padding:8px;overflow:hidden}
+#laboratory #labGraph{display:block;width:100%;height:auto;aspect-ratio:640 / 335}
+#laboratory .lab-edge{stroke:#a5bdb0;stroke-width:5;stroke-linecap:round;transition:stroke .2s,stroke-width .2s}
+#laboratory .lab-edge-route{stroke:#e56a28;stroke-width:10}
+#laboratory .lab-edge-label{font-size:19px;font-weight:800;fill:#375d48;stroke:#f2faf5;stroke-width:5;paint-order:stroke}
+#laboratory .lab-vertex circle{fill:white;stroke:#719e87;stroke-width:4;transition:fill .2s,stroke .2s}
+#laboratory .lab-vertex text{font-size:22px;fill:#1e5942;font-weight:900}
+#laboratory .lab-vertex.frontier circle{fill:#e4f5e9;stroke:#0f8758}
+#laboratory .lab-vertex.visited circle{fill:#d3e8da;stroke:#3d8b66}
+#laboratory .lab-vertex.current circle{fill:#126449;stroke:#0d503a;stroke-width:5}
+#laboratory .lab-vertex.current text{fill:#fff}
+#laboratory .lab-vertex.route circle{fill:#fdd9b7;stroke:#e56a28}
+#laboratory .lab-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}
+#laboratory .lab-controls button{border:1px solid #bfdaca;border-radius:13px;background:#eff8f2;color:#15533a;padding:12px 7px;min-height:46px;font-weight:850;font-size:12px}
+#laboratory .lab-controls #labRun{background:#126449;color:#fff;border-color:#126449}
+#laboratory .lab-status{background:#eaf4ef;border-radius:14px;padding:13px;color:#214d38;font-size:13px;min-height:60px;line-height:1.5}
+#laboratory .lab-result{font-size:14px;line-height:1.5;color:#164d38;font-weight:850;margin:11px 0}
+#laboratory .lab-distance-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+#laboratory .lab-distance-item{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid #deebe3;background:#f7fbf8;border-radius:13px;padding:9px 3px;text-align:center}
+#laboratory .lab-distance-item strong{font-size:17px}
+#laboratory .lab-distance-item span{font-size:12px;font-weight:850;color:#0b6648}
+#laboratory .lab-distance-item small{font-size:10px;color:#6a8071}
+#laboratory .lab-warning{color:#5a655e;font-size:12px;line-height:1.55}
+@media(max-width:380px){
+ #laboratory .lab-distance-grid{gap:3px}
+ #laboratory .lab-distance-item{padding:8px 1px}
+ #laboratory .lab-distance-item span{font-size:10px}
+ #laboratory .lab-edge-label{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){
+ .app button,.app .screen.active,#laboratory .lab-edge,#laboratory .lab-vertex circle{
+   transition:none!important;animation:none!important
+ }
+}
