@@ -32,9 +32,12 @@ function makeCard(suffix){
   });card.append(opt);
   var actions=el("div","srs-actions");
   var avoid=el("button","srs-action","🚫 Исключить опасный участок");avoid.type="button";avoid.addEventListener("click",function(){
-    var target=get(suffix==="home"?"avoidHomeCard":"avoidRerouteBtn");
-    if(suffix==="route" && target){target=target.closest(".route-avoid-inline")||target;}
-    if(target)target.scrollIntoView({behavior:"smooth",block:"center"});
+    var activeRoute=!!(window.__yakutskRR?.legs?.length && !["idle","completed"].includes(window.__yakutskRR.stage));
+    var useRoute=suffix==="route"||activeRoute;
+    var target=get(useRoute?"avoidRerouteBtn":"avoidHomeCard");
+    if(useRoute&&target)target=target.closest(".route-avoid-inline")||target;
+    if(typeof window.__rrOpenScreen==="function")window.__rrOpenScreen(useRoute?"route":"home",{restoreScroll:false});
+    if(target)requestAnimationFrame(function(){target.scrollIntoView({behavior:"smooth",block:"center"});});
   });
   var sos=el("button","srs-action srs-sos","SOS · 112");sos.type="button";sos.addEventListener("click",function(){
     if(window.confirm("Открыть приложение телефона для звонка 112? Звонок не выполняется автоматически.")){
@@ -46,8 +49,8 @@ function makeCard(suffix){
   return card;
 }
 function insert(){
-  var home=get("buildBtn"), route=document.querySelector("#route .route-summary");
-  if(home&&!get("srs-home"))home.parentElement.insertBefore(makeCard("home"),home);
+  var safetyScreen=get("safety"), route=document.querySelector("#route .route-summary");
+  if(safetyScreen&&!get("srs-home"))safetyScreen.appendChild(makeCard("home"));
   if(route&&!get("srs-route"))route.insertAdjacentElement("afterend",makeCard("route"));
 }
 function addAlert(target,severity,message){var a=el("div","srs-alert "+severity,message);target.append(a);}
@@ -104,7 +107,18 @@ async function refreshForecast(){
   finally{busy=false;render();}
 }
 function boot(){
-  insert();render();refreshForecast();
+  insert();
+  document.querySelectorAll("#settings [data-srs-pref]").forEach(function(box){
+    var key=box.getAttribute("data-srs-pref");
+    if(!Object.prototype.hasOwnProperty.call(defaults,key))return;
+    box.checked=!!prefs[key];
+    box.addEventListener("change",function(){
+      prefs[key]=box.checked;persist();
+      document.querySelectorAll("[data-srs-pref='"+key+"']").forEach(function(other){other.checked=box.checked;});
+      render();
+    });
+  });
+  render();refreshForecast();
   var route=get("route");if(route){new MutationObserver(function(){if(route.classList.contains("active"))render();}).observe(route,{attributes:true,attributeFilter:["class"]});}
 }
 window.SmartSafety={getPreferences:function(){return Object.assign({},prefs);},refresh:refreshForecast};
