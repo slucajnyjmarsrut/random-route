@@ -15,7 +15,7 @@ function parseRequest(raw,askDistance=false){
   wantsRoute:false,wantsSafety:false,wantsNoYards:false,wantsLight:false,wantsExcludedPlace:false,wantsReturn:false,poiWish:null,
   needsDistance:false};
  if(!s)return found;
- const negative=(noun)=>new RegExp("(?:без|не\\s+хочу|избега[йють]|обойти)\\s+(?:\\S+\\s+){0,2}"+noun,"iu").test(s);
+ const negative=(noun)=>new RegExp("(?:без|не\\s+хочу|избега[йють]|обойти)(?:\\s+\\S+){0,3}\\s+(?:"+noun+")","iu").test(s);
  let m=s.match(/(\d+(?:[.,]\d+)?)\s*(?:км|километр(?:ов|а)?)(?![а-яё])/iu);
  if(!m){let mt=s.match(/(\d+(?:[.,]\d+)?)\s*(?:метр(?:ов|а)?)(?![а-яё])/iu);if(mt){m=mt;found.distanceKm=Number(mt[1].replace(",","."))/1000;}}
  else found.distanceKm=Number(m[1].replace(",","."));
@@ -77,10 +77,10 @@ function mount(doc){
    const card=el&&el.closest(".card");if(card)card.classList.add("schat-legacy");
  });
  home.classList.add("schat-compact");
- function addBubble(role,text){
+ function addBubble(role,text,target=log){
    const b=doc.createElement("div");b.className="schat-bubble "+(role==="user"?"schat-user":"schat-bot");b.textContent=text;
-   log.appendChild(b);if(log.children.length>14)log.removeChild(log.children[0]);
-   log.scrollTop=log.scrollHeight;
+   target.appendChild(b);if(target.children.length>14)target.removeChild(target.children[0]);
+   target.scrollTop=target.scrollHeight;
  }
  function refreshSummary(){
    const ty=doc.querySelector("#typeChoices .choice.active")?.dataset.type||"city";
@@ -124,26 +124,36 @@ function mount(doc){
    else t+=" Нажмите «Построить маршрут», когда будете готовы.";
    return t;
  }
- form.addEventListener("submit",function(e){
-   e.preventDefault();const raw=input.value.trim();if(!raw)return;
-   input.value="";addBubble("user",raw);
+ function onMessage(raw,targetLog){
+   addBubble("user",raw,targetLog);
    const result=parseRequest(raw,awaitingDistance);
    if(result.distanceKm!==null||result.errors.length)awaitingDistance=false;
-   else if(result.wantsRoute && !result.understood)awaitingDistance=true;
    if(result.understood&&!result.errors.length)updatePrefs(result);
-   addBubble("assistant",reply(result));
-   if(!result.errors.length&&result.wantsRoute){
+   addBubble("assistant",reply(result),targetLog);
+   // Never silently ignore text-based safety exclusions.
+   const unverified=result.wantsLight||result.wantsExcludedPlace||(/голол[её]д|снег\s+по\s+колено|нечищ|не\s+почищ/iu.test(raw)&&/без|избег|обой|безопас/iu.test(raw));
+   if(result.wantsRoute && unverified){
+      addBubble("assistant","По этим условиям автоматический фильтр пока не готов, поэтому маршрут не запускаю. Отметьте запретные зоны на карте либо ослабьте условие. Погодные предупреждения доступны отдельно.",targetLog);
+   }
+   if(!result.errors.length&&result.wantsRoute&&!unverified){
      const rr=window.__yakutskRR;
      const active=!!(rr&&rr.legs&&rr.legs.length&&rr.stage!=="idle"&&rr.stage!=="completed");
      const target=doc.getElementById(active?"applyDistanceBtn":"buildBtn");
-     if(target&&!target.disabled){
-       setTimeout(function(){if(!target.disabled)target.click()},150);
-     }
+     if(target&&!target.disabled)setTimeout(function(){if(!target.disabled)target.click()},150);
    }
- });
- input.addEventListener("keydown",function(e){
-   if(e.key==="Enter"&&!e.shiftKey && !e.isComposing){e.preventDefault();form.requestSubmit();}
- });
+ }
+ function bindChat(chatForm,chatInput,chatLog){
+   if(!chatForm||!chatInput||!chatLog)return;
+   chatForm.addEventListener("submit",function(e){
+      e.preventDefault();const raw=chatInput.value.trim();if(!raw)return;
+      chatInput.value="";onMessage(raw,chatLog);
+   });
+   chatInput.addEventListener("keydown",function(e){
+      if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();chatForm.requestSubmit();}
+   });
+ }
+ bindChat(form,input,log);
+ bindChat(doc.getElementById("smartRouteChatForm"),doc.getElementById("smartRouteChatInput"),doc.getElementById("smartRouteChatLog"));
  if(details){
    details.addEventListener("click",function(){
      const expand=home.classList.toggle("schat-compact");
