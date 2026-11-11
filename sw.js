@@ -1,6 +1,6 @@
 /* Offline app shell only. Maps, GPS, routes and weather require services. */
-const CACHE="random-route-shell-tap-ui-v10";
-const SHELL=["./","./index.html","./smart-safety.js","./smart-safety.css","./map-fallback.js","./smart-route-chat.js","./smart-route-chat.css","./street-audit.js","./street-audit.css","./daily-quests.js","./daily-quests.css","./developer-diagnostics.js","./developer-diagnostics.css","./tap-targets.js","./tap-targets.css","./manifest.webmanifest","./icons/smart-route.svg","./icons/favicon.svg","./icons/smart-route-maskable.svg","./icons/mascot-marshik.svg"];
+const CACHE="random-route-shell-weather-v11";
+const SHELL=["./","./index.html","./smart-safety.js","./smart-safety.css","./weather-background.js","./weather-background.css","./map-fallback.js","./smart-route-chat.js","./smart-route-chat.css","./street-audit.js","./street-audit.css","./daily-quests.js","./daily-quests.css","./developer-diagnostics.js","./developer-diagnostics.css","./tap-targets.js","./tap-targets.css","./manifest.webmanifest","./icons/smart-route.svg","./icons/favicon.svg","./icons/smart-route-maskable.svg","./icons/mascot-marshik.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).catch(()=>{}));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("random-route-shell-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",event=>{
