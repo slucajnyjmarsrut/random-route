@@ -528,7 +528,7 @@ try {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:saved?.legs||[], checkpoints:saved?.checkpoints||[], current:saved?.current||1,
     routeDistance:saved?.routeDistance||0, requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||6.5), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
-    currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null,
+    currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
     watchId:null, activeScreen:saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home',
@@ -672,7 +672,7 @@ try {
   }
 
   const saveSession=()=>{
-    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones};
+    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
     try{localStorage.setItem('rr_no_go_zones',JSON.stringify(rr.noGoZones||[]))}catch(e){}
     try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
   };
@@ -1065,9 +1065,26 @@ try {
       // v10.7: контрольные точки — это сами туристические места из белого списка.
       // Раньше маршрут строился по случайным точкам-«спицам», и фототочка искалась рядом уже потом —
       // из-за этого игроку показывали адреса случайных зданий.
-      const pool=(await touristPool()).filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p));
+      // Сначала пробуем фотоквест с проверяемыми местами. Если недоступны
+      // Wikipedia/изображения, сохраняем маршрут как обычную экскурсию без наград за фото.
+      const photoPool=await Promise.race([
+        touristPool().catch(()=>[]),
+        new Promise(resolve=>setTimeout(()=>resolve([]),8500))
+      ]);
       const targetM=input*1000,maxR=Math.max(600,targetM*.5);
-      const near=pool.filter(p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR);
+      const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
+      let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
+      let usePhotoOptional=false;
+      if(near.length<2){
+        const routeOnly=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).map((p,i)=>({
+          type:'tourist_guide',id:'curated:'+i,_lat:Number(p.lat),_lng:Number(p.lng),
+          _isTouristGuide:true,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+          _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
+          tags:{name:p.name||''}
+        }));
+        near=routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
+        usePhotoOptional=true;
+      }
       if(near.length<2)throw new Error('NoTouristPois');
       const nMax=input<=2?3:Math.max(3,Math.min(8,Math.round(input/1.35)));
       const tolOk=Math.max(150,targetM*.08),tolAccept=Math.max(350,targetM*.18);
@@ -1117,6 +1134,8 @@ try {
       }
       if(chosen.diff>tolAccept){const err=new Error('DistanceMismatch');err.bestKm=chosen.actual;err.requestedKm=input;throw err}
       const {data,route}=chosen;
+      rr.usePhotoOptional=usePhotoOptional;
+      if(usePhotoOptional)toast('Фотографии недоступны: построен прогулочный маршрут без наград за пропущенные фототочки.');
       rr.legs=route.legs;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
       rr.current=1;rr.routeDistance=route.distance;rr.requestedDistance=input;rr.currentPoi=null;rr.currentCategory='city';rr.legProgress={};
@@ -1964,6 +1983,18 @@ try {
   async function preparePoi(forcedPoi=null){
     const checkpoint=rr.checkpoints[rr.current-1],searchCenter=checkpoint,camera=$('#cameraInput');
     resetPhotoTaskUi();
+    if(rr.usePhotoOptional){
+      rr.currentPoi=null;rr.currentCategory='city';rr.stage='verified';
+      if(camera)camera.disabled=true;
+      $('#photoBlock').classList.add('hidden');
+      $('#photoCheck').className='check';
+      $('#photoCheck b').textContent='Пропущено · без RouteCoin';
+      $('#checkpointTitle').textContent=checkpoint?.guideName||'Контрольная точка';
+      $('#checkpointText').textContent='Точка достигнута по GPS. Фотозадание недоступно: перейти дальше можно без награды.';
+      $('#replacePointBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');
+      $('#lockLabel').textContent='Следующий участок готов';
+      saveSession();return false;
+    }
     $('#checkpointText').textContent='Подбираем объект прямо у этой контрольной точки…';
     // Важно: ищем объект вокруг точки маршрута, а не вокруг текущего GPS пользователя.
     // Это устраняет ситуацию, когда карта ведёт в одно место, а фотозадание показывает другое.
@@ -1985,6 +2016,21 @@ try {
     // работать только с проверенным белым списком фототочек.
     if(selected&&!isPhotoSafePoi(selected)){rr.poiAvoidIds.add(selected.type+':'+selected.id);selected=null}
     rr.currentPoi=selected;
+    if(rr.usePhotoOptional && (!rr.currentPoi?._referenceUrl || rr.currentPoi?._verifyMode!=='image')){
+      // Не имитируем фотопроверку: есть GPS-точка, но не подтверждена фотография.
+      // Переход разрешён без монет и без записи photo_verified.
+      rr.currentPoi=null;rr.currentCategory='city';rr.stage='verified';
+      if(camera)camera.disabled=true;
+      $('#photoBlock').classList.add('hidden');
+      $('#photoCheck').className='check';
+      $('#photoCheck b').textContent='Не требуется · без награды';
+      $('#checkpointTitle').textContent=checkpoint?.guideName||'Контрольная точка';
+      $('#checkpointText').textContent='GPS-точка достигнута. Фото объекта недоступно из внешнего источника: можно продолжить без фотобонуса.';
+      $('#replacePointBtn').classList.add('hidden');
+      $('#nextBtn').classList.remove('hidden');
+      $('#lockLabel').textContent='Следующий участок готов';
+      saveSession();return false;
+    }
     if(!rr.currentPoi?.tags?.name||!rr.currentPoi?._referenceUrl||rr.currentPoi?._verifyMode!=='image'||!isPhotoSafePoi(rr.currentPoi)){
       rr.currentPoi=null;rr.currentCategory='city';if(camera)camera.disabled=true;
       // Важно: полностью очищаем старое задание, чтобы название прошлого объекта
@@ -2141,12 +2187,12 @@ try {
     if(rerouteBusy)return false;rerouteBusy=true;
     const oldFirst=explicitOldPoint||(rr.checkpoints?.[Math.max(0,rr.current-1)]?{lat:rr.checkpoints[Math.max(0,rr.current-1)].lat,lng:rr.checkpoints[Math.max(0,rr.current-1)].lng}:null);
     const backup={
-      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant
+      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
     };
     try{
       if(rr.livePos){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode=isDeveloperMode()?'developer':'gps'}
       rr.routeVariant+=(kind==='direction'?11:kind==='point'?23:kind==='distance'?13:kind==='avoid'?19:17);
-      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
+      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
       const startMsg=kind==='direction'?'Ищем действительно другое направление…':kind==='point'?'Переносим контрольную точку в другое место…':kind==='distance'?'Меняем километраж…':kind==='avoid'?'Строим маршрут в обход зон…':'Генерируем новый маршрут…';
       toast(startMsg);
       const requireDifferent=kind==='direction'||kind==='point'||kind==='new';
