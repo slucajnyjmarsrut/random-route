@@ -1,0 +1,13 @@
+
+/* Evidence-based, route-specific street tags from OSM; no safety score. */
+.sra-panel{border-top:1px solid #d9e8dc;margin-top:14px;padding-top:14px;display:grid;gap:8px}
+.sra-panel strong{font-size:15px;color:#0d5842}
+.sra-panel p{font-size:11px;line-height:1.5;margin:0;color:#577369}
+.sra-btn{width:100%;border:0;background:#0c6b4c;color:white;border-radius:12px;padding:12px;font-size:13px;font-weight:850}
+.sra-btn:disabled{opacity:.55}
+.sra-panel .sra-note{font-size:10px;color:#708179}
+.sra-result{display:grid;gap:7px;background:#f4f8f5;border:1px solid #d2e4d8;border-radius:13px;padding:10px}
+.sra-panel .sra-line{font-size:12px;color:#244638;line-height:1.52}
+.sra-panel .sra-line.warn{color:#75501a;background:#fff4de;border-radius:8px;padding:7px}
+.sra-panel .sra-line.small{font-size:10px;color:#62796d}
+.sra-source{font-size:10px;font-weight:700;color:#1a654e;text-decoration:underline}
