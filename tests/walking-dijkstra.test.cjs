@@ -37,4 +37,6 @@ assert.throws(()=>route.makeGraph([{nodes:[1,2],geometry:vertices.slice(0,2),tag
 const manual={nodes:new Map([['A',{lat:62,lng:129}],['B',{lat:62.0001,lng:129}],['C',{lat:62,lng:129.0001}]]),
 adj:new Map([['A',[{to:'B',cost:200,metres:100},{to:'C',cost:80,metres:120}]],['B',[]],['C',[{to:'B',cost:80,metres:120}]]])};
 const chosen=route.shortest(manual,'A','B');assert.deepEqual(chosen.ids,['A','C','B']);assert.equal(chosen.length,240);
+const costly=new Map([['A:C',1],['B:C',1]]);
+assert.deepEqual(route.shortest(manual,'A','B',[],costly).ids,['A','B'],'repeat penalty should avoid used physical edges');
 console.log('OSM walking Dijkstra: graph creation, pedestrian tags, shortest path, no-go zones, route geometry OK');
