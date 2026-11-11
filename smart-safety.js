@@ -51,7 +51,7 @@ function insert(){
   if(route&&!get("srs-route"))route.insertAdjacentElement("afterend",makeCard("route"));
 }
 function addAlert(target,severity,message){var a=el("div","srs-alert "+severity,message);target.append(a);}
-function n(v){return Number.isFinite(Number(v))?Number(v):null;}
+function n(v){if(v===null||v===undefined||v==="")return null;return Number.isFinite(Number(v))?Number(v):null;}
 function fmt(v){return v==null?"—":Math.round(v)+"°C";}
 function renderCard(suffix){
   var st=get("srs-status-"+suffix),w=get("srs-weather-"+suffix),d=get("srs-detail-"+suffix),a=get("srs-alerts-"+suffix);
