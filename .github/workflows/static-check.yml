@@ -30,6 +30,9 @@ jobs:
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
           if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
           if(!html.includes('smartChatForm') || !html.includes('smartRouteChatForm'))throw new Error('Chat UI missing');
+          const chatCss=fs.readFileSync('smart-route-chat.css','utf8');
+          if(chatCss.includes('#home.schat-compact #quickInfoGrid{display:none}'))throw new Error('Informational cards must remain visible');
+          if(!chatCss.includes('#home.schat-compact .schat-legacy{display:none}'))throw new Error('Manual settings should remain collapsible');
           const expected = ["costing:'pedestrian'","walkway_factor:0.65","sidewalk_factor:0.70","alley_factor:6.0","driveway_factor:9.0"];
           expected.forEach(value => { if (!html.includes(value)) throw new Error('Pedestrian preference missing: '+value); });
           JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
