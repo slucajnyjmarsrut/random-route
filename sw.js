@@ -1,6 +1,6 @@
 /* Offline app shell only. Maps, GPS, routes and weather require services. */
-const CACHE="random-route-shell-npk-v1";
-const SHELL=["./","./index.html","./smart-safety.js","./smart-safety.css","./manifest.webmanifest","./icons/smart-route.svg"];
+const CACHE="random-route-shell-npk-v2";
+const SHELL=["./","./index.html","./smart-safety.js","./smart-safety.css","./map-fallback.js","./manifest.webmanifest","./icons/smart-route.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).catch(()=>{}));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("random-route-shell-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",event=>{
