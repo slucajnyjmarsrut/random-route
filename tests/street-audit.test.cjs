@@ -1,0 +1,42 @@
+'use strict';
+const assert=require('node:assert/strict');
+const audit=require('../street-audit.js');
+const start={lat:62.0278,lon:129.7042},end={lat:62.0278,lon:129.7066};
+const coords=[[start.lon,start.lat],[end.lon,end.lat]];
+const pts=audit.getRouteGeometry([{steps:[{geometry:{coordinates:coords}}]}]);
+assert.equal(pts.length,2);
+const samples=audit.sampleRoute(pts,30);
+assert(samples.length>3&&samples.length<30);
+const taggedWay={type:'way',id:1,tags:{highway:'footway',lit:'yes',winter_service:'yes',foot:'yes'},
+ geometry:[start,end]};
+const counts=audit.analyze(samples,[taggedWay]);
+assert.equal(counts.total,samples.length);
+assert.equal(counts.matched,counts.total);
+assert.equal(counts.lighting.yes,counts.total);
+assert.equal(counts.sidewalk.yes,counts.total);
+assert.equal(counts.winter.yes,counts.total);
+assert.equal(counts.lighting.no,0);
+assert.equal(counts.service,0);
+const noData=audit.analyze(samples,[]);
+assert.equal(noData.lighting.unknown,noData.total);
+assert.equal(noData.sidewalk.unknown,noData.total);
+assert.equal(noData.matched,0);
+assert.equal(noData.winter.unknown,noData.total);
+const darkWay={type:'way',id:2,tags:{highway:'residential',lit:'no',sidewalk:'no',winter_service:'limited'},
+ geometry:[start,end]};
+const flagged=audit.analyze(samples,[darkWay]);
+assert.equal(flagged.lighting.no,flagged.total);
+assert.equal(flagged.sidewalk.no,flagged.total);
+assert.equal(flagged.winter.limited,flagged.total);
+const steps={type:'way',id:3,tags:{highway:'steps',access:'private',surface:'gravel'},
+ geometry:[start,end]};
+const risky=audit.analyze(samples,[steps]);
+assert.equal(risky.stairs,risky.total);
+assert.equal(risky.restricted,risky.total);
+assert.equal(risky.rough,risky.total);
+const q=audit.queryFor(audit.routeBbox(pts));
+assert(q.includes('[out:json]')&&q.includes('out tags geom'));
+assert(q.includes('footway|path|pedestrian'));
+assert.throws(()=>audit.routeBbox([{lat:62.0,lon:129.4},{lat:62.1,lon:129.9}]),/слишком большой/);
+assert.match(audit.summaries(noData)[0],/0%.*lit=yes/);
+console.log('Street audit: 23 checks passed');

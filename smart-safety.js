@@ -42,7 +42,7 @@ function makeCard(suffix){
     }
   });
   actions.append(avoid,sos);card.append(actions);
-  card.append(el("p","srs-foot","Важно: наличие освещения, тротуаров, ДТП и гололёда по каждому отрезку пока не подтверждено. Оценка «безопасен» не присваивается. Оцените обстановку на месте. SOS только открывает набор номера."));
+  card.append(el("p","srs-foot","Проверка OpenStreetMap показывает только внесённые в карту сведения и не гарантирует работающие фонари, очищенные тротуары или отсутствие гололёда сегодня. SOS только открывает набор номера."));
   return card;
 }
 function insert(){
@@ -57,11 +57,13 @@ function renderCard(suffix){
   var st=get("srs-status-"+suffix),w=get("srs-weather-"+suffix),d=get("srs-detail-"+suffix),a=get("srs-alerts-"+suffix);
   if(!st||!w||!a)return;
   a.replaceChildren();
-  st.textContent="Данные по освещению и происшествиям: недостаточно информации";
+  st.textContent=suffix==="route"
+   ?"Проверка улиц: используйте кнопку «Проверить маршрут по OSM» ниже"
+   :"Погода по Якутску. Данные улиц можно проверить после построения маршрута.";
   if(!latest){
     w.textContent=busy?"Получаем прогноз…":"Погода недоступна";
     d.textContent=busy?"Запрос к Open-Meteo":"Проверьте прогноз перед прогулкой";
-    addAlert(a,"unknown","Нет достоверных данных для оценки безопасности конкретных улиц.");
+    addAlert(a,"unknown","Прогноз временно недоступен. Проверить отмеченные в OSM тротуары и фонари можно после построения маршрута.");
     return;
   }
   var c=latest.current||{},t=n(c.temperature_2m),feel=n(c.apparent_temperature),wind=n(c.wind_speed_10m),gust=n(c.wind_gusts_10m),snow=n(c.snowfall);
@@ -74,8 +76,8 @@ function renderCard(suffix){
     if(gust!==null&&gust>=45)addAlert(a,"warn","Порывы ветра от "+Math.round(gust)+" км/ч. На открытых участках может быть некомфортно.");
     if(snow!==null&&snow>0)addAlert(a,"warn","Идёт снег. Состояние тротуаров и наличие льда по этим данным неизвестны.");
   }
-  if(prefs.darkness && (c.is_day===0 || c.is_day==="0"))addAlert(a,"warn","Сейчас темно. Уличное освещение по маршруту не проверено — выбирайте знакомые и освещённые пути.");
-  addAlert(a,"unknown","Достоверный балл безопасности не рассчитан: нет проверки освещения, переходов и инцидентов по сегментам.");
+  if(prefs.darkness && (c.is_day===0 || c.is_day==="0"))addAlert(a,"warn","Сейчас темно. Проверьте доступные отметки об освещении маршрута по OSM и обязательно оцените реальные условия на месте.");
+  if(suffix==="home")addAlert(a,"unknown","Ниже после построения маршрута доступна проверка улиц по данным OpenStreetMap. Состояние снега, льда и происшествия сервис не подтверждает.");
 }
 function render(){renderCard("home");renderCard("route");}
 async function refreshForecast(){
