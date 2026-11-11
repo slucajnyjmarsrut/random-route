@@ -9,54 +9,102 @@
 "use strict";
 const KM_MIN=1,KM_MAX=50, WALKING_KMH=4.3;
 const pattern=(s,re)=>re.test(s);
+// Numbers in a question or a rejected route must never silently change an active walk.
+function distanceMention(s){
+ const km=s.match(/(\d+(?:[.,]\d+)?)\s*(?:км|километр(?:ов|а)?)(?![а-яё])/iu);
+ if(km)return Number(km[1].replace(",","."));
+ const meters=s.match(/(\d+(?:[.,]\d+)?)\s*(?:метр(?:ов|а)?)(?![а-яё])/iu);
+ return meters?Number(meters[1].replace(",","."))/1000:null;
+}
+function timeMention(s){
+ const text=String(s||"").toLocaleLowerCase("ru-RU");
+ const hours=text.match(/(\d+(?:[.,]\d+)?)\s*(?:час(?:ов|а)?|ч)(?![а-яё])/iu);
+ const minutes=text.match(/(\d+(?:[.,]\d+)?)\s*(?:минут(?:ы|у)?|мин)(?![а-яё])/iu);
+ const oneHalfHour=/(?:полтора|полторы)\s*(?:час(?:а)?|ч)(?![а-яё])/iu.test(text);
+ const halfHour=/(?:^|[\s,])пол\s*часа(?=$|[\s,.!?])/iu.test(text);
+ const fullHour=!hours&&!oneHalfHour&&/(?:^|[\s,])(?:на\s+)?час(?:ик)?(?=$|[\s,.!?]|и\s)/iu.test(text);
+ const total=(hours?Number(hours[1].replace(",","."))*60:oneHalfHour?90:fullHour?60:0)
+    +(minutes?Number(minutes[1].replace(",",".")):0)+(halfHour?30:0);
+ return total>0&&Number.isFinite(total)?total:null;
+}
+function distanceFromMinutes(minutes){
+ return Math.round(minutes*WALKING_KMH/60*10)/10;
+}
 function parseRequest(raw,askDistance=false){
  const original=String(raw||"").trim().slice(0,500),s=original.toLocaleLowerCase("ru-RU").replace(/\u00a0/g," ");
  const found={original,understood:false,errors:[],notes:[],distanceKm:null,estimatedMinutes:null,type:null,coffee:null,area:null,
   wantsRoute:false,wantsSafety:false,wantsNoYards:false,wantsLight:false,wantsExcludedPlace:false,wantsReturn:false,poiWish:null,
-  needsDistance:false};
+  needsDistance:false,intent:"unknown",isCorrection:false,rejectedDistanceKm:null,mentionedDistanceKm:null};
  if(!s)return found;
  const negative=(noun)=>new RegExp("(?:без|не\\s+хочу|избега[йють]|обойти)(?:\\s+\\S+){0,3}\\s+(?:"+noun+")","iu").test(s);
- let m=s.match(/(\d+(?:[.,]\d+)?)\s*(?:км|километр(?:ов|а)?)(?![а-яё])/iu);
- if(!m){let mt=s.match(/(\d+(?:[.,]\d+)?)\s*(?:метр(?:ов|а)?)(?![а-яё])/iu);if(mt){m=mt;found.distanceKm=Number(mt[1].replace(",","."))/1000;}}
- else found.distanceKm=Number(m[1].replace(",","."));
- if(!m){
-    const hr=s.match(/(\d+(?:[.,]\d+)?)\s*(?:час(?:ов|а)?|ч)(?![а-яё])/iu);
-    const min=s.match(/(\d+(?:[.,]\d+)?)\s*(?:минут(?:ы|у)?|мин)(?![а-яё])/iu);
-    const plainHour=!hr&&!min&&/(?:^|\s)(?:на\s+)?час(?:ик)?(?=$|\s|[.,!?])/iu.test(s);
-    if(hr||min||plainHour||/полчаса|пол\s+часа/iu.test(s)){
-      const mins=(hr?Number(hr[1].replace(",","."))*60:plainHour?60:0)+(min?Number(min[1].replace(",",".")):0)+(/полчаса|пол\s+часа/iu.test(s)?30:0);
-      if(mins>0){found.estimatedMinutes=mins;found.distanceKm=Math.round(Math.min(KM_MAX,Math.max(0,mins*WALKING_KMH/60))*10)/10;found.notes.push("Время приблизительное: расчёт из скорости около "+WALKING_KMH+" км/ч.");}
-    }
+ const question=/^(?:ну\s+|а\s+)?(?:почему|зачем|отчего|как|сколько|что|откуда|разве|когда)(?![а-яё])/iu.test(s)
+  || (/\?\s*$/.test(s) && !/(?:^|[\s,])(?:построй|перестрой|проложи|создай)(?![а-яё])/iu.test(s));
+ const reject=/(?:^|[\s,])(?:нет(?:[,\s.!]|$)|не\s+(?:хочу|надо|нужен|нужна|подходит|строй|построй)|я\s+не\s+хочу|мне\s+не\s+нужно|мне\s+не\s+нужны|отмени|не\s+подходит|слишком\s+(?:мало|коротк))/iu.test(s);
+ const explicitCommand=/(?:^|[\s,])(?:построй|перестрой|проложи|создай|сгенерируй|подбери|составь|дай\s+маршрут)(?![а-яё])/iu.test(s);
+ const time=timeMention(s),distance=distanceMention(s);
+ found.mentionedDistanceKm=distance;
+ found.estimatedMinutes=time;
+ if(question){
+    found.intent="question";found.understood=true;
+    return found;
  }
- if(!m && found.distanceKm===null && askDistance && /^\d+(?:[.,]\d+)?$/.test(s)){found.distanceKm=Number(s.replace(",","."));}
- if(found.distanceKm!==null){
-   if(!Number.isFinite(found.distanceKm)||found.distanceKm<KM_MIN||found.distanceKm>KM_MAX){found.errors.push("Укажите расстояние от 1 до 50 км (или подходящую длительность).");found.distanceKm=null;}
-   else found.understood=true;
+ let parseText=s;
+ if(reject){
+   // Contrast ("не 2 км, а 6 км") and corrections ("нет, хочу 6 км")
+   // are new settings; the rejected number is NOT a new target.
+   const contrast=s.match(/(?:[,;]?\s+)(?:а|лучше|вместо)\s+(.+)$/iu);
+   const afterComma=s.match(/[,;]\s*(?:хочу|мне\s+нужно|нужно|надо|давай)\s+(.+)$/iu);
+   const newText=(contrast||afterComma)?.[1]||"";
+   const wanted=distanceMention(newText)!==null||timeMention(newText)!==null;
+   if(!wanted){
+     found.intent="reject";found.understood=true;found.rejectedDistanceKm=distance;
+     return found;
+   }
+   parseText=newText;
+   found.isCorrection=true;
+   found.rejectedDistanceKm=distanceMention(s.slice(0,s.indexOf(newText)));
  }
- const parks=pattern(s,/парк|сквер|алле|набережн|зел[её]н/iu);
- const nature=pattern(s,/природ|лес|дерев|рек[ауе]|озер|вод[ыуе]|лесн/iu);
- const city=pattern(s,/город|архитектур|улиц|памятник|музе|истор|центральн/iu);
- const coffee=pattern(s,/кафе|кофе|кофейн|ресторан|перекус|чай/iu);
+ let km=distanceMention(parseText),mins=timeMention(parseText);
+ if(km===null&&mins!==null)km=distanceFromMinutes(mins);
+ if(km===null&&askDistance&&/^\d+(?:[.,]\d+)?$/.test(parseText))km=Number(parseText.replace(",","."));
+ if(km!==null){
+   if(!Number.isFinite(km)||km<KM_MIN||km>KM_MAX){
+     found.errors.push("Укажите расстояние от 1 до 50 км (или подходящую длительность).");
+     km=null;
+   }else found.understood=true;
+   found.distanceKm=km;
+ }
+ if(mins!==null && (distanceMention(parseText)===null)){
+   found.estimatedMinutes=mins;
+   found.notes.push("Время приблизительное: "+mins+" мин при скорости около "+WALKING_KMH+" км/ч; остановки увеличивают длительность.");
+ }
+ const parks=pattern(parseText,/парк|сквер|алле|набережн|зел[её]н/iu);
+ const nature=pattern(parseText,/природ|лес|дерев|рек[ауе]|озер|вод[ыуе]|лесн/iu);
+ const city=pattern(parseText,/город|архитектур|улиц|памятник|музе|истор|центральн/iu);
+ const coffee=pattern(parseText,/кафе|кофе|кофейн|ресторан|перекус|чай/iu);
  if(nature&&!negative("природ|лес|рек"))found.type="nature";
  else if(parks&&!negative("парк|сквер"))found.type="parks";
  else if(city&&!negative("улиц|центр"))found.type="city";
  if(found.type)found.understood=true;
  if(coffee){found.coffee=!negative("кафе|кофе|ресторан");found.understood=true;}
- if(pattern(s,/музе|памятник|истор|собор|театр/iu)){found.poiWish="culture";found.understood=true;}
- if(pattern(s,/парк|сквер|алле|набережн/iu)&&!negative("парк|сквер")){found.poiWish="parks";found.understood=true;}
+ if(pattern(parseText,/музе|памятник|истор|собор|театр/iu)){found.poiWish="culture";found.understood=true;}
+ if(pattern(parseText,/парк|сквер|алле|набережн/iu)&&!negative("парк|сквер")){found.poiWish="parks";found.understood=true;}
  if(coffee && found.coffee===true)found.poiWish="coffee";
- found.wantsNoYards=pattern(s,/двор|подворот|переул|промзон|тупик|служебн.{0,6}проезд/iu)&&pattern(s,/без|избеж|избега|обойти|не\s+хочу|не\s+веди|миним/iu);
- found.wantsLight=pattern(s,/освещ|фонар|светл|т[её]мн|ноч[ьюи]|вечер/iu);
- found.wantsSafety=pattern(s,/безопас|риск|голол[её]д|снег|мороз|очищ|почищ|тротуар/iu);
- found.wantsExcludedPlace=pattern(s,/(не\s+веди|избегай|обойти|не\s+заходи|без)\s+(?:через\s+|на\s+|в\s+)?(?:улиц|район|адрес|двор\s+на)/iu);
- found.wantsReturn=pattern(s,/кольц|круг|верну(?:ться|сь)|обратно|назад|к\s+старт/iu);
- found.wantsRoute=pattern(s,/построй|проложи|создай|сгенерируй|подбери|составь|перестрой|новый\s+маршрут|дай\s+маршрут/iu);
- if(found.wantsRoute||found.wantsNoYards||found.wantsLight||found.wantsSafety||found.wantsReturn||found.wantsExcludedPlace)found.understood=true;
- if(pattern(s,/погуля|прогулк|маршрут|пройти|прогуляться|пешком|ходьб/iu))found.understood=true;
+ found.wantsNoYards=pattern(parseText,/двор|подворот|переул|промзон|тупик|служебн.{0,6}проезд/iu)&&pattern(parseText,/без|избеж|избега|обойти|не\s+хочу|не\s+веди|миним/iu);
+ found.wantsLight=pattern(parseText,/освещ|фонар|светл|т[её]мн|ноч[ьюи]|вечер/iu);
+ found.wantsSafety=pattern(parseText,/безопас|риск|голол[её]д|снег|мороз|очищ|почищ|тротуар/iu);
+ found.wantsExcludedPlace=pattern(parseText,/(не\s+веди|избегай|обойти|не\s+заходи|без)\s+(?:через\s+|на\s+|в\s+)?(?:улиц|район|адрес|двор\s+на)/iu);
+ found.wantsReturn=pattern(parseText,/кольц|круг|верну(?:ться|сь)|обратно|назад|к\s+старт/iu);
+ const routeWords=pattern(parseText,/погуля|прогулк|маршрут|пройти|прогуляться|пешком|ходьб/iu);
+ const wantsWalk=/(?:^|[\s,])(?:хочу|хотелось\s+бы|давай|давайте|погулять|прогуляться)(?![а-яё])/iu.test(parseText)
+     && !/(?:^|[\s,])не\s+хочу/iu.test(parseText);
+ found.wantsRoute=!found.isCorrection && (explicitCommand || (wantsWalk && km!==null && (routeWords || /хочу/iu.test(parseText))));
+ if(found.wantsRoute||found.wantsNoYards||found.wantsLight||found.wantsSafety||found.wantsReturn||found.wantsExcludedPlace||routeWords)found.understood=true;
+ found.intent=found.wantsRoute?"build":found.understood?"settings":"unknown";
  if(found.wantsExcludedPlace)found.notes.push("Конкретные улицы и районы можно исключить вручную, отметив зону на карте.");
- if(found.wantsLight)found.notes.push("Нельзя подтвердить освещение каждой улицы. Доступны лишь погодные предупреждения и предпочтение пешеходных дорожек.");
+ if(found.wantsLight)found.notes.push("Отметки об освещении можно проверить по OSM после построения, но работа фонарей сегодня не подтверждена.");
  if(found.wantsNoYards)found.notes.push("Маршрутизатор старается обходить дворовые и служебные проезды, но не исключает их полностью.");
- if(found.wantsSafety)found.notes.push("Снег, гололёд и состояние каждого тротуара не проверяются автоматически; гарантии безопасности нет.");
+ if(found.wantsSafety)found.notes.push("Снег, гололёд и состояние каждого тротуара не проверяются в реальном времени; гарантии безопасности нет.");
  return found;
 }
 function placeScore(p,pref){
@@ -109,8 +157,26 @@ function mount(doc){
    refreshSummary();
  }
  function reply(result,autostart=false){
+   if(result.intent==="question"){
+     const t=result.estimatedMinutes,km=result.mentionedDistanceKm;
+     if(t!==null){
+       const computed=distanceFromMinutes(t);
+       const hours=t>=60&&t%60===0?(t/60)+" ч":t+" мин";
+       const disagreement=km!==null&&Math.abs(km-computed)>0.5?" "+km.toLocaleString("ru-RU")+" км за "+hours+" — значительно медленнее принятой скорости.":"";
+       return "Поясню расчёт: "+hours+" прогулки при средней скорости "+WALKING_KMH+" км/ч — примерно "+computed.toLocaleString("ru-RU")+" км, а не "+(km!==null?km.toLocaleString("ru-RU")+" км":"фиксированное расстояние")+"."+disagreement+
+         " Это оценка: остановки, фото и мороз меняют реальное время. Настройки маршрута я не менял. Если хотите, напишите «Перестрой на "+computed.toLocaleString("ru-RU")+" км».";
+     }
+     if(km!==null){
+       return "При средней скорости "+WALKING_KMH+" км/ч "+km.toLocaleString("ru-RU")+" км займут примерно "+Math.round(km/WALKING_KMH*60)+" минут без длительных остановок. Это расчёт, не гарантия. Маршрут я не изменял.";
+     }
+     return "Это помощник по параметрам маршрута, а не полноценный ИИ-чат. Я могу объяснить примерное время прогулки, подобрать расстояние и перестроить путь по явной команде. Ваш маршрут не менял.";
+   }
+   if(result.intent==="reject"){
+     return "Понял: "+(result.rejectedDistanceKm!==null?result.rejectedDistanceKm.toLocaleString("ru-RU")+" км вам не подходят. ":"предложенный вариант не подходит. ")+
+       "Я не меняю маршрут и не запускаю перестроение. Напишите, сколько хотите идти: например, «Перестрой на 6,5 км» или «Хочу погулять полтора часа».";
+   }
    if(result.errors.length)return result.errors.join(" ");
-   if(!result.understood)return "Пока понимаю расстояние, время, парки, природу, город, кафе и просьбу о маршруте. Например: «Построй кольцо 3 км через парки». Конкретные адреса пока нельзя вводить как точки.";
+   if(!result.understood)return "Пока понимаю расстояние, время, парки, природу, город, кафе и просьбу о маршруте. Например: «Перестрой на 6,5 км» или «Хочу погулять полтора часа». Конкретные адреса нельзя вводить как точки.";
    const bits=[];
    if(result.distanceKm!==null)bits.push(result.distanceKm.toLocaleString("ru-RU")+" км");
    if(result.type)bits.push(({parks:"парки",nature:"природа",city:"город"})[result.type]);
@@ -119,18 +185,19 @@ function mount(doc){
    if(result.poiWish==="culture")bits.push("интерес к музеям и памятникам");
    let t=bits.length?"Учёл пожелания: "+bits.join(", ")+". ":"Понял запрос. ";
    t+="Используется кольцевой пешеходный маршрут с возвращением к старту.";
+   if(result.isCorrection)t+=" Исправил настройки, но не перестраивал маршрут без команды.";
    if(result.poiWish||result.coffee===true)t+=" Подходящие объекты выбираются только при наличии в каталоге.";
    if(result.notes.length)t+=" "+result.notes.join(" ");
    if(autostart)t+=" Пробую построить маршрут. Для реального старта нужен GPS; доступен и пробный режим из центра Якутска.";
-   else t+=" Для создания маршрута напишите «Построй маршрут» или используйте кнопку построения.";
+   else t+=" Для построения напишите «Построй маршрут» или «Перестрой на 6,5 км».";
    return t;
  }
  function onMessage(raw,targetLog){
    addBubble("user",raw,targetLog);
    const result=parseRequest(raw,awaitingDistance);
    if(result.distanceKm!==null||result.errors.length)awaitingDistance=false;
-   if(result.understood&&!result.errors.length)updatePrefs(result);
-   const directBuild=result.wantsRoute||(result.distanceKm!==null && /хочу|погуля|прогул|маршрут|пройти|прошаг|пешком/iu.test(raw));
+   if((result.intent==="build"||result.intent==="settings")&&!result.errors.length)updatePrefs(result);
+   const directBuild=result.intent==="build"&&!result.errors.length;
    // Never silently ignore text-based safety exclusions.
    const unverified=result.wantsLight||result.wantsExcludedPlace||(/голол[её]д|снег\s+по\s+колено|нечищ|не\s+почищ/iu.test(raw)&&/без|избег|обой|безопас/iu.test(raw));
    addBubble("assistant",reply(result,directBuild&&!unverified),targetLog);

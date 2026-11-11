@@ -10,7 +10,8 @@
 <meta content="strict-origin-when-cross-origin" name="referrer"/>
 <meta content="default-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; connect-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" http-equiv="Content-Security-Policy"/>
 <link href="manifest.webmanifest" rel="manifest"/>
-<link rel="icon" href="icons/smart-route.svg?v=2" type="image/svg+xml"/>
+<link rel="icon" href="icons/favicon.svg?v=4" type="image/svg+xml" sizes="any"/>
+<link rel="shortcut icon" href="icons/favicon.svg?v=4" type="image/svg+xml"/>
 <meta name="description" content="Случайный маршрут — каждый день новый путь по Якутску. Ежедневные пешеходные маршруты, квесты и RouteCoin."/>
 <title>Случайный маршрут — Якутск</title>
 <!-- v10.5: безопасные туристические фототочки; административные/силовые/чувствительные объекты исключены -->
@@ -145,6 +146,7 @@ try {
 <link href="smart-route-chat.css?v=1.1" rel="stylesheet"/>
 <link rel="stylesheet" href="street-audit.css?v=1.0"/>
 <link rel="stylesheet" href="daily-quests.css?v=2.0"/>
+<link rel="stylesheet" href="developer-diagnostics.css?v=1.0"/>
 </head>
 <body>
 <div class="app">
@@ -361,6 +363,17 @@ try {
 <div class="discoveries"><div class="store-section-title">Открытия Якутска</div><div id="yakutskDiscoveries"><div class="hint">Пройдите фотоконтроль у достопримечательности и выполните мини-квест — значок появится здесь.</div></div></div>
 </div></section><section class="screen" id="profile">
 <div class="hero"><small>Ваш профиль</small><h1 id="profileHeroTitle">Прогресс</h1><p>Страйк и статистика, рассчитанные из подтверждённых GPS-маршрутов, фотоконтроля и квестов.</p></div>
+<section id="developerDiagnostics" class="devdiag-panel" aria-label="Диагностика разработчика" hidden>
+  <div class="devdiag-head"><h2>🧪 Диагностика Якутска</h2><span>Только тестировщик</span></div>
+  <p>Показывает <b>объекты в каталоге приложения</b> и проверки доступных функций. Это не подсчёт всех достопримечательностей города.</p>
+  <div id="developerCityCounts" class="devdiag-stats" aria-live="polite">Загрузка статистики каталога…</div>
+  <div class="devdiag-actions">
+    <button type="button" id="developerRunChecks">Проверить функции</button>
+    <button type="button" id="developerCheckPoi">Проверить загрузку объектов</button>
+  </div>
+  <div id="developerCheckResults" class="devdiag-results" aria-live="polite">Запусти проверку, чтобы увидеть подробный отчёт.</div>
+  <p class="devdiag-note">GPS, фото и начисления требуют реальных испытаний на телефоне. Жёлтый статус «Не проверено» не означает неисправность.</p>
+</section>
 <div class="profile-identity" id="profileIdentity"><div class="profile-avatar" id="profileAvatar">Я</div><div class="profile-person"><b id="profileName">Пользователь</b><span id="profileEmail">—</span><div class="tester-badge hidden" id="profileRoleBadge">★ Тестировщик</div></div><button class="profile-logout" id="profileLogout" type="button">Выйти</button></div><div class="profile-badges-mini" id="profileBadgesMini"></div>
 <div class="streak-card">
 <div class="streak-head">
@@ -2008,6 +2021,37 @@ try {
     if(pool.length<5)touristPoolPromise=null;
     return pool;
   }
+  // Expose read-only summaries for the tester dashboard; never claim a citywide census.
+  window.__rrDeveloperCatalog=function(){
+    const all=Array.isArray(YAKUTSK_GUIDE_SEEDS)?YAKUTSK_GUIDE_SEEDS:[];
+    const enabled=all.filter(p=>p&&p.enabled!==false);
+    const coords=enabled.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))&&insidePilot({lat:Number(p.lat),lng:Number(p.lng)}));
+    return {
+      city:TOURIST_CITY,listed:all.length,available:enabled.length,disabled:all.length-enabled.length,
+      withCoordinates:coords.length,withReference:enabled.filter(p=>!!(p.wikipedia||p.qid||p.sourceUrl)).length,
+      photoReferences:enabled.filter(p=>!!p.img).length,source:"Встроенный туристический каталог"
+    };
+  };
+  window.__rrDeveloperPoiProbe=async function(){
+    const candidates=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false).slice(0,4);
+    if(!candidates.length)return {sample:0,loaded:0,photoEligible:0};
+    const loaded=await Promise.all(candidates.map(p=>resolveTouristGuideItem(p).catch(()=>null)));
+    const points=loaded.filter(Boolean);
+    return {sample:candidates.length,loaded:points.length,photoEligible:points.filter(p=>isPhotoSafePoi(p)&&!!p._referenceUrl).length};
+  };
+  window.__rrDeveloperRouteProbe=async function(){
+    const origin={lat:YAKUTSK.lat,lng:YAKUTSK.lng};
+    const nearby=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)))
+       .map(p=>({lat:Number(p.lat),lng:Number(p.lng)}))
+       .filter(p=>insidePilot(p)&&distMeters(p,origin)>140&&distMeters(p,origin)<1800)
+       .sort((a,b)=>distMeters(a,origin)-distMeters(b,origin));
+    const destination=nearby[0]||{lat:62.029,lng:129.737};
+    const data=await requestFootRoute([origin,destination],{allBreak:true,radius:100});
+    const route=data?.routes?.[0];
+    if(!route||!Number.isFinite(Number(route.distance))||Number(route.distance)<80||!route.legs?.length)
+       throw new Error("Маршрутизатор не вернул корректный пешеходный путь");
+    return {distanceM:Math.round(route.distance),waypoints:data?.waypoints?.length||0,mode:"pedestrian"};
+  };
   async function curatedTouristPois(p,radius=700){
     const pool=await touristPool();
     return pool.filter(poi=>isPhotoSafePoi(poi)).map(poi=>{poi._d=distMeters(p,{lat:poi._lat,lng:poi._lng});return poi}).filter(poi=>poi._d<=radius).sort((a,b)=>a._d-b._d);
@@ -2348,7 +2392,8 @@ try {
 })();
 </script>
 <script src="smart-safety.js?v=1.0"></script>
-<script src="smart-route-chat.js?v=1.0"></script>
+<script src="smart-route-chat.js?v=1.1"></script>
+<script src="developer-diagnostics.js?v=1.0"></script>
 <script src="street-audit.js?v=1.0"></script>
 <script src="daily-quests.js?v=2.0"></script>
 <script src="map-fallback.js?v=1.1"></script>

@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -18,6 +18,9 @@ jobs:
           node --check map-fallback.js
           node --check smart-route-chat.js
           node tests/chat-intent.test.cjs
+          node tests/chat-ui-regression.test.cjs
+          node --check developer-diagnostics.js
+          node tests/developer-diagnostics.test.cjs
           node --check street-audit.js
           node tests/street-audit.test.cjs
           node --check daily-quests.js
@@ -28,7 +31,7 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/mascot-marshik.svg']){
+          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
@@ -39,11 +42,19 @@ jobs:
           if(!html.includes('dailyOfferId:rr.dailyOfferId||null'))throw new Error('Daily route ID missing from verified completion event');
           if(!html.includes('window.__buildDailyRoute'))throw new Error('Daily route generator binding missing');
           if(!html.includes('icons/mascot-marshik.svg'))throw new Error('Mascot missing from home page');
+          if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
+          if(!html.includes('smart-route-chat.js?v=1.1'))throw new Error('Chat regression fix version missing');
+          if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
           const chatCss=fs.readFileSync('smart-route-chat.css','utf8');
           if(chatCss.includes('#home.schat-compact #quickInfoGrid{display:none}'))throw new Error('Informational cards must remain visible');
           if(!chatCss.includes('#home.schat-compact .schat-legacy{display:none}'))throw new Error('Manual settings should remain collapsible');
           const expected = ["costing:'pedestrian'","walkway_factor:0.65","sidewalk_factor:0.70","alley_factor:6.0","driveway_factor:9.0"];
           expected.forEach(value => { if (!html.includes(value)) throw new Error('Pedestrian preference missing: '+value); });
-          JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+          if(!manifest.icons.find(x=>x.purpose==='maskable'))throw new Error('Maskable PWA icon missing');
+          for(const p of ['icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg']){
+            const txt=fs.readFileSync(p,'utf8');
+            if(!txt.includes('<svg')||!txt.includes('</svg>'))throw new Error('SVG icon malformed: '+p);
+          }
           console.log('Static checks passed');
           NODE
