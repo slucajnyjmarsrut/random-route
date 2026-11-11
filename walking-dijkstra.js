@@ -97,7 +97,8 @@
     const t=den?Math.max(0,Math.min(1,-(ax*vx+ay*vy)/den)):0;
     return Math.hypot(ax+t*vx,ay+t*vy)<radius;
   }
-  function shortest(graph,from,to,zones=[]){
+  const edgeKey=(a,b)=>String(a)<String(b)?String(a)+":"+String(b):String(b)+":"+String(a);
+  function shortest(graph,from,to,zones=[],usedEdges=new Map()){
     if(!graph.nodes.has(from)||!graph.nodes.has(to))return null;
     if(from===to)return {ids:[from],length:0};
     const d=new Map([[from,0]]),prev=new Map(),visited=new Set(),heap=new Heap();
@@ -111,7 +112,8 @@
         if(visited.has(edge.to))continue;
         const b=graph.nodes.get(edge.to);
         if(zones.length&&zones.some(z=>intersectZone(a,b,z)))continue;
-        const next=score+edge.cost;
+        // Hybrid research repeat penalty p=2; count the physical segment in either direction.
+        const next=score+edge.cost*(1+2*(usedEdges.get(edgeKey(id,edge.to))||0));
         if(next<(d.get(edge.to)??Infinity)){
           d.set(edge.to,next);prev.set(edge.to,{id,length:edge.metres});
           heap.push([next,edge.to]);
@@ -136,11 +138,14 @@
     const zones=(options.zones||[]).map(z=>({lat:Number(z.lat),lng:Number(z.lng),radius:Number(z.radius||300)})).filter(z=>Number.isFinite(z.lat)&&Number.isFinite(z.lng)&&z.radius>0);
     const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?75:120));
     if(ids.some(id=>id===null))throw Error('NoNearbyFootpath');
-    const legs=[];let full=0;
+    const legs=[];let full=0;const usedEdges=new Map();
     for(let i=1;i<ids.length;i++){
-      const p=shortest(graph,ids[i-1],ids[i],zones);
+      const p=shortest(graph,ids[i-1],ids[i],zones,usedEdges);
       if(!p||p.ids.length<2)throw Error('DisconnectedWalkingGraph');
       legs.push(pathToLeg(graph,p));full+=p.length;
+      for(let j=1;j<p.ids.length;j++){
+        const k=edgeKey(p.ids[j-1],p.ids[j]);usedEdges.set(k,(usedEdges.get(k)||0)+1);
+      }
     }
     const locs=ids.map(id=>{const p=graph.nodes.get(id);return {location:[p.lng,p.lat],name:''};});
     return {code:'Ok',source:'dijkstra-osm',routes:[{distance:full,duration:full/1.3,legs}],waypoints:locs};
