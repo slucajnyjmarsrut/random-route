@@ -22,8 +22,9 @@ function parseRequest(raw,askDistance=false){
  if(!m){
     const hr=s.match(/(\d+(?:[.,]\d+)?)\s*(?:час(?:ов|а)?|ч)(?![а-яё])/iu);
     const min=s.match(/(\d+(?:[.,]\d+)?)\s*(?:минут(?:ы|у)?|мин)(?![а-яё])/iu);
-    if(hr||min||/полчаса|пол\s+часа/iu.test(s)){
-      const mins=(hr?Number(hr[1].replace(",","."))*60:0)+(min?Number(min[1].replace(",",".")):0)+(/полчаса|пол\s+часа/iu.test(s)?30:0);
+    const plainHour=!hr&&!min&&/(?:^|\s)(?:на\s+)?час(?:ик)?(?=$|\s|[.,!?])/iu.test(s);
+    if(hr||min||plainHour||/полчаса|пол\s+часа/iu.test(s)){
+      const mins=(hr?Number(hr[1].replace(",","."))*60:plainHour?60:0)+(min?Number(min[1].replace(",",".")):0)+(/полчаса|пол\s+часа/iu.test(s)?30:0);
       if(mins>0){found.estimatedMinutes=mins;found.distanceKm=Math.round(Math.min(KM_MAX,Math.max(0,mins*WALKING_KMH/60))*10)/10;found.notes.push("Время приблизительное: расчёт из скорости около "+WALKING_KMH+" км/ч.");}
     }
  }
