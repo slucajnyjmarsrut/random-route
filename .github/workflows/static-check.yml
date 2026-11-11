@@ -19,6 +19,7 @@ jobs:
           node tests/weather-background.test.cjs
           node --check responsive-layout.js
           node tests/responsive-layout.test.cjs
+          node tests/navigation-layout.test.cjs
           node --check map-fallback.js
           node --check smart-route-chat.js
           node tests/chat-intent.test.cjs
