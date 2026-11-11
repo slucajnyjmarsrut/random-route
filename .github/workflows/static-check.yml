@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026, fix/daily-route-full-card-click-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026, fix/daily-route-full-card-click-2026, feature/large-click-targets-throughout-app-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -26,13 +26,15 @@ jobs:
           node --check daily-quests.js
           node tests/daily-quests.test.cjs
           node tests/daily-route-card.test.cjs
+          node --check tap-targets.js
+          node tests/tap-targets.test.cjs
           node --check sw.js
           node - <<'NODE'
           const fs=require('fs');
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css']){
+          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
@@ -47,6 +49,9 @@ jobs:
           if(!dailyJS.includes('doc.createElement("button");item.type="button"') || !dailyJS.includes('item.addEventListener("click"'))throw new Error('Daily card must be one clickable button');
           if(dailyJS.includes('action.addEventListener("click"'))throw new Error('Old reward-only click target still exists');
           if(!html.includes('icons/mascot-marshik.svg'))throw new Error('Mascot missing from home page');
+          if(!html.includes('tap-targets.js?v=1.0')||!html.includes('tap-targets.css?v=1.0'))throw new Error('App-wide tap-area enhancement missing');
+          const tapCode=fs.readFileSync('tap-targets.js','utf8');
+          if(!tapCode.includes('controls.length!==1'))throw new Error('Unsafe card multi-action guard missing');
           if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
           if(!html.includes('smart-route-chat.js?v=1.1'))throw new Error('Chat regression fix version missing');
           if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
