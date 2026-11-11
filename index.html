@@ -602,10 +602,8 @@ try {
     }catch(e){
       console.warn('Yandex maps',e);
       const reason=(e&&e.message)?(' Причина: '+e.message+'.'):'';const msg='Яндекс Карты не загрузились.'+reason+' Проверьте статус JavaScript API и HTTP Referer slucajnyjmarsrut.github.io, затем перезагрузите страницу.';
-      [$('#realMap'),$('#homeMap')].forEach(parent=>{
-        if(!parent)return;
-        const d=document.createElement('div');d.className='yandex-map-error';d.innerHTML='<div><b>Не удалось загрузить Яндекс Карты</b>'+msg+'</div>';parent.appendChild(d);
-      });
+      console.info('Подключаем резервную карту OpenStreetMap');
+      document.dispatchEvent(new Event('rr-map-failed'));
     }
   }
   function updateYandexUser(p,center=false){
