@@ -112,3 +112,28 @@ body{width:100%;min-width:0;margin:0}
   .app .nav i{font-size:15px}
   #home .quick-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Home shortcuts and separate screens for settings, help, and safety. */
+.rr-settings-trigger{border:1px solid #d9e8df;background:#fff;color:#0c5a42;border-radius:12px;width:38px;height:40px;min-width:38px;flex:0 0 38px;display:grid;place-items:center;font-size:20px;cursor:pointer}
+.rr-settings-trigger:focus-visible,.rr-home-links button:focus-visible,.rr-page-links button:focus-visible{outline:3px solid #168057;outline-offset:2px}
+.rr-home-links,.rr-page-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 14px}
+.rr-home-links button,.rr-page-links button{min-width:0;min-height:48px;padding:9px 11px;line-height:1.3;border:1px solid #d2e2d9;border-radius:14px;background:#fff;color:#125d42;font-size:12px;font-weight:850;cursor:pointer;text-align:center}
+.rr-page-links{grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0}
+.rr-section-heading{font-size:18px;margin:16px 2px 11px;color:#164b36}
+.rr-settings-options label{display:flex;align-items:center;gap:12px;padding:11px 2px;font-size:14px;font-weight:700;line-height:1.35;cursor:pointer}
+.rr-settings-options label+label{border-top:1px solid #edf2ee}
+.rr-settings-options input{accent-color:#0d704d;min-width:20px;width:20px;height:20px;flex-shrink:0}
+#help .marshik-strip{margin:0 0 16px}
+#settings .card{max-width:100%}
+@media (max-width:599px){
+ .rr-settings-trigger{height:36px;width:34px;min-width:34px;flex-basis:34px;font-size:18px}
+ .rr-home-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .rr-home-links button:last-child{grid-column:1 / -1}
+ .rr-home-links button,.rr-page-links button{font-size:11px;padding:9px 8px;min-height:44px}
+}
+@media (max-width:380px){
+ .app .topbar{gap:5px}
+ .rr-settings-trigger{width:32px;min-width:32px;flex-basis:32px}
+ .app .streak-top-card{min-width:78px}
+ .app .coin-top-card{min-width:49px}
+}
