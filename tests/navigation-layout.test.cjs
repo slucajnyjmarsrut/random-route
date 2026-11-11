@@ -19,7 +19,7 @@ for(const k of ['weather','darkness','animatedBackground'])assert.ok(settings.in
 assert.ok(help.includes('id="quickInfoGrid"')&&help.includes('marshik-strip'));
 assert.ok(html.includes('window.__rrOpenScreen=showScreen')&&html.includes('data-open-screen="settings"'));
 assert.ok(chat.includes('window.__rrOpenScreen("settings"'),'chat manual options should open settings');
-assert.ok(daily.includes('getElementById("smartChat")')&&!daily.includes('getElementById("quickInfoGrid")'),'daily routes remain on home');
+assert.ok(daily.includes('getElementById("smartChat")')&&daily.includes('getElementById("quickInfoGrid")'),'daily routes remain on home');
 assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety panel belongs to its screen');
 assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]")'),'settings synchronized with safety');
 assert.ok(css.includes('.rr-settings-trigger')&&css.includes('.rr-home-links')&&css.includes('@media (max-width:599px)'));
