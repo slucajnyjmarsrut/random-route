@@ -1,0 +1,14 @@
+/* App-wide tap targets. A whole card is clickable only when it has one non-destructive preview action. */
+#quickInfoGrid .tap-info-card,.tap-whole-card,.tap-detail-card{cursor:pointer;touch-action:manipulation;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .12s ease}
+#quickInfoGrid .tap-info-card:hover,.tap-whole-card:hover,.tap-detail-card:hover{border-color:#6eaf9d;background-color:#eef8f3;box-shadow:0 6px 17px rgba(18,111,82,.11)}
+#quickInfoGrid .tap-info-card:active,.tap-whole-card:active,.tap-detail-card:active{transform:scale(.989);background-color:#e3f3ec}
+#quickInfoGrid .tap-info-card:focus-visible,.tap-whole-card:focus-visible,.tap-detail-card:focus-visible{outline:3px solid #0f7dbb;outline-offset:3px}
+.tap-card-disabled{cursor:default;opacity:.77}.tap-card-disabled:hover{transform:none}
+.tap-whole-card .tap-delegated-button{pointer-events:none}
+.tap-whole-card .buy-btn,.tap-whole-card .feature-action{border-radius:13px}
+.tap-whole-card .buy-btn:after,.tap-whole-card .feature-action:after{content:"  ›";font-weight:950;font-size:16px;vertical-align:middle}
+#quickInfoGrid .tap-info-card{min-height:108px}
+:is(.primary,.secondary,.danger-lite,.feature-action,.gold-buy,.buy-btn,.quest-option,.store-tab,.choice,.schat-send,.sra-btn,.rdq-route-button,.devdiag-actions button,.route-control-grid button,.route-exit-btn){min-height:44px;touch-action:manipulation}
+.nav button{min-height:52px;touch-action:manipulation}
+button:focus-visible{outline:3px solid #0f7dbb;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){#quickInfoGrid .tap-info-card,.tap-whole-card,.tap-detail-card{transition:none}}
