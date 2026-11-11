@@ -16,5 +16,6 @@
 .schat-summary{margin:9px 0 4px;font-size:11px;line-height:1.4;color:#456252;font-weight:750}
 .schat-settings{display:block;margin:11px 0 0;background:none;border:none;color:#0a6547;font-weight:850;font-size:12px;padding:5px 1px;text-decoration:underline;text-underline-offset:3px}
 .schat-disclaimer{display:block;margin-top:6px;font-size:10px;line-height:1.5;color:#718579}
-#home.schat-compact .schat-legacy,#home.schat-compact #quickInfoGrid{display:none}
+/* Hide only manual controls; informational cards stay visible in every mode. */
+#home.schat-compact .schat-legacy{display:none}
 @media(prefers-reduced-motion:reduce){.schat-log{scroll-behavior:auto}}
