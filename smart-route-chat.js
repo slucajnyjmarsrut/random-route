@@ -108,7 +108,7 @@ function mount(doc){
    if(result.coffee!==null)latestPref.coffee=result.coffee;
    refreshSummary();
  }
- function reply(result){
+ function reply(result,autostart=false){
    if(result.errors.length)return result.errors.join(" ");
    if(!result.understood)return "Пока понимаю расстояние, время, парки, природу, город, кафе и просьбу о маршруте. Например: «Построй кольцо 3 км через парки». Конкретные адреса пока нельзя вводить как точки.";
    const bits=[];
@@ -118,11 +118,11 @@ function mount(doc){
    if(result.coffee===false)bits.push("без кафе");
    if(result.poiWish==="culture")bits.push("интерес к музеям и памятникам");
    let t=bits.length?"Учёл пожелания: "+bits.join(", ")+". ":"Понял запрос. ";
-   t+="Строю кольцо по пешеходной сети, с возвращением к старту.";
+   t+="Используется кольцевой пешеходный маршрут с возвращением к старту.";
    if(result.poiWish||result.coffee===true)t+=" Подходящие объекты выбираются только при наличии в каталоге.";
    if(result.notes.length)t+=" "+result.notes.join(" ");
-   if(result.wantsRoute)t+=" Для настоящего маршрута потребуется GPS; также доступен пробный режим из центра Якутска.";
-   else t+=" Нажмите «Построить маршрут», когда будете готовы.";
+   if(autostart)t+=" Пробую построить маршрут. Для реального старта нужен GPS; доступен и пробный режим из центра Якутска.";
+   else t+=" Для создания маршрута напишите «Построй маршрут» или используйте кнопку построения.";
    return t;
  }
  function onMessage(raw,targetLog){
@@ -130,13 +130,14 @@ function mount(doc){
    const result=parseRequest(raw,awaitingDistance);
    if(result.distanceKm!==null||result.errors.length)awaitingDistance=false;
    if(result.understood&&!result.errors.length)updatePrefs(result);
-   addBubble("assistant",reply(result),targetLog);
+   const directBuild=result.wantsRoute||(result.distanceKm!==null && /хочу|погуля|прогул|маршрут|пройти|прошаг|пешком/iu.test(raw));
    // Never silently ignore text-based safety exclusions.
    const unverified=result.wantsLight||result.wantsExcludedPlace||(/голол[её]д|снег\s+по\s+колено|нечищ|не\s+почищ/iu.test(raw)&&/без|избег|обой|безопас/iu.test(raw));
-   if(result.wantsRoute && unverified){
+   addBubble("assistant",reply(result,directBuild&&!unverified),targetLog);
+   if(directBuild && unverified){
       addBubble("assistant","По этим условиям автоматический фильтр пока не готов, поэтому маршрут не запускаю. Отметьте запретные зоны на карте либо ослабьте условие. Погодные предупреждения доступны отдельно.",targetLog);
    }
-   if(!result.errors.length&&result.wantsRoute&&!unverified){
+   if(!result.errors.length&&directBuild&&!unverified){
      const rr=window.__yakutskRR;
      const active=!!(rr&&rr.legs&&rr.legs.length&&rr.stage!=="idle"&&rr.stage!=="completed");
      const target=doc.getElementById(active?"applyDistanceBtn":"buildBtn");
