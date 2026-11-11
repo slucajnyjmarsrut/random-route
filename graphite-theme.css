@@ -1,0 +1,277 @@
+/* Graphite Aurora: a calm, accessible dark palette with soft flowing gradients.
+   Dark is the default. Existing bright theme remains selectable in Settings.
+   Loaded last so it safely overrides legacy inline and modular light surfaces.
+*/
+html[data-rr-theme="graphite"]{
+  color-scheme:dark;
+  --bg:#171c23;
+  --card:#262d36;
+  --ink:#edf3f0;
+  --muted:#afbeb9;
+  --green:#42bf8f;
+  --green2:#3cb786;
+  --pale:#293f38;
+  --line:#3b4850;
+  --orange:#ff9861;
+  --amber:#efc469;
+  --red:#ea8b85;
+  --shadow:0 18px 36px rgba(2,8,12,.27);
+}
+html[data-rr-theme="graphite"],
+html[data-rr-theme="graphite"] body{background:#171c23;color:var(--ink)}
+html[data-rr-theme="graphite"] .app{
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse 105% 36% at -5% 10%,rgba(32,126,106,.24),transparent 68%),
+    radial-gradient(ellipse 80% 40% at 115% 46%,rgba(52,105,145,.19),transparent 72%),
+    radial-gradient(ellipse 110% 42% at 20% 96%,rgba(40,108,91,.21),transparent 67%),
+    linear-gradient(158deg,#20262e 0%,#171c23 51%,#1b222a 100%);
+  isolation:isolate;
+}
+html[data-rr-theme="graphite"] .app::before,
+html[data-rr-theme="graphite"] .app::after{
+  content:"";position:absolute;pointer-events:none;z-index:0;
+  filter:blur(52px);opacity:.76;inset:auto;
+}
+html[data-rr-theme="graphite"] .app::before{
+  width:min(92vw,1050px);height:min(38vh,400px);
+  left:-22%;top:14%;
+  border-radius:47% 53% 62% 38%/58% 44% 56% 42%;
+  transform:rotate(-13deg);
+  background:radial-gradient(ellipse at 35% 45%,rgba(52,167,121,.24),rgba(26,119,127,.12) 48%,transparent 78%);
+  animation:rr-graphite-wave-one 23s ease-in-out infinite alternate;
+}
+html[data-rr-theme="graphite"] .app::after{
+  width:min(92vw,1100px);height:min(42vh,460px);
+  right:-28%;bottom:7%;
+  border-radius:58% 42% 47% 53%/43% 65% 35% 57%;
+  transform:rotate(18deg);
+  background:radial-gradient(ellipse at 57% 42%,rgba(48,120,157,.22),rgba(42,118,98,.12) 51%,transparent 78%);
+  animation:rr-graphite-wave-two 28s ease-in-out infinite alternate;
+}
+@keyframes rr-graphite-wave-one{to{transform:translate3d(6%,4%,0) rotate(-5deg);opacity:.56}}
+@keyframes rr-graphite-wave-two{to{transform:translate3d(-5%,-5%,0) rotate(8deg);opacity:.61}}
+/* The scenic weather layer must not paint over the dark gradients. */
+html[data-rr-theme="graphite"] .app>.rr-weather-scene{
+  background:transparent;
+  opacity:.19;
+  filter:brightness(.55) saturate(.6);
+}
+html[data-rr-theme="graphite"] .app>.content{background:transparent;color:var(--ink)}
+html[data-rr-theme="graphite"] .app>.topbar{
+  background:rgba(28,34,42,.94);
+  border-bottom:1px solid rgba(185,215,204,.13);
+  color:#ebf2ef;
+  backdrop-filter:blur(18px);
+}
+html[data-rr-theme="graphite"] .app>.nav{
+  background:rgba(24,30,38,.95);
+  border-top:1px solid rgba(185,215,204,.13);
+  backdrop-filter:blur(18px);
+}
+html[data-rr-theme="graphite"] .app .subtitle{color:#b3c5be}
+html[data-rr-theme="graphite"] .app .nav button{color:#a1b5ad}
+html[data-rr-theme="graphite"] .app .nav button.active{background:#2b433c;color:#91e5bb}
+html[data-rr-theme="graphite"] .app .rr-settings-trigger{
+  background:#303a44;color:#e8f3ed;border-color:#51635d;
+}
+html[data-rr-theme="graphite"] .app .streak-top-card{
+  background:linear-gradient(150deg,#49392f,#342e2d);
+  border-color:#846449;box-shadow:none;
+}
+html[data-rr-theme="graphite"] .app .streak-top-label,
+html[data-rr-theme="graphite"] .app .streak-top-value b,
+html[data-rr-theme="graphite"] .app .streak-top-value em{color:#ffd2a3}
+html[data-rr-theme="graphite"] .app .coin-top-card{
+  background:linear-gradient(145deg,#424032,#35372e);
+  border-color:#746a42;color:#f7e8ad;
+}
+html[data-rr-theme="graphite"] .app .coin-top-card small{color:#d4c28a}
+html[data-rr-theme="graphite"] .app .pill{background:#3b3d2e;border-color:#6b6844;color:#f2d88c}
+html[data-rr-theme="graphite"] .app .pill.streak{background:#43372d;border-color:#835c41;color:#ffd0a2}
+
+/* Major cards and all secondary views: no white flashes when switching tabs. */
+html[data-rr-theme="graphite"] .app :is(
+  .card,.summary,.pstat,.rank-row,.reward-row,.feature-card,.coin-pack,
+  .rdq-card,.schat-card,.srs-card,.profile-identity,.quick-info-card,
+  .photo-task-card,.devdiag-panel,.lab-card,.badge-item,.gold-card,
+  .marshik-strip,.service-settings,.profile-badge-mini,.slot,
+  .route-edit-card,.store-note,.store-tabs
+){
+  background:linear-gradient(156deg,rgba(43,51,60,.97),rgba(32,39,47,.98));
+  border-color:#3f4d54;
+  color:#e9f0ec;
+  box-shadow:0 10px 26px rgba(1,8,12,.18);
+}
+html[data-rr-theme="graphite"] .app .avoid-card{
+  background:linear-gradient(145deg,#352e36,#2a3038);border-color:#6a5156;
+}
+html[data-rr-theme="graphite"] .app .hero,
+html[data-rr-theme="graphite"] .app #home .hero{
+  background:
+    radial-gradient(ellipse 72% 135% at 105% -20%,rgba(58,163,129,.24),transparent 75%),
+    radial-gradient(ellipse 82% 110% at -10% 110%,rgba(59,108,145,.18),transparent 74%),
+    linear-gradient(124deg,#243c39 0%,#26303b 52%,#202a34 100%);
+  border:1px solid #41594f;color:#edf6f1;
+}
+html[data-rr-theme="graphite"] .app .hero p{color:#d4e2db}
+html[data-rr-theme="graphite"] .app .hero small{color:#a8d9c4}
+html[data-rr-theme="graphite"] .app .checkpoint{
+  background:linear-gradient(140deg,#203e39,#1d343b);border:1px solid #45665a;
+}
+html[data-rr-theme="graphite"] .app .checkpoint p{color:#d5e8dd}
+html[data-rr-theme="graphite"] .app .checkpoint-address{background:rgba(215,242,229,.08)}
+html[data-rr-theme="graphite"] .app :is(.title,.rr-section-heading,.schat-heading h2,.sra-panel strong,.photo-task-title,.rdq-task-info strong,.devdiag-head h2){
+  color:#edf3ef;
+}
+html[data-rr-theme="graphite"] .app :is(
+  .sub,.hint,.unit,.small-rule,.location-status,.gps-quality,
+  .schat-description,.schat-summary,.schat-disclaimer,
+  .rdq-desc,.rdq-foot,.srs-intro,.srs-foot,.srs-weather small,
+  .sra-panel p,.sra-panel .sra-note,.devdiag-panel>p,.marshik-strip span,
+  .feature-main p,.feature-list li,.store-note,.rank-main span,.reward-main span,
+  .pstat span,.quick-info-card p,.streak-progress-row,.photo-task-kicker,
+  .badge-item .badge-summary,.badge-item .badge-progress-label,
+  .badge-detail-text,.service-status,.profile-person span
+){color:#aebfb7}
+html[data-rr-theme="graphite"] .app :is(.srs-head,.rdq-heading,.sra-panel,.feature-main,.rank-main,.reward-main,.profile-person,.gold-main,.slot){color:#edf3ef}
+html[data-rr-theme="graphite"] .app :is(.marshik-strip strong,.quick-info-more,.rdq-notice,.sra-source,.feature-price){color:#89ddb6}
+html[data-rr-theme="graphite"] .app .rdq-task-info small{color:#96e5ba}
+
+/* Nested containers and the chat should not reveal bright white rectangles. */
+html[data-rr-theme="graphite"] .app :is(
+  .rdq-task,.rdq-task.rdq-done,.schat-bot,.srs-weather,.srs-alert,.srs-alert.unknown,
+  .srs-tag,.rdq-count,.rdq-route-button,.schat-heading span,
+  .quick-info-icon,.profile-avatar,.badge-detail-block,.badge-detail-icon,
+  .quest-badge-hint,.photo-task-chip,.photo-task-address,.photo-task-note,
+  .photo-task-source,.devdiag-row,.devdiag-row.devdiag-ok,
+  .sra-result,.service-settings,.profile-logout,.store-panel,
+  .pack-grid,.streak-progress-track,.streak-next,.streak-days .day,
+  .pstat,.summary,.gps-quality,.lab-distance-item,.lab-status,.lab-svg-wrap
+){
+  background:#313b44;border-color:#46565b;color:#e7f0e9;
+}
+html[data-rr-theme="graphite"] .app :is(.srs-alert.warn,.sra-panel .sra-line.warn,.devdiag-row.devdiag-warn,.photo-task-note){
+  background:#493b2b;border-color:#8b6c46;color:#ffdfa6;
+}
+html[data-rr-theme="graphite"] .app :is(.srs-alert.critical,.srs-action.srs-sos,.devdiag-row.devdiag-bad,.message.error){
+  background:#51363c;border-color:#935d66;color:#ffd3cb;
+}
+html[data-rr-theme="graphite"] .app .message.warn{background:#493c2c;border-color:#886942;color:#ffdfaa}
+html[data-rr-theme="graphite"] .app .message.success{background:#29483c;border-color:#487d63;color:#c2efd4}
+html[data-rr-theme="graphite"] .app .schat-user{background:#1c7557;color:#effff7}
+html[data-rr-theme="graphite"] .app .schat-bot{color:#edf4ee}
+html[data-rr-theme="graphite"] .app :is(.rdq-route-button:not(:disabled):hover,.tap-whole-card:hover,#quickInfoGrid .tap-info-card:hover){
+  background:#394c49;border-color:#79aa94;color:#edf5ed;
+}
+html[data-rr-theme="graphite"] .app .streak-card{
+  background:linear-gradient(150deg,#43362e,#30313a);border-color:#7e5a44;
+}
+html[data-rr-theme="graphite"] .app :is(.streak-main,.streak-main small,.streak-kicker,.streak-next){color:#ffcd9d}
+html[data-rr-theme="graphite"] .app .streak-coef-badge{
+  background:#493d32;border-color:#90654a;color:#ffd4ab;
+}
+html[data-rr-theme="graphite"] .app .streak-coef-badge span,
+html[data-rr-theme="graphite"] .app .streak-coef-badge b{color:#ffd4ab}
+html[data-rr-theme="graphite"] .app .streak-progress-track{background:#302c2c}
+html[data-rr-theme="graphite"] .app .streak-days .day{background:#383940;color:#d2bda5;border-color:#5a4c45}
+html[data-rr-theme="graphite"] .app .streak-days .day .day-date{color:#f3c39a}
+html[data-rr-theme="graphite"] .app .streak-days .day.ok{background:#ae643b;color:#fff4e9;border-color:#bd7a4c}
+html[data-rr-theme="graphite"] .app .streak-days .day.ok .day-date{color:#fff4e9}
+html[data-rr-theme="graphite"] .app .coin-pack.best{background:linear-gradient(150deg,#473f2e,#32363a);border-color:#a48851}
+html[data-rr-theme="graphite"] .app .gold-icon{background:linear-gradient(140deg,#bf9142,#91672e)}
+html[data-rr-theme="graphite"] .app .gold-main span{color:#e7c895}
+html[data-rr-theme="graphite"] .app .gold-price{color:#ffdfa5}
+
+/* Inputs, selectors and the configuration page. */
+html[data-rr-theme="graphite"] .app :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,textarea,.distance,.auth-input,.schat-form textarea,.service-field input
+){
+  background:#202832;color:#eff5ef;border:1px solid #57666c;
+  color-scheme:dark;
+}
+html[data-rr-theme="graphite"] .app :is(input,textarea)::placeholder{color:#a8b8b1;opacity:1}
+html[data-rr-theme="graphite"] .app :is(input,select,textarea):focus-visible{
+  outline:2px solid #73d3ab;outline-offset:2px;
+}
+html[data-rr-theme="graphite"] .app .rr-settings-options label{color:#e7f2eb;border-color:#465258}
+html[data-rr-theme="graphite"] .app .rr-settings-options input{accent-color:#57c697}
+html[data-rr-theme="graphite"] .app .rr-theme-choice{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 2px;border-top:1px solid #45545c;
+  color:#ecf3ed;font-weight:800;font-size:14px;
+}
+html[data-rr-theme="graphite"] .app .rr-theme-choice select,
+.app .rr-theme-choice select{
+  min-height:44px;min-width:146px;padding:9px 12px;border-radius:12px;
+  font-size:14px;font-weight:750;
+}
+.app .rr-theme-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+@media(max-width:365px){.app .rr-theme-choice{flex-wrap:wrap}}
+
+/* Buttons and tags: dark surfaces with strong text contrast. */
+html[data-rr-theme="graphite"] .app :is(
+  .secondary,.danger-lite,.feature-action:not(.paid),.srs-refresh,.srs-action:not(.srs-sos),
+  .rr-home-links button,.rr-page-links button,.buy-btn:not(.paid),.route-control-grid button,
+  .gold-buy,.store-tab,.choice,.purchase-cancel,.profile-logout,.badge-item button,
+  .avoid-map-btn,.map-follow,.lab-controls button,.tester-login-btn
+){
+  background:#34404a;border:1px solid #52645e;color:#e9f3ec;
+}
+html[data-rr-theme="graphite"] .app :is(.primary,.schat-send,.sra-btn,.feature-action.paid,.purchase-confirm,.lab-controls #labRun){
+  background:linear-gradient(135deg,#238662,#176c55);border-color:#258765;color:#f5fff9;
+}
+html[data-rr-theme="graphite"] .app .primary.orange{
+  background:linear-gradient(135deg,#de793f,#b9552f);color:#fff8f1;
+}
+html[data-rr-theme="graphite"] .app :is(.choice.active,.store-tab.active,.feature-action.active){
+  background:#295344;border-color:#5ba884;color:#bcf8d5;
+}
+html[data-rr-theme="graphite"] .app .srs-action.srs-sos{background:#51363c;color:#ffd3cb}
+html[data-rr-theme="graphite"] .app .toggle:not(.on){background:#58676e}
+html[data-rr-theme="graphite"] .app .toggle.on{background:#208663}
+html[data-rr-theme="graphite"] .app .schat-settings{color:#9eeabf}
+html[data-rr-theme="graphite"] .app :is(.avoid-badge,.avoid-zone-chip){background:#503841;color:#ffcbc5;border-color:#85565c}
+html[data-rr-theme="graphite"] .app .avoid-zone-chip button{color:#ffbeb8}
+html[data-rr-theme="graphite"] .app .provider-chip{background:#504735;color:#ffe0a8;border-color:#7a694c}
+html[data-rr-theme="graphite"] .app .gps-auto{color:#a5e1bd}
+html[data-rr-theme="graphite"] .app #routeEngineStatus{
+  background:#2a463c!important;color:#c2f2d7!important;border-color:#416f59!important;
+}
+/* Dialogs and sheets are dark too. */
+html[data-rr-theme="graphite"] .app :is(
+  .purchase-modal,.badge-detail-sheet,.auth-sheet,.info-modal
+){background:#252d36;color:#edf4ee;border:1px solid #46545b}
+html[data-rr-theme="graphite"] .app :is(
+  .purchase-total,.auth-note,.badge-detail-block,.badge-detail-status,.profile-badge-mini
+){background:#303b43;color:#dce9e0;border-color:#46575b}
+html[data-rr-theme="graphite"] .app :is(
+  .badge-detail-block span,.badge-detail-text,.auth-note,.purchase-modal p,
+  .info-modal p,.badge-detail-block b
+){color:#c2d3ca}
+html[data-rr-theme="graphite"] .app .purchase-modal h2,
+html[data-rr-theme="graphite"] .app .auth-sheet h2,
+html[data-rr-theme="graphite"] .app .info-modal h2{color:#f1f7f2}
+/* Laboratory labels stay legible in the dark without affecting its SVG strokes. */
+html[data-rr-theme="graphite"] .app #laboratory :is(.lab-intro,.lab-warning){color:#b7c9c0}
+html[data-rr-theme="graphite"] .app #laboratory .lab-card h2{color:#eaf4ed}
+html[data-rr-theme="graphite"] .app #laboratory .lab-selector-row label{color:#cde3d7}
+html[data-rr-theme="graphite"] .app #laboratory .lab-result{color:#a7ecc8}
+html[data-rr-theme="graphite"] .app #laboratory .lab-edge-label{fill:#d8eee1;stroke:#29333a}
+html[data-rr-theme="graphite"] .app #laboratory .lab-vertex circle{fill:#2a3c42;stroke:#66ac8c}
+html[data-rr-theme="graphite"] .app #laboratory .lab-vertex text{fill:#f0f8f2}
+html[data-rr-theme="graphite"] .app #laboratory .lab-vertex.current circle{fill:#1d8d65}
+html[data-rr-theme="graphite"] .app #laboratory .lab-vertex.route circle{fill:#9c593b;stroke:#e8a071}
+html[data-rr-theme="graphite"] .app #laboratory .lab-distance-item span{color:#9bdfb8}
+html[data-rr-theme="graphite"] .app #laboratory .lab-svg-wrap{background:#26323b}
+html[data-rr-theme="graphite"] .app .lab-status{color:#d7f0e1}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-rr-theme="graphite"] .app::before,
+  html[data-rr-theme="graphite"] .app::after{animation:none!important}
+}
+@media(max-width:599px){
+  html[data-rr-theme="graphite"] .app::before{filter:blur(38px)}
+  html[data-rr-theme="graphite"] .app::after{filter:blur(36px)}
+}
