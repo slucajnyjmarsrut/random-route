@@ -125,20 +125,27 @@ function mount(doc){
    badge.textContent=claim?"✓ Пройден":(busy?"Строим…":"Сегодня · "+offers.length+" варианта");
    const list=panel.querySelector("[data-daily-options]");list.replaceChildren();
    for(const o of offers){
-    const item=doc.createElement("div");item.className="rdq-task"+(active===o.id?" rdq-done":"");
-    const icon=doc.createElement("span");icon.className="rdq-icon";icon.textContent=o.icon;
-    const content=doc.createElement("div");content.className="rdq-task-info";
+    // Entire card is a native button: full touch target, Enter/Space by browser,
+    // no nested buttons, explicit reward is informational (not the only target).
+    const item=doc.createElement("button");item.type="button";
+    item.className="rdq-task rdq-route-button"+(active===o.id?" rdq-done":"");
+    item.disabled=!!claim||busy||active===o.id;
+    item.setAttribute("aria-label",
+      (claim?.offerId===o.id?"Пройден":active===o.id?"Уже выбран":"Построить маршрут")+" «"+o.title+"», "+o.label+
+      ", награда за прохождение "+o.reward+" RouteCoin");
+    const icon=doc.createElement("span");icon.className="rdq-icon";icon.setAttribute("aria-hidden","true");icon.textContent=o.icon;
+    const content=doc.createElement("span");content.className="rdq-task-info";
     const title=doc.createElement("strong");title.textContent=o.title;
     const desc=doc.createElement("span");desc.textContent=o.label+" · "+o.subtitle;
     const hint=doc.createElement("small");
-    hint.textContent=claim?.offerId===o.id?"✓ Пройден и оплачен":(active===o.id?"Выбранный маршрут":"Пешеходный круг");
+    hint.textContent=claim?.offerId===o.id?"✓ Пройден и награда получена":(active===o.id?"✓ Выбранный маршрут":"Нажмите, чтобы построить маршрут");
     content.append(title,desc,hint);
-    const action=doc.createElement("button");action.type="button";action.className="rdq-start";
-    action.textContent=claim?.offerId===o.id?"✓ "+o.reward+" RC":"+ "+o.reward+" RC";
-    action.disabled=!!claim||busy||active===o.id;
-    action.title=claim?"Сегодня бонус уже получен":(active===o.id?"Маршрут уже построен":"Построить маршрут");
-    action.addEventListener("click",function(){start(o);});
-    item.append(icon,content,action);list.append(item);
+    const side=doc.createElement("span");side.className="rdq-reward";
+    side.setAttribute("aria-hidden","true");
+    side.textContent=claim?.offerId===o.id?"✓ "+o.reward+" RC":"+ "+o.reward+" RC";
+    const arrow=doc.createElement("span");arrow.className="rdq-arrow";arrow.textContent=active===o.id?"✓":"›";arrow.setAttribute("aria-hidden","true");
+    item.addEventListener("click",function(){start(o);});
+    item.append(icon,content,side,arrow);list.append(item);
    }
    panel.querySelector("[data-daily-msg]").textContent=claim
     ?"🎉 Сегодня маршрут дня пройден. Завтра появятся новые!"
