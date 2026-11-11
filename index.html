@@ -973,9 +973,9 @@ try {
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
-  $('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+  $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
   window.__rrOpenScreen=showScreen;
-  $('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.openScreen,{restoreScroll:false})));
+  $$('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.openScreen,{restoreScroll:false})));
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
