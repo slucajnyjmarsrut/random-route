@@ -211,6 +211,7 @@ try {
 <div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Показать меня на карте" class="map-follow" id="mapFollowBtn">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
+<div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <section class="schat-card" id="smartRouteChat" aria-label="Чат для изменения маршрута">
  <div class="schat-heading"><h2>💬 Изменить маршрут</h2><span>В движении</span></div>
@@ -647,7 +648,7 @@ try {
   const rr = window.__yakutskRR = {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:saved?.legs||[], checkpoints:saved?.checkpoints||[], current:saved?.current||1,
-    routeDistance:saved?.routeDistance||0, requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||6.5), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
+    routeDistance:saved?.routeDistance||0, routeEngine:saved?.routeEngine||'', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||6.5), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
     currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
@@ -798,7 +799,7 @@ try {
   }
 
   const saveSession=()=>{
-    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
+    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
     try{localStorage.setItem('rr_no_go_zones',JSON.stringify(rr.noGoZones||[]))}catch(e){}
     try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
   };
@@ -965,6 +966,7 @@ try {
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
     rr.activeScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1050,7 +1052,7 @@ try {
       steps:[{name:'',geometry:{coordinates}}]
     };
   }
-  async function requestFootRoute(points,opts={}){
+  async function requestValhallaFootRoute(points,opts={}){
     const payload={
       // Ограничиваем радиус привязки промежуточных точек. Иначе Valhalla может
       // привязать точку к далёкой пешеходной дороге и визуально отправить человека
@@ -1098,7 +1100,16 @@ try {
     const duration=Math.max(0,Number(trip.summary?.time||0));
     const locs=(trip.locations?.length===points.length?trip.locations:null)||points.map(p=>({lat:p.lat,lon:p.lng}));
     const waypoints=locs.map((loc,i)=>({location:[Number(loc.lon??points[i]?.lng),Number(loc.lat??points[i]?.lat)],name:loc.street||''}));
-    return {code:'Ok',routes:[{distance,duration,legs,geometry:{type:'LineString',coordinates:allCoords}}],waypoints};
+    return {code:'Ok',source:'valhalla',routes:[{distance,duration,legs,geometry:{type:'LineString',coordinates:allCoords}}],waypoints};
+  }
+  async function requestFootRoute(points,opts={}){
+    try{
+      if(!window.RRWalkingDijkstra?.requestRoute)throw new Error('DijkstraUnavailable');
+      return await window.RRWalkingDijkstra.requestRoute(points,{distanceKm:opts.distanceKm||Number($('#distanceInput').value)||3,zones:rr.noGoZones});
+    }catch(e){
+      console.info('OSM Dijkstra unavailable for this route, using pedestrian Valhalla:',e?.message||e);
+      return await requestValhallaFootRoute(points,opts);
+    }
   }
   function legCoords(leg){
     const out=[];(leg?.steps||[]).forEach(step=>(step.geometry?.coordinates||[]).forEach(c=>{const p=[c[1],c[0]],last=out[out.length-1];if(!last||Math.abs(last[0]-p[0])>1e-8||Math.abs(last[1]-p[1])>1e-8)out.push(p)}));return out;
@@ -1269,7 +1280,7 @@ try {
         const c=cands[iter===0?Math.floor(dailyRandom()*Math.min(4,cands.length)):0];
         tried.add(c.key);
         try{
-          const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80}),route=data.routes[0];
+          const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80,distanceKm:input}),route=data.routes[0];
           factor=route.distance/Math.max(200,c.raw);
           const snapOk=c.pois.every((p,i)=>{const sp=waypointPoint(data.waypoints[i+1]);return sp&&distMeters(sp,ll(p))<=120});
           if(!snapOk)continue;
@@ -1277,11 +1288,11 @@ try {
           const diff=Math.abs(route.distance-targetM);
           const preferenceBoost=window.SmartRouteChat?.preferenceBoost;
           const prefHits=typeof preferenceBoost==='function'?c.pois.reduce((sum,p)=>sum+Number(preferenceBoost(p)||0),0):0;
-          const candidateRank=diff-Math.min(tolOk*.38,prefHits*35);
+          const candidateRank=diff-Math.min(tolOk*.38,prefHits*35)+(data.source==='dijkstra-osm'?0:Math.max(100,tolOk*.6));
           // Do not trade a valid distance for an unacceptable one to satisfy a theme.
           if(!best||((diff<=tolAccept||best.diff>tolAccept)&&candidateRank<best.rank))
             best={data,route,pois:c.pois,diff,actual:route.distance/1000,rank:candidateRank};
-          if(diff<=tolOk)break;
+          if(diff<=tolOk&&(data.source==='dijkstra-osm'||iter>=5))break;
         }catch(e){console.warn('route candidate',e)}
       }
       const chosen=best;
@@ -1295,6 +1306,7 @@ try {
       rr.usePhotoOptional=usePhotoOptional;
       if(usePhotoOptional)toast('Фотографии недоступны: построен прогулочный маршрут без наград за пропущенные фототочки.');
       rr.legs=route.legs;
+      rr.routeEngine=data.source||'valhalla';
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
       rr.current=1;rr.routeDistance=route.distance;rr.requestedDistance=input;rr.currentPoi=null;rr.currentCategory='city';rr.legProgress={};
       rr.dailyOfferId=dailyOffer?.id||null;rr.dailyOfferDay=dailyOffer?.day||null;
@@ -2385,7 +2397,7 @@ try {
     if(rerouteBusy)return false;rerouteBusy=true;
     const oldFirst=explicitOldPoint||(rr.checkpoints?.[Math.max(0,rr.current-1)]?{lat:rr.checkpoints[Math.max(0,rr.current-1)].lat,lng:rr.checkpoints[Math.max(0,rr.current-1)].lng}:null);
     const backup={
-      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
+      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
     };
     try{
       if(rr.livePos){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode=isDeveloperMode()?'developer':'gps'}
@@ -2417,7 +2429,7 @@ try {
 
   function clearActiveRoute(){
     rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
-    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;
+    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;rr.routeEngine='';
     if(yMap){[yRouteLine,yRouteCasing,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yCheckpointMarker=null}
     if(window.state){window.state.current=1;window.state.gps=false;window.state.photo=false;window.state.verified=false}
     $('#cameraInput').value='';$('#photoPreview').src='';$('#photoPreview').classList.remove('show');
@@ -2476,5 +2488,6 @@ try {
 <script src="tap-targets.js?v=1.0"></script>
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
+<script src="walking-dijkstra.js?v=1.0"></script>
 </body>
 </html>
