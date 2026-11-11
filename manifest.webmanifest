@@ -1,12 +1,12 @@
 {
   "name": "Случайный маршрут — Smart Route",
   "short_name": "Случайный маршрут",
-  "description": "Исследуйте Якутск: кольцевые прогулки, контрольные точки и погодные предупреждения.",
+  "description": "Каждый день — новый путь! Маршруты дня по Якутску, прогулки, квесты и RouteCoin.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f6f4",
-  "theme_color": "#0c5a42",
+  "theme_color": "#0b568e",
   "lang": "ru",
   "icons": [
     {

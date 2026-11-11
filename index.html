@@ -10,6 +10,8 @@
 <meta content="strict-origin-when-cross-origin" name="referrer"/>
 <meta content="default-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; connect-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" http-equiv="Content-Security-Policy"/>
 <link href="manifest.webmanifest" rel="manifest"/>
+<link rel="icon" href="icons/smart-route.svg?v=2" type="image/svg+xml"/>
+<meta name="description" content="Случайный маршрут — каждый день новый путь по Якутску. Ежедневные пешеходные маршруты, квесты и RouteCoin."/>
 <title>Случайный маршрут — Якутск</title>
 <!-- v10.5: безопасные туристические фототочки; административные/силовые/чувствительные объекты исключены -->
 <!-- v9.6.5: strict local tester authentication; generic local registration disabled -->
@@ -142,12 +144,12 @@ try {
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
 <link href="smart-route-chat.css?v=1.1" rel="stylesheet"/>
 <link rel="stylesheet" href="street-audit.css?v=1.0"/>
-<link rel="stylesheet" href="daily-quests.css?v=1.0"/>
+<link rel="stylesheet" href="daily-quests.css?v=2.0"/>
 </head>
 <body>
 <div class="app">
 <header class="topbar">
-<div class="topbar-main"><div class="brand">Случайный маршрут</div><div class="subtitle">Открывай Якутск по-новому</div></div>
+<div class="topbar-main"><div class="brand">Случайный маршрут</div><div class="subtitle">Каждый день — новый путь!</div></div>
 <div class="stats-top">
 <div aria-label="Текущий страйк" class="streak-top-card"><span class="streak-top-label">🔥 СТРАЙК</span><div class="streak-top-value"><b><span id="streakTop">0</span> дн.</b><em>×<span id="coefTop">1.0</span></em></div></div>
 <div aria-label="Баланс RouteCoin" class="coin-top-card"><small>ROUTECOIN</small><b>🪙 <span id="coinsTop">0</span></b></div>
@@ -171,6 +173,10 @@ try {
  <button id="smartChatSettings" type="button" class="schat-settings" aria-expanded="false">Показать ручные настройки</button>
  <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
 </section>
+<aside class="marshik-strip" aria-label="Маршик — помощник исследователя">
+ <img src="icons/mascot-marshik.svg" width="100" height="106" alt="Маршик с картой в зимней одежде" loading="lazy"/>
+ <div><strong>Каждый день — новый путь!</strong><span>Маршик поможет выбрать прогулку и открыть новые места Якутска.</span></div>
+</aside>
 <div class="quick-info-grid" id="quickInfoGrid">
   <div class="quick-info-card" data-info-title="Как работает маршрут" data-info-icon="🧭" data-info-text="Вы задаёте дистанцию и тип прогулки. Приложение строит кольцевой маршрут, но показывает его по частям: следующий участок открывается только после прохождения текущей контрольной точки.">
     <div><div class="quick-info-icon">🧭</div><b>Как работает</b><p>Кольцевой маршрут открывается поэтапно.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
@@ -567,7 +573,7 @@ try {
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
     watchId:null, activeScreen:saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home',
     scrolls:saved?.scrolls||{}, gpsAccuracy:saved?.gpsAccuracy||null, lastGpsAt:saved?.lastGpsAt||0, lastGpsPos:saved?.lastGpsPos||null, suspiciousGps:false, autoGpsBusy:false, gpsFresh:false,
-    routeVariant:saved?.routeVariant||0, currentPhotoFile:null, replacementsUsed:saved?.replacementsUsed||0, routeId:saved?.routeId||null, routeStartedAt:saved?.routeStartedAt||0, trackedDistanceM:Number(saved?.trackedDistanceM||0), trackLastPos:saved?.trackLastPos||null, trackLastAt:saved?.trackLastAt||0, legProgress:(saved?.legProgress&&typeof saved.legProgress==='object')?saved.legProgress:{},
+    dailyOfferId:saved?.dailyOfferId||null,dailyOfferDay:saved?.dailyOfferDay||null,routeVariant:saved?.routeVariant||0, currentPhotoFile:null, replacementsUsed:saved?.replacementsUsed||0, routeId:saved?.routeId||null, routeStartedAt:saved?.routeStartedAt||0, trackedDistanceM:Number(saved?.trackedDistanceM||0), trackLastPos:saved?.trackLastPos||null, trackLastAt:saved?.trackLastAt||0, legProgress:(saved?.legProgress&&typeof saved.legProgress==='object')?saved.legProgress:{},
     noGoZones:Array.isArray(saved?.noGoZones)?saved.noGoZones:(()=>{try{return JSON.parse(localStorage.getItem('rr_no_go_zones')||'[]')}catch(e){return []}})()
   };
 
@@ -706,7 +712,7 @@ try {
   }
 
   const saveSession=()=>{
-    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
+    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
     try{localStorage.setItem('rr_no_go_zones',JSON.stringify(rr.noGoZones||[]))}catch(e){}
     try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
   };
@@ -1107,6 +1113,9 @@ try {
   }
 
   async function buildYakutsk(options={}){
+    const todayDailyOffers=window.DailyRouteQuests?.offersForDay?.(window.DailyRouteQuests.dayKey(Date.now()))||[];
+    const dailyOffer=options.dailyOffer?todayDailyOffers.find(o=>o.id===options.dailyOffer.id&&o.day===options.dailyOffer.day):null;
+    const dailyRandom=dailyOffer?window.DailyRouteQuests.rngForOffer(dailyOffer.seed):Math.random;
     const input=Number(options.distanceKm??parseFloat($('#distanceInput').value.replace(',','.')));if(!input||input<1||input>50){toast('Введите дистанцию от 1 до 50 км');return false}
     if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return false}
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
@@ -1141,11 +1150,11 @@ try {
       const tolOk=Math.max(150,targetM*.08),tolAccept=Math.max(350,targetM*.18);
       const ll=p=>({lat:p._lat,lng:p._lng});
       const mkCandidate=()=>{
-        const kMax=Math.min(nMax,near.length),k=2+Math.floor(Math.random()*(kMax-1));
+        const kMax=Math.min(nMax,near.length),k=2+Math.floor(dailyRandom()*(kMax-1));
         const picked=[];
-        for(const p of [...near].sort(()=>Math.random()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
+        for(const p of [...near].sort(()=>dailyRandom()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
         if(picked.length<2)return null;
-        const off=Math.random()*360,cw=Math.random()<.5?1:-1;
+        const off=dailyRandom()*360,cw=dailyRandom()<.5?1:-1;
         const ang=p=>((bearingDeg(rr.start,ll(p))-off)*cw+720)%360;
         picked.sort((x,y)=>ang(x)-ang(y));
         const pts=[rr.start,...picked.map(ll),rr.start];let raw=0;for(let i=0;i<pts.length-1;i++)raw+=distMeters(pts[i],pts[i+1]);
@@ -1169,7 +1178,7 @@ try {
           c.score=Math.abs(c.raw*factor-targetM)-Math.min(tolOk*.4,hits*32);
         });
         cands.sort((x,y)=>x.score-y.score);
-        const c=cands[iter===0?Math.floor(Math.random()*Math.min(4,cands.length)):0];
+        const c=cands[iter===0?Math.floor(dailyRandom()*Math.min(4,cands.length)):0];
         tried.add(c.key);
         try{
           const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80}),route=data.routes[0];
@@ -1200,11 +1209,13 @@ try {
       rr.legs=route.legs;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
       rr.current=1;rr.routeDistance=route.distance;rr.requestedDistance=input;rr.currentPoi=null;rr.currentCategory='city';rr.legProgress={};
+      rr.dailyOfferId=dailyOffer?.id||null;rr.dailyOfferDay=dailyOffer?.day||null;
       rr.routeId=(crypto.randomUUID?crypto.randomUUID():'route-'+Date.now()+'-'+Math.random().toString(36).slice(2));rr.routeStartedAt=Date.now();rr.trackedDistanceM=0;rr.trackLastPos=rr.livePos?{lat:rr.livePos.lat,lng:rr.livePos.lng}:{lat:rr.start.lat,lng:rr.start.lng};rr.trackLastAt=Date.now();
       if(window.state){window.state.distance=input;window.state.type=$('#typeChoices .choice.active')?.dataset.type||window.state.type;window.state.partner=$('#partnerToggle').classList.contains('on');try{localStorage.setItem('rr_distance',String(input))}catch(e){}}
       $('#distanceInput').value=input.toFixed(1);$('#activeDistanceInput').value=input.toFixed(1);
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
-      resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast('Маршрут '+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
+      resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
+      window.dispatchEvent(new Event('rr:daily-route-built'));
       return true;
     }catch(e){
       console.error(e);
@@ -1217,6 +1228,13 @@ try {
       return false;
     }finally{btn.disabled=false;btn.textContent=old}
   }
+  window.__buildDailyRoute=async function(offer){
+    const valid=window.DailyRouteQuests?.offersForDay?.(window.DailyRouteQuests.dayKey(Date.now()))?.find(o=>o.id===offer?.id);
+    if(!valid)return false;
+    const b=$('#typeChoices .choice[data-type="'+valid.type+'"]');if(b)b.click();
+    $('#distanceInput').value=String(valid.distanceKm);
+    return await buildYakutsk({distanceKm:valid.distanceKm,dailyOffer:valid});
+  };
   $('#buildBtn').onclick=buildYakutsk;
 
   // ---------- Бесплатный локальный фотоконтроль ----------
@@ -2196,7 +2214,7 @@ try {
   function setFinish(){
     rr.current=rr.checkpoints.length+1;rr.stage='finish';showLeg(rr.checkpoints.length,true);$('#pointNumber').textContent='F';$('#checkpointTitle').textContent='Финиш — вернитесь к старту';$('#checkpointText').textContent='Последний участок ведёт к месту старта. На финише нужен только GPS.';$('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#lockLabel').textContent='Финиш открыт';$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Ожидается';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Не требуется';$('#gpsBtn').textContent='Подтвердить возвращение к старту';$('#gpsBtn').disabled=false;saveSession();
   }
-  function finishGps(){if(isDeveloperMode()){rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0};updateMarkers(rr.livePos,false);rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Режим разработчика: маршрут завершён без GPS. Статистика и страйк не изменены.';saveSession();toast('Маршрут завершён в режиме разработчика');return}navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);if(!sane){toast('GPS изменился слишком резко. Подождите.');return}if(p.accuracy>90){toast('Недостаточная точность GPS: ±'+Math.round(p.accuracy)+' м');return}const d=distMeters(p,rr.start);if(d<=85){const finishKey=(rr.routeId||('legacy-'+(rr.routeStartedAt||Date.now())))+':finish';const added=window.__recordVerifiedEvent?.('route_completed',finishKey,{routeId:rr.routeId,routeDistanceM:Math.max(0,Number(rr.routeDistance||0)),gpsTrackedDistanceM:Math.max(0,Math.round(Number(rr.trackedDistanceM||0))),checkpoints:rr.checkpoints.length,startedAt:rr.routeStartedAt||null,finishedAt:Date.now(),dailyEligible:!demoMode&&!isDeveloperMode()&&rr.startMode==='gps'})!==false;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';let st={changed:false,text:'Маршрут уже был засчитан.'};if(added){st=window.__completeStreakDay?window.__completeStreakDay():{changed:false,text:'Маршрут завершён'};window.__addBadgeProgress?.()}$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Кольцевой маршрут завершён. Подтверждено '+(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км.'+(rr.trackedDistanceM?` GPS-трек: ${(rr.trackedDistanceM/1000).toFixed(1).replace('.',',')} км.`:'')+' '+st.text;saveSession();toast(added?(st.changed?'Страйк засчитан':'Маршрут завершён'):'Маршрут уже засчитан')}else toast('До стартовой зоны ещё '+Math.round(d)+' м')},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+  function finishGps(){if(isDeveloperMode()){rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0};updateMarkers(rr.livePos,false);rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Режим разработчика: маршрут завершён без GPS. Статистика и страйк не изменены.';saveSession();toast('Маршрут завершён в режиме разработчика');return}navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);if(!sane){toast('GPS изменился слишком резко. Подождите.');return}if(p.accuracy>90){toast('Недостаточная точность GPS: ±'+Math.round(p.accuracy)+' м');return}const d=distMeters(p,rr.start);if(d<=85){const finishKey=(rr.routeId||('legacy-'+(rr.routeStartedAt||Date.now())))+':finish';const added=window.__recordVerifiedEvent?.('route_completed',finishKey,{routeId:rr.routeId,routeDistanceM:Math.max(0,Number(rr.routeDistance||0)),gpsTrackedDistanceM:Math.max(0,Math.round(Number(rr.trackedDistanceM||0))),checkpoints:rr.checkpoints.length,startedAt:rr.routeStartedAt||null,finishedAt:Date.now(),dailyEligible:!demoMode&&!isDeveloperMode()&&rr.startMode==='gps',dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null})!==false;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';let st={changed:false,text:'Маршрут уже был засчитан.'};if(added){st=window.__completeStreakDay?window.__completeStreakDay():{changed:false,text:'Маршрут завершён'};window.__addBadgeProgress?.()}$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Кольцевой маршрут завершён. Подтверждено '+(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км.'+(rr.trackedDistanceM?` GPS-трек: ${(rr.trackedDistanceM/1000).toFixed(1).replace('.',',')} км.`:'')+' '+st.text;saveSession();toast(added?(st.changed?'Страйк засчитан':'Маршрут завершён'):'Маршрут уже засчитан')}else toast('До стартовой зоны ещё '+Math.round(d)+' м')},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
 
   $('#nextBtn').onclick=()=>{
     if(rr.current>=rr.checkpoints.length){setFinish();$('#gpsBtn').onclick=finishGps;$('#demoGpsBtn').onclick=()=>{if(!demoMode)return;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Маршрут завершён. Страйк и рейтинг не изменены.';saveSession();toast('Маршрут завершён')};return}
@@ -2248,16 +2266,18 @@ try {
     if(rerouteBusy)return false;rerouteBusy=true;
     const oldFirst=explicitOldPoint||(rr.checkpoints?.[Math.max(0,rr.current-1)]?{lat:rr.checkpoints[Math.max(0,rr.current-1)].lat,lng:rr.checkpoints[Math.max(0,rr.current-1)].lng}:null);
     const backup={
-      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
+      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
     };
     try{
       if(rr.livePos){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode=isDeveloperMode()?'developer':'gps'}
       rr.routeVariant+=(kind==='direction'?11:kind==='point'?23:kind==='distance'?13:kind==='avoid'?19:17);
-      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
+      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
       const startMsg=kind==='direction'?'Ищем действительно другое направление…':kind==='point'?'Переносим контрольную точку в другое место…':kind==='distance'?'Меняем километраж…':kind==='avoid'?'Строим маршрут в обход зон…':'Генерируем новый маршрут…';
       toast(startMsg);
       const requireDifferent=kind==='direction'||kind==='point'||kind==='new';
-      const ok=await buildYakutsk({requireDifferentFirst:requireDifferent,avoidFirstPoint:requireDifferent?oldFirst:null,minDirectionChangeDeg:kind==='direction'?58:42,distanceKm:regenerateOptions.distanceKm});
+      const prevDaily=(backup.dailyOfferDay===window.DailyRouteQuests?.dayKey?.(Date.now()) && ['avoid','direction','point'].includes(kind))
+        ? window.DailyRouteQuests.offersForDay(backup.dailyOfferDay).find(o=>o.id===backup.dailyOfferId):null;
+      const ok=await buildYakutsk({requireDifferentFirst:requireDifferent,avoidFirstPoint:requireDifferent?oldFirst:null,minDirectionChangeDeg:kind==='direction'?58:42,distanceKm:regenerateOptions.distanceKm,dailyOffer:prevDaily});
       if(ok)toast(kind==='direction'?'Направление действительно изменено':kind==='point'?'Контрольная точка перенесена':kind==='distance'?'Километраж изменён':kind==='avoid'?'Маршрут перестроен в обход зон':'Новый маршрут готов');
       else if(backup.legs?.length){Object.assign(rr,backup);saveSession();restoreUI();toast('Старый маршрут сохранён — другой вариант не найден.');}
       return ok;
@@ -2277,7 +2297,7 @@ try {
   };
 
   function clearActiveRoute(){
-    rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
+    rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
     rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;
     if(yMap){[yRouteLine,yRouteCasing,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yCheckpointMarker=null}
     if(window.state){window.state.current=1;window.state.gps=false;window.state.photo=false;window.state.verified=false}
@@ -2330,7 +2350,7 @@ try {
 <script src="smart-safety.js?v=1.0"></script>
 <script src="smart-route-chat.js?v=1.0"></script>
 <script src="street-audit.js?v=1.0"></script>
-<script src="daily-quests.js?v=1.0"></script>
+<script src="daily-quests.js?v=2.0"></script>
 <script src="map-fallback.js?v=1.1"></script>
 </body>
 </html>

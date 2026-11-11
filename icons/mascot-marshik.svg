@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="370" viewBox="0 0 340 370" role="img" aria-label="Маршик — дружелюбный пёс-исследователь в зимней шапке с картой">
+<defs><linearGradient id="coat" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#19adb0"/><stop offset="1" stop-color="#006b86"/></linearGradient><linearGradient id="hat" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffc53e"/><stop offset="1" stop-color="#e78719"/></linearGradient></defs>
+<g stroke="#19384f" stroke-linejoin="round" stroke-linecap="round">
+<path d="M91 221Q51 229 48 298L75 344L133 339L156 256Z" fill="#9c6038" stroke-width="7"/>
+<path d="M125 220Q87 226 77 293L92 345L249 345Q268 280 224 226Z" fill="url(#coat)" stroke-width="8"/>
+<path d="M111 210Q67 189 61 129Q64 82 96 68L118 98Z" fill="#34455f" stroke-width="7"/>
+<path d="M224 211Q264 175 269 129Q263 86 237 72L213 106Z" fill="#34455f" stroke-width="7"/>
+<path d="M82 144Q66 120 84 102Q118 68 170 67Q243 73 256 126L247 183Q237 226 179 240Q109 237 87 200Z" fill="#f8f4e8" stroke-width="8"/>
+<path d="M85 158Q86 119 123 113Q117 169 96 187Z" fill="#61738a" stroke-width="3"/>
+<path d="M252 154Q244 118 220 111Q229 169 246 184Z" fill="#61738a" stroke-width="3"/>
+<path d="M93 101Q87 59 117 38Q145 18 187 25Q240 32 251 86L244 113Q169 88 91 119Z" fill="url(#hat)" stroke-width="7"/>
+<circle cx="116" cy="30" r="23" fill="#fff8e8" stroke-width="6"/>
+<path d="M98 112Q165 96 244 106" fill="none" stroke="#ffe8a4" stroke-width="18"/>
+<path d="M131 146Q143 130 156 150M200 148Q214 132 225 148" fill="none" stroke-width="7"/>
+<path d="M176 175q-13 5 0 16q13-11 0-16Z" fill="#273044" stroke-width="4"/>
+<path d="M156 191Q174 213 194 191Q190 222 176 225Q160 220 156 191Z" fill="#f78b87" stroke-width="4"/>
+<circle cx="123" cy="182" r="14" fill="#ffb8a7" stroke="none" opacity=".6"/>
+<circle cx="226" cy="182" r="14" fill="#ffb8a7" stroke="none" opacity=".6"/>
+<path d="M107 227Q155 245 235 222Q249 239 227 259Q157 269 115 255Z" fill="#0877a0" stroke-width="7"/>
+<path d="M230 253Q266 263 267 284L246 289L211 263Z" fill="#0877a0" stroke-width="6"/>
+<path d="M119 263L199 248L228 318L148 330Z" fill="#e7f1d4" stroke-width="7"/>
+<path d="M143 266L163 321M192 252L186 324" stroke="#67b6a7" stroke-width="4" fill="none"/>
+<path d="M159 292Q174 267 199 295" stroke="#da8f2a" stroke-width="6" stroke-dasharray="4 8" fill="none"/>
+<path d="M186 283q0-11 11-11q11 0 11 11q0 12-11 24q-11-12-11-24Z" fill="#ffc949" stroke-width="3"/>
+<path d="M123 272Q89 282 100 305Q113 320 145 309" fill="#f6f4eb" stroke-width="6"/>
+<path d="M217 274Q251 276 246 299Q231 318 212 305" fill="#f6f4eb" stroke-width="6"/>
+</g>
+<path d="M271 88l9 20 20 9-20 9-9 20-9-20-20-9 20-9Z" fill="#ffce4b"/>
+</svg>
