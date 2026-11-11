@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Случайный маршрут"><rect width="512" height="512" rx="108" fill="#0c5a42"/><circle cx="256" cy="256" r="177" fill="none" stroke="#c9f4cf" stroke-width="20"/><path d="M117 356C178 333 170 194 252 227S329 323 393 145" fill="none" stroke="#ffb44b" stroke-width="27" stroke-linecap="round" stroke-dasharray="4 46"/><path d="M251 93l31 151-41 27z" fill="#ffffff"/><circle cx="397" cy="142" r="25" fill="#ffb44b"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Случайный маршрут: карта с маршрутом и отметкой">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#109ad4"/><stop offset="1" stop-color="#0b568e"/></linearGradient>
+ <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#11aeac"/><stop offset="1" stop-color="#026e75"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#03223e" flood-opacity=".28"/></filter>
+</defs>
+<rect x="15" y="15" width="482" height="482" rx="105" fill="url(#sky)"/>
+<path d="M30 318L153 214L215 259L304 154L480 316V481H30Z" fill="#f8ffff"/>
+<path d="M30 338L153 254L218 292L305 194L480 336V477H30Z" fill="#a3e1e5"/>
+<path d="M30 360Q130 300 226 343T480 362V481H30Z" fill="url(#ground)"/>
+<path d="M92 452C21 391 156 379 208 417S369 437 341 334S371 254 430 247" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-dasharray="18 30" opacity=".95"/>
+<path d="M344 112c0-44 33-78 78-78s78 34 78 78c0 52-78 150-78 150S344 164 344 112Z" transform="translate(-35 34)" fill="#ffd649" stroke="#f7b729" stroke-width="9" filter="url(#shadow)"/>
+<circle cx="387" cy="146" r="28" fill="#08668a"/>
+<path d="M73 110l12 24 24 12-24 12-12 24-12-24-24-12 24-12Z" fill="#fff"/>
+<rect x="15" y="15" width="482" height="482" rx="105" fill="none" stroke="#fff" stroke-width="15"/>
+</svg>
