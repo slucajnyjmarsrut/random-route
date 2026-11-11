@@ -5,7 +5,11 @@
  "use strict";
  const api=factory();
  if(typeof module==="object"&&module.exports)module.exports=api;
- if(root&&root.document){root.SmartRouteAudit=api;api.mount(root.document);}
+ if(root&&root.document){
+   root.SmartRouteAudit=api;
+   if(root.document.readyState==="loading")root.document.addEventListener("DOMContentLoaded",function(){api.mount(root.document);},{once:true});
+   else api.mount(root.document);
+ }
 })(typeof window!=="undefined"?window:null,function(){
 "use strict";
 const ENDPOINTS=[
