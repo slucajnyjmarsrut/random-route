@@ -3,7 +3,8 @@
  */
 .app{isolation:isolate;--rr-sky-a:#d6e9e2;--rr-sky-b:#f3f6f4;--rr-hill-a:#d6e6dd;--rr-hill-b:#bcd7c6;--rr-hero-a:#085d55;--rr-hero-b:#0e493f}
 .app>.rr-weather-scene{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;background:linear-gradient(180deg,var(--rr-sky-a) 0%,var(--rr-sky-b) 74%);transition:background-color .4s ease}
-.app>.topbar,.app>.content,.app>.nav{position:relative;z-index:1}
+.app>.topbar,.app>.content{position:relative;z-index:1}
+.app>.nav{z-index:3}
 .app>.content{background:transparent}
 .rr-wb-sun,.rr-wb-moon,.rr-wb-cloud,.rr-wb-hill,.rr-wb-grass,.rr-wb-particles{position:absolute;pointer-events:none}
 .rr-wb-sun{top:15%;right:8%;width:108px;height:108px;border-radius:50%;background:#ffda58;box-shadow:0 0 0 18px #fffbd551,0 0 60px #fff5b8a0;opacity:0;transition:opacity .5s ease}
