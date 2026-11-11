@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026]
   pull_request:
     branches: [main]
 jobs:
