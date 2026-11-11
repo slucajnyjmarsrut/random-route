@@ -1,0 +1,20 @@
+
+/* Chat-first mode. Original controls remain available under manual settings. */
+.schat-card{margin:12px 0 14px;padding:15px;border:1px solid #bcd9c9;border-radius:22px;background:linear-gradient(155deg,#eaf7ef,#fff 73%);box-shadow:0 9px 22px rgba(21,83,55,.09)}
+.schat-heading{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.schat-heading h2{font-size:19px;line-height:1.2;font-weight:950;margin:0;color:#0c5a42;letter-spacing:-.3px}
+.schat-heading span{font-weight:800;font-size:10px;color:#3c7460;border-radius:22px;background:#d9eddf;padding:5px 8px}
+.schat-description{font-size:12px;color:#526c5e;line-height:1.55;margin:10px 0}
+.schat-log{display:grid;gap:8px;max-height:216px;overflow:auto;margin:12px 0 10px;padding-right:2px;overscroll-behavior:contain}
+.schat-bubble{padding:11px 12px;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:15px;max-width:97%}
+.schat-bot{background:#fff;border:1px solid #d4e5da;color:#244438;justify-self:start}
+.schat-user{background:#0d694d;color:#fff;justify-self:end}
+.schat-form label{display:block;margin:0 0 7px;font-weight:800;font-size:12px;color:#173e2e}
+.schat-form textarea{display:block;width:100%;min-height:75px;max-height:170px;resize:vertical;border:1px solid #bcd1c5;border-radius:14px;padding:11px 12px;font-family:inherit;font-size:14px;color:#143a29;background:white;outline:none}
+.schat-form textarea:focus{border-color:#168057;box-shadow:0 0 0 3px rgba(28,145,94,.16)}
+.schat-send{display:block;width:100%;margin-top:9px;border:none;border-radius:13px;background:#0d704d;color:white;padding:12px 14px;font-size:14px;font-weight:850}
+.schat-summary{margin:9px 0 4px;font-size:11px;line-height:1.4;color:#456252;font-weight:750}
+.schat-settings{display:block;margin:11px 0 0;background:none;border:none;color:#0a6547;font-weight:850;font-size:12px;padding:5px 1px;text-decoration:underline;text-underline-offset:3px}
+.schat-disclaimer{display:block;margin-top:6px;font-size:10px;line-height:1.5;color:#718579}
+#home.schat-compact .schat-legacy,#home.schat-compact #quickInfoGrid{display:none}
+@media(prefers-reduced-motion:reduce){.schat-log{scroll-behavior:auto}}
