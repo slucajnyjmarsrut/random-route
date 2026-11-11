@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -20,19 +20,23 @@ jobs:
           node tests/chat-intent.test.cjs
           node --check street-audit.js
           node tests/street-audit.test.cjs
+          node --check daily-quests.js
+          node tests/daily-quests.test.cjs
           node --check sw.js
           node - <<'NODE'
           const fs=require('fs');
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','sw.js','manifest.webmanifest','icons/smart-route.svg']){
+          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
           if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
           if(!html.includes('smartChatForm') || !html.includes('smartRouteChatForm'))throw new Error('Chat UI missing');
           if(!html.includes('street-audit.js') || !html.includes('street-audit.css'))throw new Error('OSM audit missing');
+          if(!html.includes('daily-quests.js') || !html.includes('daily-quests.css'))throw new Error('Daily quests UI missing');
+          if((html.match(/dailyEligible:/g)||[]).length!==3)throw new Error('Daily bonuses must be limited to verified photo/quest/route events');
           const chatCss=fs.readFileSync('smart-route-chat.css','utf8');
           if(chatCss.includes('#home.schat-compact #quickInfoGrid{display:none}'))throw new Error('Informational cards must remain visible');
           if(!chatCss.includes('#home.schat-compact .schat-legacy{display:none}'))throw new Error('Manual settings should remain collapsible');
