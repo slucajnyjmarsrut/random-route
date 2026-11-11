@@ -32,4 +32,9 @@ assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety 
 assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]")'),'settings synchronized with safety');
 assert.ok(css.includes('.rr-settings-trigger')&&css.includes('.rr-home-links')&&css.includes('@media (max-width:599px)'));
 assert.equal((html.match(/data-screen="/g)||[]).length,5,'keep bottom navigation usable on narrow phones');
-console.log('Navigation, settings, safety and home layout OK');
+assert.ok(html.includes('walking-dijkstra.js?v=1.0'),'OSM Dijkstra script missing from main app');
+assert.ok(html.includes('id="routeEngineStatus"'),'algorithm attribution missing');
+assert.ok(html.includes('window.RRWalkingDijkstra.requestRoute(points'),'production route should call OSM Dijkstra');
+assert.ok(html.includes('return await requestValhallaFootRoute(points,opts)'),'routing fallback should be preserved');
+assert.ok(html.includes("rr.routeEngine=data.source||'valhalla'"),'route algorithm must be recorded');
+console.log('Navigation, settings, safety, Yandex map and Dijkstra integration OK');
