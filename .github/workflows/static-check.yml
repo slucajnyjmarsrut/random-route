@@ -1,7 +1,7 @@
 name: Check Smart Route static files
 on:
   push:
-    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026, fix/daily-route-full-card-click-2026, feature/large-click-targets-throughout-app-2026]
+    branches: [main, feature/npk-smart-safety-2026, fix/pedestrian-path-preference-2026, feature/chat-first-route-planning-2026, feature/osm-street-evidence-2026, feature/daily-quests-routecoin-2026, feature/daily-routes-instead-of-daily-tasks-2026, fix/chat-questions-negations-and-time-2026, fix/daily-route-full-card-click-2026, feature/large-click-targets-throughout-app-2026, feature/live-weather-background-2026]
   pull_request:
     branches: [main]
 jobs:
@@ -15,6 +15,8 @@ jobs:
       - name: Validate HTML inline JavaScript and external scripts
         run: |
           node --check smart-safety.js
+          node --check weather-background.js
+          node tests/weather-background.test.cjs
           node --check map-fallback.js
           node --check smart-route-chat.js
           node tests/chat-intent.test.cjs
@@ -34,10 +36,13 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
+          for(const name of ['smart-safety.js','smart-safety.css','weather-background.js','weather-background.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
+          if(!html.includes('weather-background.js?v=1.0')||!html.includes('weather-background.css?v=1.0'))throw new Error('Animated weather background not loaded');
+          const safetyCode=fs.readFileSync('smart-safety.js','utf8');
+          if(!safetyCode.includes('weather_code,is_day')||!safetyCode.includes('RRWeatherBackground.setConditions'))throw new Error('Weather visual state disconnected from real forecast');
           if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
           if(!html.includes('smartChatForm') || !html.includes('smartRouteChatForm'))throw new Error('Chat UI missing');
           if(!html.includes('street-audit.js') || !html.includes('street-audit.css'))throw new Error('OSM audit missing');
