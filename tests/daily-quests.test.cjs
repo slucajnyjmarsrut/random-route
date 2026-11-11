@@ -1,0 +1,23 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {dayKey,MISSIONS,safeLedger,dailyProgress}=require('../daily-quests.js');
+const day="2026-11-11",base=Date.parse("2026-11-11T06:30:00Z"); // 15:30 in Yakutsk
+const ev=(key,type,at=base,eligible=true)=>({key,type,at,data:{dailyEligible:eligible}});
+assert.equal(dayKey(base),day);
+assert.equal(dayKey(Date.parse("2026-11-11T14:59:59Z")),day);
+assert.equal(dayKey(Date.parse("2026-11-11T15:00:00Z")),"2026-11-12");
+assert.equal(MISSIONS.length,3);
+assert.deepEqual(MISSIONS.map(m=>m.reward),[15,20,50]);
+assert.equal(MISSIONS.reduce((n,m)=>n+m.reward,0),85);
+assert.deepEqual(dailyProgress([],day).map(m=>m.progress),[0,0,0]);
+const all=[ev("p1","photo_verified"),ev("q1","quest_correct"),ev("r1","route_completed")];
+assert.deepEqual(dailyProgress(all,day).map(m=>m.progress),[1,1,1]);
+assert(dailyProgress(all,day).every(m=>m.ready));
+assert.deepEqual(dailyProgress([...all,ev("p1","photo_verified")],day).map(m=>m.progress),[1,1,1]);
+assert.deepEqual(dailyProgress([...all,ev("p2","photo_verified",base,false)],day).map(m=>m.progress),[1,1,1]);
+assert.deepEqual(dailyProgress([ev("only-demo","photo_verified",base,false)],day).map(m=>m.progress),[0,0,0]);
+assert.deepEqual(dailyProgress([ev("future","photo_verified",Date.parse("2026-11-11T15:00:00Z"))],day).map(m=>m.progress),[0,0,0]);
+assert.deepEqual(dailyProgress(all,"2026-11-12").map(m=>m.progress),[0,0,0]);
+assert.equal(safeLedger([ev("p1","photo_verified"),ev("p2","photo_verified",base,false),{},null]).length,1);
+assert.equal(dailyProgress([ev("fake","unverified_route")],day)[0].progress,0);
+console.log('Daily quests: 14 checks passed');
