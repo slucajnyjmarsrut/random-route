@@ -18,6 +18,14 @@ assert.ok(settings.includes('id="distanceInput"')&&settings.includes('id="partne
 for(const k of ['weather','darkness','animatedBackground'])assert.ok(settings.includes('data-srs-pref="'+k+'"'),'missing setting '+k);
 assert.ok(help.includes('id="quickInfoGrid"')&&help.includes('marshik-strip'));
 assert.ok(html.includes('window.__rrOpenScreen=showScreen')&&html.includes('data-open-screen="settings"'));
+assert.ok(html.includes("$$('.nav button').forEach(b=>b.onclick=()=>showScreen"),'bottom navigation should use querySelectorAll');
+assert.ok(html.includes("$$('[data-open-screen]').forEach(b=>b.addEventListener"),'top screen buttons should use querySelectorAll');
+assert.ok(!html.includes("  $('.nav button').forEach(b=>b.onclick=()=>showScreen"),'broken single-element nav iteration');
+assert.ok(!html.includes("  $('[data-open-screen]').forEach(b=>b.addEventListener"),'broken single-element screen links');
+assert.ok(html.includes('id="laboratory"')&&html.includes('id="labGraph"')&&html.includes('id="labStart"'));
+assert.ok(html.includes('dijkstra-lab.js?v=1.0')&&html.includes('interface-interactions.css?v=1.0'));
+const motion=fs.readFileSync('interface-interactions.css','utf8');
+assert.ok(motion.includes('.app button:not(:disabled):active')&&motion.includes('prefers-reduced-motion'));
 assert.ok(chat.includes('window.__rrOpenScreen("settings"'),'chat manual options should open settings');
 assert.ok(daily.includes('getElementById("smartChat")')&&daily.includes('getElementById("quickInfoGrid")'),'daily routes remain on home');
 assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety panel belongs to its screen');
