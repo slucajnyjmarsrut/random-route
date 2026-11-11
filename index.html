@@ -1983,6 +1983,18 @@ try {
   async function preparePoi(forcedPoi=null){
     const checkpoint=rr.checkpoints[rr.current-1],searchCenter=checkpoint,camera=$('#cameraInput');
     resetPhotoTaskUi();
+    if(rr.usePhotoOptional){
+      rr.currentPoi=null;rr.currentCategory='city';rr.stage='verified';
+      if(camera)camera.disabled=true;
+      $('#photoBlock').classList.add('hidden');
+      $('#photoCheck').className='check';
+      $('#photoCheck b').textContent='Пропущено · без RouteCoin';
+      $('#checkpointTitle').textContent=checkpoint?.guideName||'Контрольная точка';
+      $('#checkpointText').textContent='Точка достигнута по GPS. Фотозадание недоступно: перейти дальше можно без награды.';
+      $('#replacePointBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');
+      $('#lockLabel').textContent='Следующий участок готов';
+      saveSession();return false;
+    }
     $('#checkpointText').textContent='Подбираем объект прямо у этой контрольной точки…';
     // Важно: ищем объект вокруг точки маршрута, а не вокруг текущего GPS пользователя.
     // Это устраняет ситуацию, когда карта ведёт в одно место, а фотозадание показывает другое.
