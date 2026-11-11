@@ -4,7 +4,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" name="viewport"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#f7faf8" name="theme-color"/>
 <meta content="index,follow" name="robots"/>
 <meta content="strict-origin-when-cross-origin" name="referrer"/>
@@ -149,6 +149,7 @@ try {
 <link rel="stylesheet" href="tap-targets.css?v=1.0"/>
 <link rel="stylesheet" href="developer-diagnostics.css?v=1.0"/>
 <link rel="stylesheet" href="weather-background.css?v=1.0"/>
+<link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 </head>
 <body>
 <div class="app">
@@ -627,6 +628,12 @@ try {
   // Карта приложения отрисовывается Яндекс Картами; пеший маршрут рассчитывается через бесплатный Valhalla demo API.
 
   let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yCheckpointMarker=null;
+  // Map canvas must be refreshed when desktop width or phone orientation changes.
+  window.__rrResizeMaps=function(){
+    [yHomeMap,yMap].forEach(function(m){
+      try{m?.container?.fitToViewport?.()}catch(_){}
+    });
+  };
   let noGoHomeLayers=[],noGoRouteLayers=[],yNoGoHome=[],yNoGoRoute=[],avoidPickMode=null;
   function setMapCredits(provider){
     const t='Яндекс Карты';
@@ -2401,5 +2408,6 @@ try {
 <script src="daily-quests.js?v=2.1"></script>
 <script src="map-fallback.js?v=1.1"></script>
 <script src="tap-targets.js?v=1.0"></script>
+<script src="responsive-layout.js?v=1.0"></script>
 </body>
 </html>

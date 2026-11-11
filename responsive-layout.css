@@ -1,0 +1,114 @@
+/* Adaptive desktop / tablet / portrait phone layout.
+ * Full browser width on PC, touch-first natural portrait on phones (~9:16),
+ * respects real viewport dimensions including landscape and split-screen.
+ * Keep route, chat, safety, PWA maps and their controls unchanged.
+ */
+:root{--rr-page-width:1580px}
+html{min-width:0;width:100%;height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{width:100%;min-width:0;margin:0}
+.app{width:100%;max-width:none;min-width:0;height:100vh;height:100dvh;margin:0 auto;overflow:hidden;border-radius:0}
+.app .content{width:100%;min-width:0;overscroll-behavior-y:contain}
+.app .screen,.app .card,.app .schat-card,.app .rdq-card,.app .marshik-strip,.app .srs-card{min-width:0}
+.app .map,.app #homeMap,.app #realMap{width:100%;max-width:100%;min-width:0}
+.app .schat-card textarea,.app input,.app select{max-width:100%}
+.app .schat-bubble,.app .rdq-task-info,.app .quick-info-card{overflow-wrap:anywhere}
+.app .rdq-list{min-width:0}
+.app .rdq-task{min-width:0}
+.app .nav{width:100%}
+@media (min-width:900px){
+  body{display:block;background:#e9f1ed}
+  .app{max-width:none!important;width:100%;box-shadow:none!important}
+  .app .topbar{height:82px;min-height:82px;
+    padding:12px max(24px,calc((100vw - var(--rr-page-width))/2))}
+  .app .brand{font-size:23px}
+  .app .subtitle{font-size:11px;max-width:none}
+  .app .content{height:calc(100dvh - 82px);padding:
+    22px max(24px,calc((100vw - var(--rr-page-width))/2))
+    calc(115px + env(safe-area-inset-bottom))}
+  .app .nav{grid-template-columns:repeat(5,minmax(130px,185px));justify-content:center;gap:10px;
+    padding:9px 22px calc(9px + env(safe-area-inset-bottom))}
+  .app .nav button{font-size:12px;min-height:56px}
+  .app .nav i{font-size:22px}
+  #home .hero{min-height:155px;padding:25px 30px 44px}
+  #home .hero h1{font-size:34px}
+  #home .hero p{font-size:14px;max-width:720px}
+  #home .quick-info-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  #home .quick-info-card{min-height:145px;padding:16px}
+  #home .quick-info-card b{font-size:14px}
+  #home .marshik-strip{max-width:none;padding:10px 24px;gap:22px}
+  #home .marshik-strip img{width:110px;height:115px;flex-basis:110px}
+  #home .marshik-strip strong{font-size:22px}
+  #home .marshik-strip span{font-size:14px}
+  #home #smartChat{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);
+    grid-template-areas:"head head" "desc desc" "log form" "log summary" "log settings" "log foot";
+    column-gap:22px;row-gap:9px;padding:22px}
+  #home #smartChat .schat-heading{grid-area:head}
+  #home #smartChat .schat-description{grid-area:desc}
+  #home #smartChat .schat-log{grid-area:log;min-height:260px;max-height:370px;align-self:stretch;margin:0}
+  #home #smartChat .schat-form{grid-area:form;align-self:start}
+  #home #smartChat .schat-summary{grid-area:summary}
+  #home #smartChat .schat-settings{grid-area:settings;justify-self:start}
+  #home #smartChat .schat-disclaimer{grid-area:foot}
+  #home #smartChat .schat-form textarea{min-height:120px;font-size:16px}
+  #home #smartChat .schat-heading h2{font-size:23px}
+  #home .rdq-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  #home .rdq-task{min-height:122px;align-items:flex-start;padding:14px 12px}
+  #home .rdq-card{padding:20px}
+  #home #homeMap{height:clamp(360px,51dvh,610px)}
+  #route .map{height:clamp(430px,58dvh,760px);min-height:430px}
+  #route .schat-log{max-height:300px}
+  #shop .pack-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #shop .feature-card{padding:21px}
+  .app .route-summary{max-width:none}
+}
+@media (min-width:600px) and (max-width:899px){
+  body{display:block}
+  .app{max-width:none!important;width:100%;box-shadow:none!important}
+  .app .topbar{padding-left:20px;padding-right:20px}
+  .app .content{height:calc(100dvh - 82px);padding:18px 20px calc(100px + env(safe-area-inset-bottom))}
+  #home .quick-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #home .rdq-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #home #homeMap{height:clamp(310px,44dvh,520px)}
+  #route .map{height:clamp(370px,55dvh,590px)}
+  #home .marshik-strip img{width:95px;height:106px;flex-basis:95px}
+  .app .nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media (max-width:599px){
+  /* Portrait phone: use screen's natural height (roughly 9:16), never crop to an exact ratio. */
+  html,body{max-width:100%;overflow:hidden}
+  body{display:block}
+  .app{width:100%;max-width:none!important;height:100vh;height:100dvh;box-shadow:none!important}
+  .app .content{width:100%;height:calc(100dvh - 74px);
+    padding:10px 10px calc(96px + env(safe-area-inset-bottom))}
+  .app .topbar{min-height:74px;padding:10px 10px 8px}
+  #home .quick-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #home .rdq-list{grid-template-columns:1fr}
+  #home #homeMap{height:clamp(225px,35dvh,345px)}
+  #route .map{height:clamp(290px,45dvh,470px);min-height:290px}
+  #home .schat-form textarea,#route .schat-form textarea,
+  .app input:not([type="checkbox"]),.app select{font-size:max(16px,1rem)}
+  .app .nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media (max-width:340px){
+  #home .quick-info-grid{grid-template-columns:1fr}
+  .app .brand{font-size:14px}
+  .app .topbar{gap:4px;padding-left:7px;padding-right:7px}
+  .app .streak-top-card{min-width:71px;padding:4px}
+  .app .coin-top-card{min-width:44px;padding:4px}
+  .app .nav button{font-size:8px}
+}
+/* When rotated to landscape, keep maps and controls usable without hiding scroll. */
+@media (orientation:landscape) and (max-height:600px) and (max-width:1050px){
+  .app{height:100dvh}
+  .app .topbar{height:58px;min-height:58px;padding:5px 12px}
+  .app .brand{font-size:16px}
+  .app .subtitle{font-size:9px}
+  .app .content{height:calc(100dvh - 58px);
+    padding:9px 15px calc(69px + env(safe-area-inset-bottom))}
+  #home #homeMap{height:clamp(190px,59dvh,330px)}
+  #route .map{height:clamp(215px,65dvh,380px);min-height:215px}
+  .app .nav{padding:3px 8px calc(3px + env(safe-area-inset-bottom))}
+  .app .nav button{min-height:40px;font-size:9px;padding:2px}
+  .app .nav i{font-size:15px}
+  #home .quick-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

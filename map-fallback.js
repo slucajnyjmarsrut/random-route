@@ -5,6 +5,10 @@
 (function(){
 "use strict";
 var ready=false, loading=false, started=false, maps={}, lines={}, pins={}, zonePick=null;
+window.__rrResizeFallbackMaps=function(){
+ if(!ready)return;
+ Object.values(maps).forEach(function(m){try{m.invalidateSize({pan:false})}catch(_){}});
+};
 function id(x){return document.getElementById(x)}
 function status(text){["homeMapCredit","routeMapCredit"].forEach(function(name){var n=id(name);if(n)n.textContent=text})}
 function addCss(url){var l=document.createElement("link");l.rel="stylesheet";l.href=url;document.head.appendChild(l)}
