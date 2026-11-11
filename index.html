@@ -139,7 +139,8 @@ try {
     localStorage.setItem('rr_v8_reset_done','1');
   }
 } catch(e) {}
-</script></head>
+</script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
+</head>
 <body>
 <div class="app">
 <header class="topbar">
@@ -2206,5 +2207,6 @@ try {
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 })();
 </script>
+<script src="smart-safety.js?v=1.0"></script>
 </body>
 </html>
