@@ -142,7 +142,7 @@ try {
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
 <link href="smart-route-chat.css?v=1.1" rel="stylesheet"/>
 <link rel="stylesheet" href="street-audit.css?v=1.0"/>
-<link rel="stylesheet" href="daily-quests.css?v=1.0"/>
+<link rel="stylesheet" href="daily-quests.css?v=2.0"/>
 </head>
 <body>
 <div class="app">
@@ -171,6 +171,10 @@ try {
  <button id="smartChatSettings" type="button" class="schat-settings" aria-expanded="false">Показать ручные настройки</button>
  <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
 </section>
+<aside class="marshik-strip" aria-label="Маршик — помощник исследователя">
+ <img src="icons/mascot-marshik.svg" width="100" height="106" alt="Маршик с картой в зимней одежде" loading="lazy"/>
+ <div><strong>Каждый день — новый путь!</strong><span>Маршик поможет выбрать прогулку и открыть новые места Якутска.</span></div>
+</aside>
 <div class="quick-info-grid" id="quickInfoGrid">
   <div class="quick-info-card" data-info-title="Как работает маршрут" data-info-icon="🧭" data-info-text="Вы задаёте дистанцию и тип прогулки. Приложение строит кольцевой маршрут, но показывает его по частям: следующий участок открывается только после прохождения текущей контрольной точки.">
     <div><div class="quick-info-icon">🧭</div><b>Как работает</b><p>Кольцевой маршрут открывается поэтапно.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
@@ -2260,16 +2264,18 @@ try {
     if(rerouteBusy)return false;rerouteBusy=true;
     const oldFirst=explicitOldPoint||(rr.checkpoints?.[Math.max(0,rr.current-1)]?{lat:rr.checkpoints[Math.max(0,rr.current-1)].lat,lng:rr.checkpoints[Math.max(0,rr.current-1)].lng}:null);
     const backup={
-      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
+      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
     };
     try{
       if(rr.livePos){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode=isDeveloperMode()?'developer':'gps'}
       rr.routeVariant+=(kind==='direction'?11:kind==='point'?23:kind==='distance'?13:kind==='avoid'?19:17);
-      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
+      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
       const startMsg=kind==='direction'?'Ищем действительно другое направление…':kind==='point'?'Переносим контрольную точку в другое место…':kind==='distance'?'Меняем километраж…':kind==='avoid'?'Строим маршрут в обход зон…':'Генерируем новый маршрут…';
       toast(startMsg);
       const requireDifferent=kind==='direction'||kind==='point'||kind==='new';
-      const ok=await buildYakutsk({requireDifferentFirst:requireDifferent,avoidFirstPoint:requireDifferent?oldFirst:null,minDirectionChangeDeg:kind==='direction'?58:42,distanceKm:regenerateOptions.distanceKm});
+      const prevDaily=(backup.dailyOfferDay===window.DailyRouteQuests?.dayKey?.(Date.now()) && ['avoid','direction','point'].includes(kind))
+        ? window.DailyRouteQuests.offersForDay(backup.dailyOfferDay).find(o=>o.id===backup.dailyOfferId):null;
+      const ok=await buildYakutsk({requireDifferentFirst:requireDifferent,avoidFirstPoint:requireDifferent?oldFirst:null,minDirectionChangeDeg:kind==='direction'?58:42,distanceKm:regenerateOptions.distanceKm,dailyOffer:prevDaily});
       if(ok)toast(kind==='direction'?'Направление действительно изменено':kind==='point'?'Контрольная точка перенесена':kind==='distance'?'Километраж изменён':kind==='avoid'?'Маршрут перестроен в обход зон':'Новый маршрут готов');
       else if(backup.legs?.length){Object.assign(rr,backup);saveSession();restoreUI();toast('Старый маршрут сохранён — другой вариант не найден.');}
       return ok;
@@ -2289,7 +2295,7 @@ try {
   };
 
   function clearActiveRoute(){
-    rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
+    rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
     rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;
     if(yMap){[yRouteLine,yRouteCasing,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yCheckpointMarker=null}
     if(window.state){window.state.current=1;window.state.gps=false;window.state.photo=false;window.state.verified=false}
@@ -2342,7 +2348,7 @@ try {
 <script src="smart-safety.js?v=1.0"></script>
 <script src="smart-route-chat.js?v=1.0"></script>
 <script src="street-audit.js?v=1.0"></script>
-<script src="daily-quests.js?v=1.0"></script>
+<script src="daily-quests.js?v=2.0"></script>
 <script src="map-fallback.js?v=1.1"></script>
 </body>
 </html>
