@@ -5,7 +5,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="#f7faf8" name="theme-color"/>
+<meta content="#20262e" name="theme-color"/>
+<script>try{document.documentElement.setAttribute("data-rr-theme",localStorage.getItem("visual_theme_v1")==="light"?"light":"graphite")}catch(e){document.documentElement.setAttribute("data-rr-theme","graphite")}</script>
 <meta content="index,follow" name="robots"/>
 <meta content="strict-origin-when-cross-origin" name="referrer"/>
 <meta content="default-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; connect-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" http-equiv="Content-Security-Policy"/>
@@ -151,6 +152,7 @@ try {
 <link rel="stylesheet" href="weather-background.css?v=1.0"/>
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
+<link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
 </head>
 <body>
 <div class="app">
@@ -390,6 +392,7 @@ try {
 <label><input type="checkbox" data-srs-pref="weather"/> Погодные предупреждения</label>
 <label><input type="checkbox" data-srs-pref="darkness"/> Предупреждать о темноте</label>
 <label><input type="checkbox" data-srs-pref="animatedBackground"/> Движущийся погодный фон</label>
+<div class="rr-theme-choice"><label for="rrThemeSelect">🎨 Тема оформления</label><select id="rrThemeSelect" aria-label="Тема оформления"><option value="graphite" selected>Графитовые волны</option><option value="light">Светлая</option></select></div>
 </div>
 <div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button><button type="button" data-open-screen="laboratory">🧪 Лаборатория Дейкстры</button></div>
 <button class="primary" type="button" data-open-screen="home">Вернуться к построению маршрута</button>
@@ -2487,6 +2490,7 @@ try {
 <script src="map-fallback.js?v=1.1"></script>
 <script src="tap-targets.js?v=1.0"></script>
 <script src="responsive-layout.js?v=1.0"></script>
+<script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
 <script src="walking-dijkstra.js?v=1.0"></script>
 </body>
