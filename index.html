@@ -150,6 +150,7 @@ try {
 <link rel="stylesheet" href="developer-diagnostics.css?v=1.0"/>
 <link rel="stylesheet" href="weather-background.css?v=1.0"/>
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
+<link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 </head>
 <body>
 <div class="app">
@@ -389,7 +390,7 @@ try {
 <label><input type="checkbox" data-srs-pref="darkness"/> Предупреждать о темноте</label>
 <label><input type="checkbox" data-srs-pref="animatedBackground"/> Движущийся погодный фон</label>
 </div>
-<div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button></div>
+<div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button><button type="button" data-open-screen="laboratory">🧪 Лаборатория Дейкстры</button></div>
 <button class="primary" type="button" data-open-screen="home">Вернуться к построению маршрута</button>
 </section>
 <section class="screen" id="safety" aria-label="Безопасность прогулки">
@@ -417,7 +418,42 @@ try {
   </div>
 </div>
 
-<div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ Построить маршрут</button><button type="button" data-open-screen="settings">⚙️ Настройки</button></div>
+<div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ Построить маршрут</button><button type="button" data-open-screen="settings">⚙️ Настройки</button><button type="button" data-open-screen="laboratory">🧪 Лаборатория Дейкстры</button></div>
+</section>
+
+<section class="screen" id="laboratory" aria-label="Исследовательская лаборатория алгоритма Дейкстры">
+  <div class="hero"><small>Исследовательский режим</small><h1>🧪 Лаборатория Дейкстры</h1><p>Наблюдайте, как алгоритм шаг за шагом находит кратчайший путь в графе.</p></div>
+  <div class="lab-card">
+    <h2>Эксперимент с графом</h2>
+    <p class="lab-intro">Пять вершин A–E и семь соединяющих их участков. Числа на рёбрах — длина в условных метрах. Выберите вершины и сравните варианты пути.</p>
+    <div class="lab-selector-row">
+      <label for="labStart">Откуда
+        <select id="labStart"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select>
+      </label>
+      <label for="labEnd">Куда
+        <select id="labEnd"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E" selected>E</option></select>
+      </label>
+    </div>
+    <div class="lab-svg-wrap">
+      <svg id="labGraph" viewBox="0 0 640 335" role="img" aria-label="Учебный граф с пятью вершинами и весами рёбер. Выделенный путь показывает результат поиска."></svg>
+    </div>
+    <div class="lab-controls">
+      <button type="button" id="labPrevious">← Назад на шаг</button>
+      <button type="button" id="labNext">Следующий шаг →</button>
+      <button type="button" id="labRun">Рассчитать сразу</button>
+      <button type="button" id="labReset">↺ Начать заново</button>
+    </div>
+    <div id="labStatus" class="lab-status" aria-live="polite">Подготовка расчёта…</div>
+    <p id="labResult" class="lab-result" aria-live="polite"></p>
+    <h2>Текущие оценки расстояний</h2>
+    <div id="labDistanceTable" class="lab-distance-grid" aria-label="Расстояния до вершин"></div>
+  </div>
+  <div class="lab-card">
+    <h2>Как это связано с проектом</h2>
+    <p class="lab-warning">Дейкстра находит кратчайший путь между двумя точками при неотрицательных весах. Кольцевая прогулка заданной длины — другая задача: для неё нужны промежуточные точки, объединение участков и контроль повторов.</p>
+    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении реальные пешеходные маршруты рассчитываются через Valhalla; лаборатория не меняет GPS, маршруты или RouteCoin.</p>
+  </div>
+  <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
 </main>
 <nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Карта</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
@@ -937,9 +973,9 @@ try {
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
-  $('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+  $$('.nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
   window.__rrOpenScreen=showScreen;
-  $('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.openScreen,{restoreScroll:false})));
+  $$('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.openScreen,{restoreScroll:false})));
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
@@ -2439,5 +2475,6 @@ try {
 <script src="map-fallback.js?v=1.1"></script>
 <script src="tap-targets.js?v=1.0"></script>
 <script src="responsive-layout.js?v=1.0"></script>
+<script src="dijkstra-lab.js?v=1.0"></script>
 </body>
 </html>
