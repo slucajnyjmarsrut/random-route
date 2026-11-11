@@ -13,6 +13,7 @@ class Fake{
  addEventListener(type,fn){this.listeners[type]=fn;}
  matches(selector){return this.tag==='button' && selector==='button[data-buy-type]';}
  contains(other){return other===this||this.children.some(c=>c.contains(other));}
+ closest(selector){return this.tag==='button'&&selector.includes('button')?this:null;}
  querySelector(sel){
   if(sel==='button,input,select,textarea,a[href]')return this.children.find(c=>['button','a','input','select','textarea'].includes(c.tag))||null;
   if(sel==='button[data-buy-type="coins"]'||sel==='button[data-buy-type="feature"]')return this.children.find(c=>c.tag==='button'&&c.dataset.buyType===sel.match(/="(\w+)"/)[1])||null;
