@@ -56,5 +56,6 @@ function mount(doc){
  update();
  api.refresh=schedule;
 }
-return {viewClass,mount};
+const api={viewClass,mount};
+return api;
 });
