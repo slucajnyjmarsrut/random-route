@@ -95,12 +95,12 @@ function mount(doc){
  api.setConditions=function(current){api.current=classify(current);apply(api.current);};
  api.setAnimationEnabled=function(yes){animated=!!yes;if(initialized)apply(api.current);};
  api.getVisualState=function(){return api.current||{mode:"unknown",night:false};};
- const pref=root.RRWeatherBackgroundPrefs; // optional future setting, no network
  apply({mode:"unknown",night:false});
  if(window.SmartSafety?.getPreferences){
    const s=window.SmartSafety.getPreferences();
    api.setAnimationEnabled(s.animatedBackground!==false);
  }
 }
-return {classify,sceneLabel,modes,mount};
+const api={classify,sceneLabel,modes,mount};
+return api;
 });
