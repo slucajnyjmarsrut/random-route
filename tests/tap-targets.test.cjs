@@ -45,7 +45,7 @@ assert(info.press('Enter').prevented);
 assert.equal(modal,1);
 assert(info.press(' ').prevented);
 assert.equal(modal,2);
-assert.equal(info.press('Enter',{repeat:true}).prevented);
+assert(info.press('Enter',{repeat:true}).prevented);
 assert.equal(modal,2);
 assert(!tap.makeInfoButton(info));
 
