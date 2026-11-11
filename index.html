@@ -140,6 +140,7 @@ try {
   }
 } catch(e) {}
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
+<link href="smart-route-chat.css?v=1.0" rel="stylesheet"/>
 </head>
 <body>
 <div class="app">
@@ -152,7 +153,22 @@ try {
 </header>
 <main class="content">
 <section class="screen active" id="home">
-<div class="hero"><h1>Исследуем весь Якутск</h1><p>Открывайте новые места города по кольцевым маршрутам, которые раскрываются постепенно по ходу прогулки.</p></div>
+<div class="hero"><h1>Исследуем весь Якутск</h1><p>Расскажите, куда и насколько хотите погулять: помощник настроит маршрут по пешеходным дорогам.</p></div>
+<section class="schat-card" id="smartChat" aria-label="Чат для создания прогулки">
+ <div class="schat-heading"><h2>💬 Куда пойдём?</h2><span>Работает без AI API</span></div>
+ <p class="schat-description">Опишите прогулку обычными словами: «Построй 3 км через парки, без дворов» или «Хочу погулять 40 минут».</p>
+ <div class="schat-log" id="smartChatLog" role="log" aria-live="polite" aria-relevant="additions">
+ <div class="schat-bubble schat-bot">Привет! Расскажите, что хотите увидеть и сколько готовы пройти. Я помогу подобрать параметры пешеходного маршрута.</div>
+ </div>
+ <form id="smartChatForm" class="schat-form">
+   <label for="smartChatInput">Ваше пожелание</label>
+   <textarea id="smartChatInput" maxlength="450" rows="2" placeholder="Например: построй кольцо 3 км через парки" autocomplete="off"></textarea>
+   <button class="schat-send" type="submit">✦ Отправить пожелание</button>
+ </form>
+ <p class="schat-summary" id="smartChatSummary">Настройки маршрута загружаются…</p>
+ <button id="smartChatSettings" type="button" class="schat-settings" aria-expanded="false">Показать ручные настройки</button>
+ <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
+</section>
 <div class="quick-info-grid" id="quickInfoGrid">
   <div class="quick-info-card" data-info-title="Как работает маршрут" data-info-icon="🧭" data-info-text="Вы задаёте дистанцию и тип прогулки. Приложение строит кольцевой маршрут, но показывает его по частям: следующий участок открывается только после прохождения текущей контрольной точки.">
     <div><div class="quick-info-icon">🧭</div><b>Как работает</b><p>Кольцевой маршрут открывается поэтапно.</p></div><div class="quick-info-more">Нажмите, чтобы узнать подробнее</div>
@@ -206,6 +222,18 @@ try {
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
+<section class="schat-card" id="smartRouteChat" aria-label="Чат для изменения маршрута">
+ <div class="schat-heading"><h2>💬 Изменить маршрут</h2><span>В движении</span></div>
+ <div class="schat-log" id="smartRouteChatLog" role="log" aria-live="polite" aria-relevant="additions">
+ <div class="schat-bubble schat-bot">Можно изменить пожелания: «Перестрой на 4 км по паркам».</div>
+ </div>
+ <form id="smartRouteChatForm" class="schat-form">
+   <label for="smartRouteChatInput">Что изменить?</label>
+   <textarea id="smartRouteChatInput" maxlength="450" rows="2" placeholder="Например: перестрой на 4 км" autocomplete="off"></textarea>
+   <button type="submit" class="schat-send">↻ Применить и перестроить</button>
+ </form>
+ <small class="schat-disclaimer">Маршрут будет пересчитан с текущей GPS-позиции, если она доступна. Отсутствие реальных данных о тротуарах не считается подтверждением безопасности.</small>
+</section>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
@@ -1130,7 +1158,12 @@ try {
           if(f2.length)cands=f2;else if(cands.length)rejectedAsSame++;
         }
         if(!cands.length)break;
-        cands.forEach(c=>c.score=Math.abs(c.raw*factor-targetM));
+        cands.forEach(c=>{
+          const pref=window.SmartRouteChat?.preferenceBoost;
+          const hits=typeof pref==='function'?c.pois.reduce((sum,p)=>sum+Number(pref(p)||0),0):0;
+          // Preference bonus is soft; measured walking distance and safety checks remain authoritative.
+          c.score=Math.abs(c.raw*factor-targetM)-Math.min(tolOk*.4,hits*32);
+        });
         cands.sort((x,y)=>x.score-y.score);
         const c=cands[iter===0?Math.floor(Math.random()*Math.min(4,cands.length)):0];
         tried.add(c.key);
@@ -1141,7 +1174,12 @@ try {
           if(!snapOk)continue;
           if(routeHitsNoGo(route)){rejectedByZones++;continue}
           const diff=Math.abs(route.distance-targetM);
-          if(!best||diff<best.diff)best={data,route,pois:c.pois,diff,actual:route.distance/1000};
+          const preferenceBoost=window.SmartRouteChat?.preferenceBoost;
+          const prefHits=typeof preferenceBoost==='function'?c.pois.reduce((sum,p)=>sum+Number(preferenceBoost(p)||0),0):0;
+          const candidateRank=diff-Math.min(tolOk*.38,prefHits*35);
+          // Do not trade a valid distance for an unacceptable one to satisfy a theme.
+          if(!best||((diff<=tolAccept||best.diff>tolAccept)&&candidateRank<best.rank))
+            best={data,route,pois:c.pois,diff,actual:route.distance/1000,rank:candidateRank};
           if(diff<=tolOk)break;
         }catch(e){console.warn('route candidate',e)}
       }
@@ -2286,6 +2324,7 @@ try {
 })();
 </script>
 <script src="smart-safety.js?v=1.0"></script>
+<script src="smart-route-chat.js?v=1.0"></script>
 <script src="map-fallback.js?v=1.1"></script>
 </body>
 </html>
