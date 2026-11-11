@@ -1,0 +1,32 @@
+name: Check Smart Route static files
+on:
+  push:
+    branches: [main, feature/npk-smart-safety-2026]
+  pull_request:
+    branches: [main]
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate HTML inline JavaScript and external scripts
+        run: |
+          node --check smart-safety.js
+          node --check map-fallback.js
+          node --check sw.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
+          blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
+          for(const name of ['smart-safety.js','smart-safety.css','map-fallback.js','sw.js','manifest.webmanifest','icons/smart-route.svg']){
+            if(!fs.existsSync(name))throw new Error('Missing file '+name);
+          }
+          if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
+          if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
+          JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+          console.log('Static checks passed');
+          NODE
