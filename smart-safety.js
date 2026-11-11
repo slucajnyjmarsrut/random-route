@@ -7,7 +7,7 @@
 "use strict";
 var KEY="rr_safety_preferences_v1";
 var CITY={lat:62.03545,lon:129.6755,label:"Якутск"};
-var defaults={weather:true,darkness:true};
+var defaults={weather:true,darkness:true,animatedBackground:true};
 var prefs=defaults;
 try {prefs=Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(_){}
 var latest=null, lastChecked=null, busy=false;
@@ -25,7 +25,7 @@ function makeCard(suffix){
   var refresh=el("button","srs-refresh","↻ Обновить");refresh.type="button";refresh.addEventListener("click",refreshForecast);weather.append(info,refresh);card.append(weather);
   var alerts=el("div","srs-alerts");alerts.id="srs-alerts-"+suffix;alerts.setAttribute("aria-live","polite");card.append(alerts);
   var opt=el("div","srs-options");
-  [["weather","Погодные предупреждения"],["darkness","Предупреждать о темноте"]].forEach(function(k){
+  [["weather","Погодные предупреждения"],["darkness","Предупреждать о темноте"],["animatedBackground","Движущийся погодный фон"]].forEach(function(k){
     var lab=el("label");var box=el("input");box.type="checkbox";box.checked=!!prefs[k[0]];
     box.addEventListener("change",function(){prefs[k[0]]=box.checked;persist();document.querySelectorAll("[data-srs-pref='"+k[0]+"']").forEach(function(e){e.checked=box.checked;});render();});
     box.setAttribute("data-srs-pref",k[0]);lab.append(box,document.createTextNode(k[1]));opt.append(lab);
@@ -79,12 +79,20 @@ function renderCard(suffix){
   if(prefs.darkness && (c.is_day===0 || c.is_day==="0"))addAlert(a,"warn","Сейчас темно. Проверьте доступные отметки об освещении маршрута по OSM и обязательно оцените реальные условия на месте.");
   if(suffix==="home")addAlert(a,"unknown","Ниже после построения маршрута доступна проверка улиц по данным OpenStreetMap. Состояние снега, льда и происшествия сервис не подтверждает.");
 }
-function render(){renderCard("home");renderCard("route");}
+function render(){
+  renderCard("home");renderCard("route");
+  // The ambient scene consumes the SAME forecast as safety warnings.
+  // If the external service fails, the background becomes neutral.
+  if(window.RRWeatherBackground){
+    window.RRWeatherBackground.setAnimationEnabled(prefs.animatedBackground!==false);
+    window.RRWeatherBackground.setConditions(latest?.current||null);
+  }
+}
 async function refreshForecast(){
   if(busy)return;busy=true;render();
   try{
     var url="https://api.open-meteo.com/v1/forecast?latitude="+CITY.lat+"&longitude="+CITY.lon+
-      "&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,snowfall,precipitation,is_day"+
+      "&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,snowfall,precipitation,weather_code,is_day"+
       "&timezone=Asia%2FYakutsk&forecast_days=1";
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},9000);
     var res;
