@@ -225,10 +225,7 @@ function mount(doc){
  bindChat(doc.getElementById("smartRouteChatForm"),doc.getElementById("smartRouteChatInput"),doc.getElementById("smartRouteChatLog"));
  if(details){
    details.addEventListener("click",function(){
-     const expand=home.classList.toggle("schat-compact");
-     const opened=!expand;
-     details.setAttribute("aria-expanded",String(opened));
-     details.textContent=opened?"Скрыть ручные настройки":"Показать ручные настройки";
+     if(typeof window.__rrOpenScreen==="function")window.__rrOpenScreen("settings",{restoreScroll:false});
    });
  }
  refreshSummary();

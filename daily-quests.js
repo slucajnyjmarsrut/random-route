@@ -97,8 +97,8 @@ function mount(doc){
   foot.textContent="Варианты обновляются в полночь по Якутску. Маршрут строится после выбора, поэтому фактическая длина может немного отличаться. Один бонус за день. В мороз выходить ради монет не нужно.";
   root.append(foot);return root;
  }
- const a=panel("home"),b=panel("route"),info=doc.getElementById("quickInfoGrid");
- if(info)info.insertAdjacentElement("afterend",a);else home.prepend(a);
+ const a=panel("home"),b=panel("route"),intro=doc.getElementById("smartChat")||doc.getElementById("quickInfoGrid");
+ if(intro)intro.insertAdjacentElement("afterend",a);else home.prepend(a);
  const anchor=doc.getElementById("srs-route")||doc.querySelector("#route .route-summary");
  if(anchor)anchor.insertAdjacentElement("afterend",b);else route.prepend(b);
  let shownDay="",busy=false;

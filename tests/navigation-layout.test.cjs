@@ -1,0 +1,27 @@
+/* Home navigation and settings: static integration smoke checks. */
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('index.html','utf8');
+const chat=fs.readFileSync('smart-route-chat.js','utf8');
+const daily=fs.readFileSync('daily-quests.js','utf8');
+const safety=fs.readFileSync('smart-safety.js','utf8');
+const css=fs.readFileSync('responsive-layout.css','utf8');
+for(const id of ['home','route','profile','settings','safety','help','quickInfoGrid','smartChat','distanceInput','typeChoices','partnerToggle','avoidHomeCard']){
+  assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1,'element '+id+' must exist once');
+}
+const home=html.split('<section class="screen active" id="home">')[1].split('<section class="screen" id="route">')[0];
+const settings=html.split('<section class="screen" id="settings"')[1].split('<section class="screen" id="safety"')[0];
+const help=html.split('<section class="screen" id="help"')[1].split('</main>')[0];
+assert.ok(home.includes('id="smartChat"')&&home.includes('id="homeMap"')&&home.includes('id="buildBtn"'));
+assert.ok(!home.includes('id="quickInfoGrid"')&&!home.includes('id="distanceInput"'),'home should focus on route building');
+assert.ok(settings.includes('id="distanceInput"')&&settings.includes('id="partnerToggle"'));
+for(const k of ['weather','darkness','animatedBackground'])assert.ok(settings.includes('data-srs-pref="'+k+'"'),'missing setting '+k);
+assert.ok(help.includes('id="quickInfoGrid"')&&help.includes('marshik-strip'));
+assert.ok(html.includes('window.__rrOpenScreen=showScreen')&&html.includes('data-open-screen="settings"'));
+assert.ok(chat.includes('window.__rrOpenScreen("settings"'),'chat manual options should open settings');
+assert.ok(daily.includes('getElementById("smartChat")')&&daily.includes('getElementById("quickInfoGrid")'),'daily routes remain on home');
+assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety panel belongs to its screen');
+assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]")'),'settings synchronized with safety');
+assert.ok(css.includes('.rr-settings-trigger')&&css.includes('.rr-home-links')&&css.includes('@media (max-width:599px)'));
+assert.equal((html.match(/data-screen="/g)||[]).length,5,'keep bottom navigation usable on narrow phones');
+console.log('Navigation, settings, safety and home layout OK');
