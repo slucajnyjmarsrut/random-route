@@ -966,7 +966,7 @@ try {
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
     rr.activeScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Граф OSM для Дейкстры не был доступен.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
