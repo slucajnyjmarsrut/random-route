@@ -183,6 +183,43 @@ html[data-rr-theme="graphite"] .app .gold-icon{background:linear-gradient(140deg
 html[data-rr-theme="graphite"] .app .gold-main span{color:#e7c895}
 html[data-rr-theme="graphite"] .app .gold-price{color:#ffdfa5}
 
+/* Photo history must be readable in graphite. The old white history card
+   inherited pale route text, making all quest option labels look blank. */
+html[data-rr-theme="graphite"] .app #historyBlock{
+  background:#28353a;
+  border-color:#526860;
+  color:#eff8f2;
+}
+html[data-rr-theme="graphite"] .app #historyBlock :is(h4,#questQuestion){
+  color:#f4fff7;
+}
+html[data-rr-theme="graphite"] .app #historyBlock :is(p,.history-source,#questResult){
+  color:#d3e6dc;
+}
+html[data-rr-theme="graphite"] .app #questBlock{
+  background:#303f43;
+  border-color:#597168;
+  color:#eef9f3;
+}
+html[data-rr-theme="graphite"] .app #questBlock .quest-option{
+  background:#24333a;
+  border-color:#647b73;
+  color:#f4fff8;
+}
+html[data-rr-theme="graphite"] .app #questBlock .quest-option.correct{
+  background:#23513e;
+  border-color:#5fba8b;
+  color:#e7fff0;
+}
+html[data-rr-theme="graphite"] .app #questBlock .quest-option.wrong{
+  background:#56333b;
+  border-color:#b36c75;
+  color:#ffe9e6;
+}
+html[data-rr-theme="graphite"] .app #questBlock .quest-option:focus-visible{
+  outline:2px solid #7de4b3;
+  outline-offset:2px;
+}
 /* Inputs, selectors and the configuration page. */
 html[data-rr-theme="graphite"] .app :is(
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
