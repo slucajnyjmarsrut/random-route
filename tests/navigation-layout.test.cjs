@@ -44,7 +44,7 @@ assert.ok(simpleCss.includes('.app[data-rr-screen="home"] .nav')&&simpleCss.incl
 assert.equal((html.match(/data-screen="/g)||[]).length,5,'keep bottom navigation usable on narrow phones');
 assert.ok(html.includes('walking-dijkstra.js?v=1.0'),'OSM Dijkstra script missing from main app');
 assert.ok(html.includes('id="routeEngineStatus"'),'algorithm attribution missing');
-assert.ok(html.includes('window.RRWalkingDijkstra.requestRoute(points'),'production route should call OSM Dijkstra');
-assert.ok(html.includes('return await requestValhallaFootRoute(points,opts)'),'routing fallback should be preserved');
+assert.ok(html.includes('engine?.hasWarmGraph?.(points[0],km)')&&html.includes('engine.requestRoute(points'),'warm OSM Dijkstra graph must be used without a network wait');
+assert.ok(html.includes('return requestValhallaFootRoute(points,opts)'),'fast Valhalla pedestrian routing must be preserved');
 assert.ok(html.includes("rr.routeEngine=data.source||'valhalla'"),'route algorithm must be recorded');
 console.log('Simple home, route wizard, navigation, GPS, Yandex and Dijkstra integration OK');
