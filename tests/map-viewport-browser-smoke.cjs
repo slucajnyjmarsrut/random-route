@@ -28,6 +28,7 @@ const ROOT='http://127.0.0.1:8765';
      const homeOpen=await home.evaluate(el=>({rect:el.getBoundingClientRect().toJSON(),pressed:el.querySelector('#rrHomeMapExpand')?.getAttribute('aria-pressed'),inApp:el.parentElement?.classList.contains('app')}));
      assert.equal(homeOpen.pressed,'true');
      assert.equal(homeOpen.inApp,true);
+     assert.equal(await page.locator('#rrMapNavigationHud').isVisible(),false,'start map must not show route directions');
      assert.ok(homeOpen.rect.width>=device.width-3&&homeOpen.rect.height>=device.height-3,'home map not full screen: '+JSON.stringify(homeOpen));
      await page.keyboard.press('Escape');
      assert.equal(await page.locator('#rrHomeMapExpand').getAttribute('aria-pressed'),'false');
@@ -54,11 +55,52 @@ const ROOT='http://127.0.0.1:8765';
        assert.ok(before.map.height>=260,'landscape map too short');
        assert.ok(before.map.top<before.nav.top,'landscape map must be first');
      }
+     await page.evaluate(()=>{
+       document.querySelector('#rrNavArrow').textContent='↱';
+       document.querySelector('#rrNavInstruction').textContent='Через 80 м — направо';
+       document.querySelector('#rrNavStepDistance').textContent='Следуйте зелёной линии к точке';
+       document.querySelector('#rrNavNext').textContent='180 м';
+       document.querySelector('#rrNavTotal').textContent='2,7 км';
+       document.querySelector('#rrNavGpsStatus').textContent='GPS активен';
+     });
      await page.locator('#rrRouteMapExpand').click();
      const opened=await page.locator('.app>.rr-map-expanded').evaluate(el=>({bounds:el.getBoundingClientRect().toJSON(),pressed:el.querySelector('.rr-map-toggle').getAttribute('aria-pressed')}));
      assert.ok(opened.bounds.width>=device.width-3&&opened.bounds.height>=device.height-3,'route map not full screen '+JSON.stringify(opened));
      assert.equal(opened.pressed,'true');
+     await page.waitForFunction(()=>{
+       const hud=document.querySelector('#rrMapNavigationHud');
+       return hud && getComputedStyle(hud).display!=='none'
+         && hud.querySelector('.rr-map-hud-instruction')?.textContent==='Через 80 м — направо'
+         && hud.querySelector('.rr-map-hud-next')?.textContent==='180 м'
+         && hud.querySelector('.rr-map-hud-remaining')?.textContent==='2,7 км';
+     });
+     const hud=await page.locator('#rrMapNavigationHud').evaluate(el=>{
+       const rect=el.getBoundingClientRect();
+       const map=el.closest('.map').getBoundingClientRect();
+       return {gps:el.querySelector('.rr-map-hud-gps').textContent,
+         symbol:el.querySelector('.rr-map-hud-arrow').textContent,
+         rect:rect.toJSON(),pointerEvents:getComputedStyle(el).pointerEvents,
+         map:map.toJSON()};
+     });
+     assert.equal(hud.gps,'GPS активен');
+     assert.equal(hud.symbol,'↱');
+     assert.equal(hud.pointerEvents,'none','guidance must not block map drag');
+     assert.ok(hud.rect.top>=0&&hud.rect.bottom<hud.map.bottom-50,'full-screen HUD out of map: '+JSON.stringify(hud));
+     // GPS and direction updates while the full-screen map stays open.
+     await page.evaluate(()=>{
+       document.querySelector('#rrNavInstruction').textContent='Вы отошли от линии маршрута';
+       document.querySelector('#rrNavNext').textContent='—';
+       document.querySelector('#rrNavGpsStatus').textContent='Вне маршрута';
+       document.querySelector('#rrNavPanel').classList.add('rr-nav-offtrack');
+     });
+     await page.waitForFunction(()=>{
+       const hud=document.querySelector('#rrMapNavigationHud');
+       return hud.classList.contains('rr-map-hud-offtrack')
+         && hud.querySelector('.rr-map-hud-gps')?.textContent==='Вне маршрута'
+         && hud.querySelector('.rr-map-hud-instruction')?.textContent==='Вы отошли от линии маршрута';
+     });
      await page.locator('#rrRouteMapExpand').click();
+     assert.equal(await page.locator('#rrMapNavigationHud').isVisible(),false,'guidance must hide outside fullscreen');
      assert.equal(await page.locator('#rrRouteMapExpand').getAttribute('aria-pressed'),'false');
      assert.equal(await page.locator('#route .map').count(),1,'map returned to route section');
      assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,'runtime errors '+errors.join(' | '));
