@@ -9,11 +9,41 @@
   if(root)root.RRWalkingDijkstra=api;
 })(typeof window!=='undefined'?window:null,function(){
   'use strict';
-  const ENDPOINTS=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+  // Public Overpass can be overloaded or refuse requests. The bundled OSM
+  // snapshot below is authoritative for its downtown bounding box.
+  const ENDPOINTS=['https://overpass.private.coffee/api/interpreter'];
   const ROAD_TYPES='footway|path|pedestrian|steps|living_street|residential|service|unclassified|tertiary|secondary|primary|track|cycleway';
   const LIMIT_NODES=55000,LIMIT_EDGES=145000;
   // Two bounded cached graphs allow route length changes without reloading OSM.
   const graphCache=new Map(),pending=new Map();let unavailableUntil=0;
+  const STATIC_PATH='./data/yakutsk-center-walking.json?v=1';
+  const STATIC_BOUNDS={south:62.016,west:129.708,north:62.046,east:129.760};
+  let staticGraph=null,staticPromise=null,staticUnavailableUntil=0;
+  function canUseStatic(start,requestedKm){
+    const p=start||{},km=Number(requestedKm);
+    return Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&km>=1&&km<=6
+      &&p.lat>=STATIC_BOUNDS.south+.002&&p.lat<=STATIC_BOUNDS.north-.002
+      &&p.lng>=STATIC_BOUNDS.west+.004&&p.lng<=STATIC_BOUNDS.east-.004;
+  }
+  async function loadStaticGraph(){
+    if(staticGraph)return staticGraph;
+    if(staticPromise)return staticPromise;
+    if(staticUnavailableUntil>Date.now())throw Error('StaticGraphUnavailable');
+    staticPromise=(async()=>{
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+      try{
+        const response=await fetch(STATIC_PATH,{signal:controller.signal,cache:'force-cache'});
+        if(!response.ok)throw Error('StaticGraphHTTP'+response.status);
+        const data=await response.json();
+        if(data.version!==1||!Array.isArray(data.ways)||data.ways.length<100)throw Error('StaticGraphInvalid');
+        if(data.bbox?.south!==STATIC_BOUNDS.south||data.bbox?.north!==STATIC_BOUNDS.north)throw Error('StaticGraphBoundsMismatch');
+        staticGraph=makeGraph(data.ways);
+        return staticGraph;
+      }catch(e){staticUnavailableUntil=Date.now()+15000;throw e;}
+      finally{clearTimeout(timer);}
+    })();
+    try{return await staticPromise;}finally{staticPromise=null;}
+  }
   function distance(a,b){
     const lat=(a.lat+b.lat)*Math.PI/360;
     return Math.hypot((a.lat-b.lat)*111195,(a.lng-b.lng)*111195*Math.cos(lat));
@@ -198,10 +228,15 @@
     return bbox(start,radius).map(v=>v.toFixed(3)).join(':')+':'+radius;
   }
   function hasWarmGraph(start,requestedKm=3){
+    if(staticGraph&&canUseStatic(start,requestedKm))return true;
     try{const item=graphCache.get(graphKey(start,requestedKm));return !!item&&item.expires>Date.now();}
     catch(e){return false;}
   }
   async function loadGraph(start,requestedKm){
+    if(canUseStatic(start,requestedKm)){
+      try{return await loadStaticGraph();}
+      catch(e){console.warn('Local OSM street snapshot is unavailable:',e?.message||e);}
+    }
     const radius=graphRadius(requestedKm),area=bbox(start,radius),key=graphKey(start,requestedKm);
     const item=graphCache.get(key);
     if(item&&item.expires>Date.now())return item.graph;
@@ -240,5 +275,5 @@
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,reachableNodes,reachableStops,walkingWaypoints,loadGraph,hasWarmGraph,preload,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,reachableNodes,reachableStops,walkingWaypoints,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
 });
