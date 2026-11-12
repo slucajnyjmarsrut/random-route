@@ -12,6 +12,7 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
   try{
     const context=await browser.newContext({
       viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,
+      serviceWorkers:'block',
       geolocation:{latitude:62.0274,longitude:129.732,accuracy:12},
       permissions:['geolocation']
     });
@@ -26,7 +27,7 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
       if(url.includes('/@tensorflow-models/mobilenet@'))return route.fulfill({
         status:200,contentType:'application/javascript',body:modelMock
       });
-      if(url===root+'/tests/photo-reference-test.svg')return route.fulfill({
+      if(url.includes('/tests/photo-reference-test.svg'))return route.fulfill({
         status:200,contentType:'image/svg+xml',body:reference
       });
       return url.startsWith(root+'/')?route.continue():route.abort();
