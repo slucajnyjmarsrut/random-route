@@ -707,7 +707,8 @@ try {
 
   // Карта приложения отрисовывается Яндекс Картами; пеший маршрут рассчитывается через бесплатный Valhalla demo API.
 
-  let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yCheckpointMarker=null;
+  let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yPassedLine=null,yCheckpointMarker=null;
+  let followGps=true,markerAnimationId=null,mapFollowLast=0,mapFollowLastPos=null;
   // Map canvas must be refreshed when desktop width or phone orientation changes.
   window.__rrResizeMaps=function(){
     [yHomeMap,yMap].forEach(function(m){
@@ -739,6 +740,8 @@ try {
       const p=rr.livePos||rr.start;updateYandexUser(p,true);
       yHomeMap.events.add('click',e=>{if(avoidPickMode!=='home')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
       yMap.events.add('click',e=>{if(avoidPickMode!=='route')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
+      // Deliberate map gestures pause auto-follow; users can resume with the locator.
+      yMap.events.add('actionbegin',()=>{followGps=false;syncFollowButton();});
       renderNoGoZones();
       if(rr.legs.length)showYandexLeg(Math.max(0,rr.current-1),true);
     }catch(e){
@@ -751,19 +754,55 @@ try {
   function updateYandexUser(p,center=false){
     if(!window.ymaps||!yMap||!yHomeMap)return;
     const coords=[p.lat,p.lng],opts={preset:'islands#darkGreenCircleDotIcon',iconColor:'#0c5a42'};
-    if(yUserMarker)yUserMarker.geometry.setCoordinates(coords);else{yUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yMap.geoObjects.add(yUserMarker)}
+    if(yUserMarker){
+      const previous=yUserMarker.geometry.getCoordinates();
+      if(markerAnimationId!==null){cancelAnimationFrame(markerAnimationId);markerAnimationId=null}
+      const change=distMeters({lat:previous[0],lng:previous[1]},p);
+      if(rr.activeScreen==='route'&&change>1&&change<120&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+        const start=performance.now(),duration=650;
+        const animate=(now)=>{
+          const t=Math.min(1,(now-start)/duration),k=1-Math.pow(1-t,2.5);
+          if(yUserMarker)yUserMarker.geometry.setCoordinates([previous[0]+(coords[0]-previous[0])*k,previous[1]+(coords[1]-previous[1])*k]);
+          markerAnimationId=t<1?requestAnimationFrame(animate):null;
+        };
+        markerAnimationId=requestAnimationFrame(animate);
+      }else yUserMarker.geometry.setCoordinates(coords);
+    }else{yUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yMap.geoObjects.add(yUserMarker)}
     if(yHomeUserMarker)yHomeUserMarker.geometry.setCoordinates(coords);else{yHomeUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yHomeMap.geoObjects.add(yHomeUserMarker)}
-    if(center){yHomeMap.setCenter(coords,16,{duration:220});if(rr.activeScreen==='route')yMap.setCenter(coords,17,{duration:220})}
+    if(center&&rr.activeScreen==='create'&&$('#createMapDetails')?.open)yHomeMap.setCenter(coords,16,{duration:220});
+    if(center&&rr.activeScreen==='route')yMap.setCenter(coords,17,{duration:220})
   }
-  function showYandexLeg(index,fit=true,overridePts=null){
+  function syncFollowButton(){
+    const btn=$('#mapFollowBtn');if(!btn)return;
+    btn.setAttribute('aria-pressed',String(followGps));
+    btn.setAttribute('aria-label',followGps?'Карта следует за мной. Нажмите, чтобы остановить':'Включить слежение за моим местоположением');
+    btn.title=followGps?'Карта следует за вами':'Следить за мной';
+    btn.classList.toggle('following',followGps);
+    btn.textContent=followGps?'◉':'◎';
+  }
+  function autoFollow(p,immediate=false){
+    if(!followGps||!yMap||rr.activeScreen!=='route'||!p)return;
+    const now=Date.now();
+    const moved=!mapFollowLastPos||distMeters(mapFollowLastPos,p)>18;
+    if(!immediate&&now-mapFollowLast<2500)return;
+    if(!immediate&&!moved&&now-mapFollowLast<8000)return;
+    mapFollowLast=now;mapFollowLastPos={lat:p.lat,lng:p.lng};
+    try{yMap.setCenter([p.lat,p.lng],Math.max(yMap.getZoom()||16,16),{duration:immediate?180:650});}catch(e){}
+  }
+  function showYandexLeg(index,fit=true,overridePts=null,passedPts=null){
     if(!window.ymaps||!yMap)return;const leg=rr.legs[index];if(!leg)return;const pts=overridePts||legCoords(leg);if(pts.length<2)return;
-    [yRouteCasing,yRouteLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});
+    [yRouteCasing,yRouteLine,yPassedLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});
     yRouteCasing=new ymaps.Polyline(pts,{}, {strokeColor:'#ffffff',strokeWidth:9,strokeOpacity:.9});
-    yRouteLine=new ymaps.Polyline(pts,{}, {strokeColor:'#0c5a42',strokeWidth:5,strokeOpacity:1});yMap.geoObjects.add(yRouteCasing).add(yRouteLine);
+    yRouteLine=new ymaps.Polyline(pts,{}, {strokeColor:'#25bd7d',strokeWidth:6,strokeOpacity:1});yMap.geoObjects.add(yRouteCasing).add(yRouteLine);
+    if(passedPts&&passedPts.length>=2){yPassedLine=new ymaps.Polyline(passedPts,{}, {strokeColor:'#889a9b',strokeWidth:5,strokeOpacity:.82});yMap.geoObjects.add(yPassedLine)}
+    else yPassedLine=null;
     const target=index<rr.checkpoints.length?rr.checkpoints[index]:rr.start,label=index<rr.checkpoints.length?String(index+1):'F';
     const hint=index<rr.checkpoints.length?(target.fullAddress||('Контрольная точка '+label)):'Финиш';
     yCheckpointMarker=new ymaps.Placemark([target.lat,target.lng],{iconContent:label,hintContent:hint},{preset:index<rr.checkpoints.length?'islands#orangeCircleIcon':'islands#darkGreenCircleIcon'});yMap.geoObjects.add(yCheckpointMarker);
-    if(fit){const all=pts.concat([[target.lat,target.lng],[(rr.livePos||rr.start).lat,(rr.livePos||rr.start).lng]]);try{yMap.setBounds(ymaps.util.bounds.fromPoints(all),{checkZoomRange:true,zoomMargin:55,duration:0})}catch(e){}}
+    if(fit){
+      const all=pts.concat([[target.lat,target.lng],[(rr.livePos||rr.start).lat,(rr.livePos||rr.start).lng]]);
+      try{yMap.setBounds(ymaps.util.bounds.fromPoints(all),{checkZoomRange:true,zoomMargin:55,duration:0})}catch(e){}
+    }
   }
   initYandexMaps();
 
