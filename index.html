@@ -1325,7 +1325,7 @@ try {
         // Honest fallback: a walk through ACTUAL OSM road nodes, not fabricated
         // monuments. GPS checkpoints still work, but photo rewards are disabled.
         const walkNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
-        const generated=walkNodes.map((n,i)=>({
+        const generated=walkNodes.filter((_,i)=>i%Math.max(1,Math.ceil(walkNodes.length/90))===0).map((n,i)=>({
           type:'walk_node',id:'osm-walk:'+n.id,_lat:n.lat,_lng:n.lng,
           _isTouristGuide:false,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
           _fullAddress:'Пешеходная дорожка OpenStreetMap',tags:{name:'Прогулочная точка '+(i+1)}
@@ -1391,7 +1391,8 @@ try {
       // attempt a simple walking loop using only REAL OSM road nodes. It will
       // never claim to visit monuments or unlock a photograph reward.
       if((!best||best.diff>tolAccept)&&!syntheticWalk){
-        const streetNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
+        const allStreetNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
+        const streetNodes=allStreetNodes.filter((_,i)=>i%Math.max(1,Math.ceil(allStreetNodes.length/120))===0);
         const toPoi=(n,i)=>({
           type:'walk_node',id:'osm-walk:'+n.id,_lat:n.lat,_lng:n.lng,
           _isTouristGuide:false,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
