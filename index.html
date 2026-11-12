@@ -742,7 +742,7 @@ try {
       yHomeMap.events.add('click',e=>{if(avoidPickMode!=='home')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
       yMap.events.add('click',e=>{if(avoidPickMode!=='route')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
       // Deliberate map gestures pause auto-follow; users can resume with the locator.
-      yMap.events.add('actionbegin',()=>{followGps=false;syncFollowButton();});
+      realEl.addEventListener('pointerdown',()=>{followGps=false;syncFollowButton();},{passive:true});
       renderNoGoZones();
       if(rr.legs.length)showYandexLeg(Math.max(0,rr.current-1),true);
     }catch(e){
