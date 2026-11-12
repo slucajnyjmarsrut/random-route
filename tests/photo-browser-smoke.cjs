@@ -95,12 +95,54 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     assert.equal(valid.coins,25);
     assert.equal(valid.photoEvents,1);
     assert.equal(valid.nextVisible,true);
+    await page.waitForFunction(()=>!document.querySelector('#historyBlock').classList.contains('hidden')
+      &&document.querySelectorAll('#questOptions .quest-option').length>=3,null,{timeout:7000});
+    const readable=async()=>{
+      return page.evaluate(()=>{
+        const btn=document.querySelector('#questOptions .quest-option');
+        const history=document.querySelector('#historyBlock');
+        const css=getComputedStyle(btn),card=getComputedStyle(history);
+        return {
+          option:btn.textContent.trim(),foreground:css.color,background:css.backgroundColor,
+          historyForeground:getComputedStyle(document.querySelector('#historyText')).color,
+          historyBackground:card.backgroundColor
+        };
+      });
+    };
+    const luminance=color=>{
+      const rgb=color.match(/[0-9.]+/g).slice(0,3).map(x=>Number(x)/255);
+      const vals=rgb.map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);
+      return 0.2126*vals[0]+0.7152*vals[1]+0.0722*vals[2];
+    };
+    const ratio=(a,b)=>{const [l1,l2]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (l1+.05)/(l2+.05)};
+    const dark=await readable();
+    assert.ok(dark.option.length>=5,'empty quest label under graphite');
+    assert.ok(ratio(dark.foreground,dark.background)>=4.5,'quest button not readable in graphite: '+JSON.stringify(dark));
+    assert.ok(ratio(dark.historyForeground,dark.historyBackground)>=4.5,'history text not readable in graphite: '+JSON.stringify(dark));
+    await page.evaluate(()=>document.documentElement.setAttribute('data-rr-theme','light'));
+    const light=await readable();
+    assert.ok(ratio(light.foreground,light.background)>=4.5,'quest button unreadable in light theme: '+JSON.stringify(light));
+    await page.evaluate(()=>document.documentElement.setAttribute('data-rr-theme','graphite'));
     // Replaying the same photo for the same checkpoint may not mint again.
     await page.evaluate(()=>document.querySelector('#verifyBtn').classList.remove('hidden'));
     await page.locator('#verifyBtn').click();
     await page.waitForTimeout(350);
     const repeat=await page.evaluate(()=>({coins:window.state.coins,photos:window.__verifiedStats().photos}));
     assert.deepEqual(repeat,{coins:25,photos:1});
+    // A genuinely matched photo and its event-ledger proof survive reload.
+    await page.reload({waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>window.__yakutskRR?.stage==='verified'
+      &&!document.querySelector('#historyBlock').classList.contains('hidden'),null,{timeout:13000});
+    const resumed=await page.evaluate(()=>({
+      proof:window.__yakutskRR.photoProof,
+      photos:window.__verifiedStats().photos,
+      history:document.querySelector('#historyTitle').textContent,
+      quiz:document.querySelectorAll('#questOptions .quest-option').length
+    }));
+    assert.ok(resumed.proof&&resumed.proof.routeId==='photo-e2e-gps-2026');
+    assert.equal(resumed.photos,1);
+    assert.match(resumed.history,/Тестовый памятник/);
+    assert.ok(resumed.quiz>=3);
     assert.equal(errors.filter(e=>/TypeError|ReferenceError/.test(e)).length,0,errors.join(' | '));
     console.log('PHOTO_GPS_BROWSER_OK wrong photo rejected; matching photo accepted; 25 RC once; next leg unlocked');
     // Regression: a previously saved "photo optional" route with a NAMED
@@ -151,6 +193,11 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
       rr.usePhotoOptional=true;rr.routeSynthetic=false;rr.stage='walking';
       rr.checkpoints=[{lat:62.022376,lng:129.724729,guideName:'Памятная ограда Реального училища'}];
       rr.currentPhotoFile=null;
+      // Mimic stale HTML left by an old build; selecting a missing photo
+      // MUST hide the old "История: Точка 1" and empty mini-quest.
+      document.querySelector('#historyBlock').classList.remove('hidden');
+      document.querySelector('#historyTitle').textContent='История: Точка 1';
+      document.querySelector('#questBlock').classList.remove('hidden');
       document.querySelector('#demoGpsBtn').click();
     });
     await demo.waitForFunction(()=>window.__yakutskRR?.stage==='photo_unavailable',null,{timeout:18000});
