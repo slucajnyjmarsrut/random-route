@@ -7,8 +7,12 @@ on:
 jobs:
   static-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -98,6 +102,18 @@ jobs:
           }
           console.log('Static checks passed');
           NODE
-      - name: Live Yakutsk OSM walking loop test
-        timeout-minutes: 2
+      - name: Prepare a real OSM city-centre graph (only if absent)
+        timeout-minutes: 3
+        run: python3 scripts/build-static-osm.py
+      - name: Verify a real Yakutsk walking loop from saved OSM data
         run: node tests/live-osm-smoke.test.cjs
+      - name: Commit verified offline OSM graph to project branch
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/mobile-one-hand-ux-2026'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/yakutsk-center-walking.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Добавить проверенные реальные пешеходные дорожки центра Якутска"
+            git push origin HEAD:feature/mobile-one-hand-ux-2026
+          fi
