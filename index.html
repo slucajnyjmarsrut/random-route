@@ -1314,18 +1314,21 @@ try {
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
       let usePhotoOptional=false;
-      if(near.length<2){
-        const routeOnly=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).map((p,i)=>({
-          type:'tourist_guide',id:'curated:'+i,_lat:Number(p.lat),_lng:Number(p.lng),
-          _isTouristGuide:true,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
-          _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
-          tags:{name:p.name||''}
-        }));
-        const known=new Set(near.map(p=>normalizeOcrText(p.tags?.name)));
-        near=near.concat(routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p)&&!known.has(normalizeOcrText(p.tags?.name))));
-        // Reference retrieval may still be in progress. Defer photo eligibility
-        // to each checkpoint instead of disabling photo rewards for the whole walk.
-      }
+      // Include additional known pedestrian destinations even when a few
+      // photo-backed places exist. With only two neighbouring photo locations,
+      // Dijkstra could not build a 3 km loop and always fell back to OSM nodes.
+      const routeOnly=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false
+        &&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).map((p,i)=>({
+        type:'tourist_guide',id:'curated:'+i,_lat:Number(p.lat),_lng:Number(p.lng),
+        _isTouristGuide:true,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+        _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
+        tags:{name:p.name||''}
+      }));
+      const known=new Set(near.map(p=>normalizeOcrText(p.tags?.name)));
+      near=near.concat(routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p)
+        &&!known.has(normalizeOcrText(p.tags?.name))));
+      // Reference retrieval can still fail, in which case each named
+      // checkpoint shows retry/replace rather than auto-awarding anything.
       // Public tourist POIs may be far from the user's position or isolated
       // from a real walking path. Remove inaccessible/duplicate snapped nodes
       // BEFORE spending 4 Dijkstra attempts on impossible waypoint combinations.
@@ -1353,6 +1356,10 @@ try {
       const mkCandidate=()=>{
         const kMax=Math.min(nMax,near.length),k=kMax===1?1:2+Math.floor(dailyRandom()*(kMax-1));
         const picked=[];
+        // Try at least one verified reference per proposed sightseeing route.
+        // A route still has to pass actual Dijkstra length and connectivity checks.
+        const photoCandidates=near.filter(p=>!!p._referenceUrl);
+        if(photoCandidates.length)picked.push(photoCandidates[Math.floor(dailyRandom()*photoCandidates.length)]);
         for(const p of [...near].sort(()=>dailyRandom()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
         if(picked.length<1)return null;
         const off=dailyRandom()*360,cw=dailyRandom()<.5?1:-1;
