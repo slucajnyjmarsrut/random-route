@@ -1584,7 +1584,7 @@ try {
     });
   }
   async function imageFromRemote(url){
-    const r=await fetch(url,{mode:'cors',cache:'force-cache'});if(!r.ok)throw new Error('Эталон этого же объекта на карте недоступно.');
+    const r=await fetch(url,{mode:'cors',cache:'force-cache'});if(!r.ok)throw new Error('Эталонная фотография недоступна. Повторите проверку или замените точку.');
     return imageFromBlob(await r.blob());
   }
   function cosine(a,b){
