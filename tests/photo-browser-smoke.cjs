@@ -34,6 +34,15 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     await page.goto(root+'/index.html',{waitUntil:'domcontentloaded',timeout:20000});
     await page.waitForFunction(()=>!!window.__yakutskRR&&!!window.state);
     await page.evaluate(()=>{
+      // The routing smoke test above checks Chromium's geolocation permission.
+      // Here we make individual GPS readings deterministic so photo + reward
+      // checks cannot fail because of the headless provider timing out.
+      window.__photoTestLat=62.0274;
+      Object.defineProperty(navigator.geolocation,'getCurrentPosition',{
+        configurable:true,value:success=>success({coords:{
+          latitude:window.__photoTestLat,longitude:129.732,accuracy:12,speed:0
+        },timestamp:Date.now()})
+      });
       const rr=window.__yakutskRR;
       rr.routeId='photo-e2e-gps-2026';rr.startMode='gps';rr.usePhotoOptional=false;
       rr.current=1;rr.stage='photo';rr.currentPhotoFile=null;
@@ -66,6 +75,13 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
         nextVisible:!document.querySelector('#nextBtn').classList.contains('hidden')
       }));
     }
+    // Even a matching-looking picture cannot unlock a distant checkpoint.
+    await page.evaluate(()=>{window.__photoTestLat=62.035;window.__yakutskRR.lastGpsPos=null});
+    const far=await verify('#ea3323','far.svg');
+    assert.match(far.text,/слишком далеко/i);
+    assert.equal(far.coins,0);
+    assert.equal(far.nextVisible,false);
+    await page.evaluate(()=>{window.__photoTestLat=62.0274;window.__yakutskRR.lastGpsPos=null});
     const invalid=await verify('#2365ef','wrong.svg');
     assert.match(invalid.text,/не похоже/i);
     assert.equal(invalid.stage,'photo_ready');
