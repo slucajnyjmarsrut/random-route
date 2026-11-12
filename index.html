@@ -230,6 +230,7 @@ try {
  </div>
 </details>
 <button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
+<p id="routeBuildStatus" class="rr-build-status" role="status" aria-live="polite" hidden></p>
 <p class="rr-create-final-note">Нужен интернет. Для настоящей прогулки разрешите GPS. Всегда проверяйте дорожные условия.</p>
 <details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
@@ -1162,7 +1163,7 @@ try {
       directions_options:{units:'kilometers',language:'ru-RU'}
     };
     const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.max(900,Math.min(6000,Number(opts.timeoutMs)||6000)));
     let res;
     try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
     finally {clearTimeout(timer);}
@@ -1181,13 +1182,15 @@ try {
     return {code:'Ok',source:'valhalla',routes:[{distance,duration,legs,geometry:{type:'LineString',coordinates:allCoords}}],waypoints};
   }
   async function requestFootRoute(points,opts={}){
-    try{
-      if(!window.RRWalkingDijkstra?.requestRoute)throw new Error('DijkstraUnavailable');
-      return await window.RRWalkingDijkstra.requestRoute(points,{distanceKm:opts.distanceKm||Number($('#distanceInput').value)||3,zones:rr.noGoZones});
-    }catch(e){
-      console.info('OSM Dijkstra unavailable for this route, using pedestrian Valhalla:',e?.message||e);
-      return await requestValhallaFootRoute(points,opts);
+    // Only run Dijkstra synchronously when a complete real OSM graph is ALREADY
+    // in memory. Do not block each attempt on public Overpass HTTP requests.
+    const engine=window.RRWalkingDijkstra;
+    const km=opts.distanceKm||Number($('#distanceInput').value)||3;
+    if(engine?.hasWarmGraph?.(points[0],km)){
+      try{return await engine.requestRoute(points,{distanceKm:km,zones:rr.noGoZones});}
+      catch(e){console.info('Cached pedestrian graph has no suitable path, using Valhalla:',e?.message||e);}
     }
+    return requestValhallaFootRoute(points,opts);
   }
   function legCoords(leg){
     const out=[];(leg?.steps||[]).forEach(step=>(step.geometry?.coordinates||[]).forEach(c=>{const p=[c[1],c[0]],last=out[out.length-1];if(!last||Math.abs(last[0]-p[0])>1e-8||Math.abs(last[1]-p[1])>1e-8)out.push(p)}));return out;
