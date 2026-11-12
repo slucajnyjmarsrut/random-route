@@ -456,7 +456,7 @@ try {
   <div class="lab-card">
     <h2>Как это связано с проектом</h2>
     <p class="lab-warning">Дейкстра находит кратчайший путь между двумя точками при неотрицательных весах. Кольцевая прогулка заданной длины — другая задача: для неё нужны промежуточные точки, объединение участков и контроль повторов.</p>
-    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении реальные пешеходные маршруты рассчитываются через Valhalla; лаборатория не меняет GPS, маршруты или RouteCoin.</p>
+    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении сначала применяется Дейкстра по OSM, а если граф недоступен — пешеходный Valhalla. Эта учебная лаборатория не меняет GPS, маршруты или RouteCoin.</p>
   </div>
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
@@ -474,7 +474,7 @@ try {
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const nativeApkMode=new URLSearchParams(location.search).get('apk')==='1';
-  const state = window.state = {distance:+(localStorage.getItem('rr_distance')||6.5),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')!=='0',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||0),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||1),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
+  const state = window.state = {distance:+(localStorage.getItem('rr_distance')||3),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')==='1',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||0),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||1),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
   const safeJSON=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}};
   state.badgeStats=Object.assign({photoVerified:0,questsCorrect:0,routesCompleted:0},safeJSON('rr_badge_stats',{}));
   state.earnedBadges=new Set(safeJSON('rr_earned_badges',[]));
@@ -652,7 +652,7 @@ try {
   const rr = window.__yakutskRR = {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:saved?.legs||[], checkpoints:saved?.checkpoints||[], current:saved?.current||1,
-    routeDistance:saved?.routeDistance||0, routeEngine:saved?.routeEngine||'', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||6.5), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
+    routeDistance:saved?.routeDistance||0, routeEngine:saved?.routeEngine||'', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||3), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
     currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
@@ -1006,7 +1006,7 @@ try {
     const coffee=$('#partnerToggle');if(coffee)coffee.setAttribute('aria-pressed',String(coffee.classList.contains('on')));
   }
   $$('[data-distance-km]').forEach(b=>b.addEventListener('click',()=>{
-    $('#distanceInput').value=b.dataset.distanceKm;$('#distanceInput').dispatchEvent(new Event('input',{bubbles:true}));
+    $('#distanceInput').value=b.dataset.distanceKm;$('#rrCustomDistance').open=false;$('#distanceInput').dispatchEvent(new Event('input',{bubbles:true}));
     syncRouteChoiceButtons();
   }));
   $('#distanceInput').addEventListener('input',()=>{
@@ -2468,7 +2468,7 @@ try {
   $('#exitRouteConfirm').onclick=()=>{$('#exitRouteModal').classList.remove('show');clearActiveRoute()};
 
   function restoreUI(){
-    if(window.state){$('#distanceInput').value=window.state.distance||6.5;$('#activeDistanceInput').value=window.state.distance||6.5;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner);syncRouteChoiceButtons()}
+    if(window.state){$('#distanceInput').value=window.state.distance||3;$('#activeDistanceInput').value=window.state.distance||3;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner);syncRouteChoiceButtons();if(!$$('[data-distance-km]').some(b=>Number(b.dataset.distanceKm)===Number($('#distanceInput').value)))$('#rrCustomDistance').open=true;}
     renderNoGoZones();
     if(rr.livePos)updateMarkers(rr.livePos,false);else updateMarkers(rr.start,false);
     if(rr.legs.length){
