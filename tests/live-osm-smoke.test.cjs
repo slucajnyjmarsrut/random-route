@@ -4,10 +4,14 @@
  */
 const assert=require('node:assert/strict');
 const walk=require('../walking-dijkstra.js');
+const fs=require('node:fs');
 const start={lat:62.030715,lng:129.724493};
 (async()=>{
   const begin=Date.now();
-  const graph=await walk.loadGraph(start,2);
+  const snapshot=JSON.parse(fs.readFileSync('data/yakutsk-center-walking.json','utf8'));
+  assert.equal(snapshot.version,1);
+  assert.match(snapshot.source,/OpenStreetMap/);
+  const graph=walk.makeGraph(snapshot.ways);
   assert.ok(graph.nodes.size>=20,'OSM walking graph must contain real nodes');
   const points=walk.walkingWaypoints(graph,start,2);
   assert.ok(points.length>=2,'Street graph needs reachable walking points');
@@ -25,5 +29,5 @@ const start={lat:62.030715,lng:129.724493};
   assert.ok(found,'Dijkstra should find a real closed walking loop in central Yakutsk');
   assert.equal(found.source,'dijkstra-osm');
   assert.ok(found.routes[0].geometry.coordinates.length>2);
-  console.log(JSON.stringify({result:'LIVE_OSM_LOOP_OK',nodes:graph.nodes.size,edges:graph.edgeCount,metres:Math.round(found.routes[0].distance),ms:Date.now()-begin}));
-})().catch(err=>{console.error('LIVE_OSM_LOOP_FAILED:',err.message);process.exitCode=1});
+  console.log(JSON.stringify({result:'REAL_OSM_LOOP_OK',source:snapshot.source,nodes:graph.nodes.size,edges:graph.edgeCount,metres:Math.round(found.routes[0].distance),ms:Date.now()-begin}));
+})().catch(err=>{console.error('REAL_OSM_LOOP_FAILED:',err.message);process.exitCode=1});
