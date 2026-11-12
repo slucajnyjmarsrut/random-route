@@ -664,12 +664,12 @@ try {
   const saved=(()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}})();
   const rr = window.__yakutskRR = {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
-    legs:saved?.routeEngine==='valhalla'?[]:(saved?.legs||[]), checkpoints:saved?.routeEngine==='valhalla'?[]:(saved?.checkpoints||[]), current:saved?.routeEngine==='valhalla'?1:(saved?.current||1),
-    routeDistance:saved?.routeEngine==='valhalla'?0:(saved?.routeDistance||0), routeEngine:saved?.routeEngine==='valhalla'?'':(saved?.routeEngine||''), routeTheme:saved?.routeTheme||'city', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||3), stage:saved?.routeEngine==='valhalla'?'idle':(saved?.stage||'idle'), currentPoi:saved?.routeEngine==='valhalla'?null:(saved?.currentPoi||null),
+    legs:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.legs||[]), checkpoints:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.checkpoints||[]), current:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?1:(saved?.current||1),
+    routeDistance:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?0:(saved?.routeDistance||0), routeEngine:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'':(saved?.routeEngine||''), routeTheme:saved?.routeTheme||'city', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||3), stage:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'idle':(saved?.stage||'idle'), currentPoi:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?null:(saved?.currentPoi||null),
     currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
-    watchId:null, activeScreen:saved?.routeEngine==='valhalla'?'home':(saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home'),
+    watchId:null, activeScreen:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'home':(saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home'),
     scrolls:saved?.scrolls||{}, gpsAccuracy:saved?.gpsAccuracy||null, lastGpsAt:saved?.lastGpsAt||0, lastGpsPos:saved?.lastGpsPos||null, suspiciousGps:false, autoGpsBusy:false, gpsFresh:false,
     dailyOfferId:saved?.dailyOfferId||null,dailyOfferDay:saved?.dailyOfferDay||null,routeVariant:saved?.routeVariant||0, currentPhotoFile:null, replacementsUsed:saved?.replacementsUsed||0, routeId:saved?.routeId||null, routeStartedAt:saved?.routeStartedAt||0, trackedDistanceM:Number(saved?.trackedDistanceM||0), trackLastPos:saved?.trackLastPos||null, trackLastAt:saved?.trackLastAt||0, legProgress:(saved?.legProgress&&typeof saved.legProgress==='object')?saved.legProgress:{},
     noGoZones:Array.isArray(saved?.noGoZones)?saved.noGoZones:(()=>{try{return JSON.parse(localStorage.getItem('rr_no_go_zones')||'[]')}catch(e){return []}})()
