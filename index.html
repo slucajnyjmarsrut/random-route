@@ -2488,7 +2488,7 @@ try {
     try{await preparePoi()}finally{btn.disabled=false;btn.textContent='↻ Повторить поиск эталонного фото'}
   };
 
-  $('#cameraInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;rr.currentPhotoFile=f;const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');$('#photoCheck').className='check';$('#photoCheck b').textContent='Готово к проверке';$('#verifyBtn').classList.remove('hidden');rr.stage='photo_ready';saveSession()};
+  $('#cameraInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;rr.currentPhotoFile=f;$('#verificationMessage').className='hidden';$('#verificationMessage').textContent='';const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');$('#photoCheck').className='check';$('#photoCheck b').textContent='Готово к проверке';$('#verifyBtn').classList.remove('hidden');rr.stage='photo_ready';saveSession()};
   async function loadHistory(){
     const block=$('#historyBlock'),title=$('#historyTitle'),text=$('#historyText'),source=$('#historySource');block.classList.remove('hidden');$('#questBlock').classList.remove('hidden');const poi=rr.currentPoi,name=poi?.tags?.name||`Точка ${rr.current}`;title.textContent='История: '+name;
     let body=poi?._historyText||poi?._description||'Вы открыли место из проверенного белого списка. Для него пока нет короткой исторической справки.';source.textContent=poi?._sourceName?('Источник точки: '+poi._sourceName):'Карточка места';const wp=poi?.tags?.wikipedia;
