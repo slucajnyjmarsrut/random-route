@@ -51,6 +51,38 @@ async function main(){
   assert.ok(state.panelVisible,'mobile navigation card should be visible');
   assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,'uncaught runtime JS errors: '+errors.join(' | '));
   console.log('MOBILE_BROWSER_DIJKSTRA_OK '+JSON.stringify(state));
+  // Separate phone context, not demo: pressing Build should request GPS and
+  // CONTINUE ON ITS OWN after the user approves location. Geolocation is
+  // emulated by Chromium, not a physical handset.
+  const gpsContext=await browser.newContext({
+    viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,
+    geolocation:{latitude:62.0274,longitude:129.732,accuracy:12},
+    permissions:['geolocation']
+  });
+  try{
+    const gpsPage=await gpsContext.newPage();
+    await gpsPage.route('**/*',route=>{
+      const url=route.request().url();
+      return url.startsWith('http://127.0.0.1:8765/')?route.continue():route.abort();
+    });
+    await gpsPage.goto('http://127.0.0.1:8765/index.html',{waitUntil:'domcontentloaded',timeout:20000});
+    await gpsPage.locator('#homeOpenCreateBtn').click();
+    await gpsPage.locator('[data-distance-km="3"]').click();
+    await gpsPage.locator('#buildBtn').click();
+    await gpsPage.waitForFunction(()=>document.getElementById('route')?.classList.contains('active'),null,{timeout:25000});
+    const gpsState=await gpsPage.evaluate(()=>({
+      engine:window.__yakutskRR?.routeEngine,
+      startMode:window.__yakutskRR?.startMode,
+      legs:window.__yakutskRR?.legs?.length,
+      actualDistanceM:window.__yakutskRR?.routeDistance,
+      gpsFresh:window.__yakutskRR?.gpsFresh
+    }));
+    assert.equal(gpsState.engine,'dijkstra-osm');
+    assert.equal(gpsState.startMode,'gps');
+    assert.ok(gpsState.gpsFresh&&gpsState.legs>=2);
+    console.log('MOBILE_GPS_AUTO_BUILD_OK '+JSON.stringify(gpsState));
+  }finally{await gpsContext.close();}
+
  }finally{await browser.close();}
 }
 main().catch(e=>{console.error(e.stack||e);process.exitCode=1});
