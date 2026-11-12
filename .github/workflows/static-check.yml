@@ -98,3 +98,6 @@ jobs:
           }
           console.log('Static checks passed');
           NODE
+      - name: Live Yakutsk OSM walking loop test
+        timeout-minutes: 2
+        run: node tests/live-osm-smoke.test.cjs
