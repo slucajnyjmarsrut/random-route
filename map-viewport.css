@@ -64,3 +64,59 @@
  #home #homeMap,#create #homeMap{height:clamp(235px,67dvh,460px);min-height:235px}
  .app .rr-map-expanded{height:100dvh!important}
 }
+
+/* Live walking instructions stay visible in full-screen mode. They mirror
+   the existing navigation panel; maps underneath remain draggable/zoomable. */
+.rr-map-hud{display:none;pointer-events:none}
+.app .rr-map-expanded .rr-map-hud{
+  display:block;position:absolute;z-index:2300;
+  top:calc(61px + env(safe-area-inset-top));
+  left:50%;transform:translateX(-50%);width:calc(100% - 24px);
+  max-width:570px;padding:13px 15px 11px;border-radius:19px;
+  background:rgba(16,43,38,.94);border:1px solid rgba(160,220,185,.68);
+  box-shadow:0 14px 35px rgba(0,0,0,.28);color:#f2fff6;
+  backdrop-filter:blur(10px);
+}
+.rr-map-hud-main{display:flex;align-items:center;gap:11px;min-width:0}
+.rr-map-hud-arrow{display:grid;place-items:center;flex:0 0 51px;
+  width:51px;height:51px;border-radius:14px;background:#276c50;
+  color:#effff4;font-size:36px;line-height:1}
+.rr-map-hud-copy{display:flex;flex-direction:column;min-width:0;gap:4px}
+.rr-map-hud-instruction{font-size:clamp(16px,3.7vw,21px);line-height:1.25;color:#fff;
+  overflow-wrap:anywhere}
+.rr-map-hud-detail{font-size:13px;line-height:1.35;color:#d5f2e0;overflow-wrap:anywhere}
+.rr-map-hud-stats{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:6px 12px;margin-top:10px;font-size:12px;line-height:1.35;color:#d5e9df}
+.rr-map-hud-stats b{font-size:16px;font-weight:900;color:#fff;margin-left:3px;white-space:nowrap}
+.rr-map-hud-gps{padding:4px 7px;border-radius:8px;background:rgba(69,142,105,.55);
+  color:#fff;font-size:11px;font-weight:850}
+.rr-map-hud-legend{display:block;font-size:10px;line-height:1.35;
+  color:#c5dfd0;margin-top:9px}
+.rr-map-hud.rr-map-hud-poor{border-color:#d8b777}
+.rr-map-hud.rr-map-hud-poor .rr-map-hud-gps{background:#735b29}
+.rr-map-hud.rr-map-hud-offtrack{border-color:#f0a095;background:#523332}
+.rr-map-hud.rr-map-hud-offtrack .rr-map-hud-arrow{background:#754441}
+@media(max-width:599px){
+ .app .rr-map-expanded .rr-map-hud{
+   top:calc(56px + env(safe-area-inset-top));padding:11px 12px 10px;
+   border-radius:16px;
+ }
+ .rr-map-hud-arrow{flex-basis:43px;width:43px;height:43px;font-size:31px}
+ .rr-map-hud-instruction{font-size:16px}
+ .rr-map-hud-detail{font-size:12px}
+ .rr-map-hud-stats{font-size:11px;margin-top:7px}
+ .rr-map-hud-stats b{font-size:14px}
+ .rr-map-hud-legend{font-size:10px;margin-top:6px}
+}
+@media(orientation:landscape) and (max-height:500px){
+ .app .rr-map-expanded .rr-map-hud{
+   top:calc(42px + env(safe-area-inset-top));padding:7px 11px;
+   width:min(540px,calc(100% - 20px));border-radius:13px;
+ }
+ .rr-map-hud-main{gap:8px}
+ .rr-map-hud-arrow{flex-basis:34px;width:34px;height:34px;font-size:26px;border-radius:9px}
+ .rr-map-hud-instruction{font-size:14px}
+ .rr-map-hud-detail,.rr-map-hud-legend{display:none}
+ .rr-map-hud-stats{margin-top:5px;font-size:10px}
+ .rr-map-hud-stats b{font-size:12px}
+}
