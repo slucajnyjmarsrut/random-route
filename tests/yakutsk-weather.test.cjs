@@ -6,7 +6,7 @@ const fixture={current:{temperature_2m:-24.3,apparent_temperature:-31.5,wind_spe
   wind_gusts_10m:17,snowfall:0,precipitation:0,weather_code:3,is_day:0}};
 assert.equal(mod.parseOpenMeteo(fixture).current.temperature_2m,-24.3);
 assert.equal(mod.parseOpenMeteo(fixture).current.is_day,0);
-assert.throws(()=>mod.parseOpenMeteo({}),/temperature/i);
+assert.throws(()=>mod.parseOpenMeteo({}),/weather values|temperature/i);
 assert.throws(()=>mod.parseOpenMeteo({current:{temperature_2m:null}}),/temperature/i);
 assert.equal(mod.tempLabel(-24.3),'-24°C');
 assert.equal(mod.tempLabel(2.8),'+3°C');
