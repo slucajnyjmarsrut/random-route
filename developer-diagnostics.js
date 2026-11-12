@@ -112,8 +112,8 @@ function mount(doc){
    add("Безопасность улиц",null,"Не подтверждает уборку снега, работу фонарей или отсутствие гололёда.");
    const live=await Promise.all([
      withTimeout(()=>window.__rrDeveloperRouteProbe?.(),15500).then(x=>
-       makeCheck("Пешеходный маршрут Valhalla",!!(x&&x.mode==="pedestrian"&&x.distanceM>0),x?"Длина тестового пути "+x.distanceM+" м":"Ответ не получен"))
-       .catch(e=>makeCheck("Пешеходный маршрут Valhalla",false,String(e.message||e))),
+       makeCheck("Пешеходный маршрут Дейкстры",!!(x&&x.mode==="pedestrian"&&x.engine==="dijkstra-osm"&&x.distanceM>0),x?"Длина тестового пути "+x.distanceM+" м":"Ответ не получен"))
+       .catch(e=>makeCheck("Пешеходный маршрут Дейкстры",false,String(e.message||e))),
      checkHTTP("https://api.open-meteo.com/v1/forecast?latitude=62.027&longitude=129.732&current=temperature_2m&timezone=Asia%2FYakutsk",s=>{
        try{return Number.isFinite(JSON.parse(s)?.current?.temperature_2m)}catch(_){return false;}
      }).then(()=>makeCheck("Сервис погоды Open-Meteo",true,"Температура получена с сервера"))

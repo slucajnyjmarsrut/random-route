@@ -31,6 +31,8 @@ jobs:
           node tests/dijkstra-lab.test.cjs
           node --check walking-dijkstra.js
           node tests/walking-dijkstra.test.cjs
+          node --check route-ai.js
+          node tests/route-ai.test.cjs
           node tests/fast-route-building.test.cjs
           node --check map-fallback.js
           node --check smart-route-chat.js
@@ -51,7 +53,7 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','yakutsk-weather.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','route-navigation.js','route-navigation.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
+          for(const name of ['smart-safety.js','yakutsk-weather.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','route-ai.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','route-navigation.js','route-navigation.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('yakutsk-weather.js?v=1.0')||!html.includes('smart-safety.js?v=1.2'))throw new Error('Independent auto-weather module missing');
@@ -86,8 +88,8 @@ jobs:
           if(!html.includes('simple-home.css?v=1.0')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
           if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
           if(!html.includes('id="rrHomeWeatherValue"') || !html.includes('id="homeOpenCreateBtn"') || !html.includes('id="rrNavPanel"'))throw new Error('Simple home or GPS navigation missing');
-          const expected = ["costing:'pedestrian'","walkway_factor:0.65","sidewalk_factor:0.70","alley_factor:6.0","driveway_factor:9.0"];
-          expected.forEach(value => { if (!html.includes(value)) throw new Error('Pedestrian preference missing: '+value); });
+          if(!html.includes('RRWalkingDijkstra.requestRoute')||!html.includes('RRRouteAI?.score'))throw new Error('Dijkstra/learned route selection missing');
+          if(/valhalla/i.test(html))throw new Error('Only Dijkstra can calculate routes');
           const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
           if(!manifest.icons.find(x=>x.purpose==='maskable'))throw new Error('Maskable PWA icon missing');
           for(const p of ['icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg']){

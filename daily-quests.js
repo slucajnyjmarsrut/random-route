@@ -1,6 +1,6 @@
 /* Routes of the Day — one RouteCoin bonus for a completed daily walk.
  * Offers are deterministic by Yakutsk calendar day; actual routes are computed
- * by the existing pedestrian Valhalla generator after the user selects one.
+ * by OSM Dijkstra, based on the chosen tourist points.
  */
 (function(root,factory){
  "use strict";

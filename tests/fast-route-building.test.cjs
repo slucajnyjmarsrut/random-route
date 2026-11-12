@@ -13,10 +13,11 @@ assert.doesNotMatch(build,/iter<14|8500|await touristPool\(\)/,'photo data must 
 assert.match(build,/touristPoolPromise\.catch/,'completed photo catalog may still be used');
 assert.match(build,/remainingMs=.*routeBudgetMs/,'HTTP timeout must use the remaining time budget');
 assert.match(build,/if\(diff<=tolAccept\)break/,'stop once a route is acceptable');
+assert.match(build,/RRRouteAI\?\.score\?\./,'learning model ranks random tourist points');
 assert.match(build,/id="routeBuildStatus"|report\('Строим пешеходный маршрут/,'screen-reader progress must be updated');
-assert.match(foot,/engine\?\.hasWarmGraph\?\./);
-assert.doesNotMatch(foot,/await .*loadGraph|await .*preload/,'never block route attempts on an OSM network prewarm');
-assert.match(html,/Math\.min\(6000,Number\(opts\.timeoutMs\)\)/,'HTTP calls within generation are capped');
+assert.match(foot,/RRWalkingDijkstra\.requestRoute\(points/);
+assert.match(build,/await window\.RRWalkingDijkstra\.loadGraph\(rr\.start,input\)/,'load the real OSM graph once before ranking');
+assert.doesNotMatch(html,/valhalla/i,'only Dijkstra should be in the live route planner');
 assert.match(dijkstra,/function hasWarmGraph\(/);
 assert.match(dijkstra,/function preload\(/);
 assert.match(css,/\.rr-build-status/);

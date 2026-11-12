@@ -1,6 +1,6 @@
 /* Experimental production routing: Dijkstra on real OSM pedestrian ways.
  * Map remains Yandex; live OSM is retrieved from public Overpass endpoints.
- * On errors the caller must fall back to Valhalla. No straight-line route substitution.
+ * No other routing engine or straight-line substitution is allowed.
  */
 (function(root,factory){
   'use strict';
@@ -12,7 +12,8 @@
   const ENDPOINTS=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
   const ROAD_TYPES='footway|path|pedestrian|steps|living_street|residential|service|unclassified|tertiary|secondary|primary|track|cycleway';
   const LIMIT_NODES=55000,LIMIT_EDGES=145000;
-  const cached={value:null,key:'',expires:0,promise:null,unavailableUntil:0};
+  // Two bounded cached graphs allow route length changes without reloading OSM.
+  const graphCache=new Map(),pending=new Map();let unavailableUntil=0;
   function distance(a,b){
     const lat=(a.lat+b.lat)*Math.PI/360;
     return Math.hypot((a.lat-b.lat)*111195,(a.lng-b.lng)*111195*Math.cos(lat));
@@ -148,42 +149,46 @@
       }
     }
     const locs=ids.map(id=>{const p=graph.nodes.get(id);return {location:[p.lng,p.lat],name:''};});
-    return {code:'Ok',source:'dijkstra-osm',routes:[{distance:full,duration:full/1.3,legs}],waypoints:locs};
+    const allCoords=legs.flatMap(l=>l.steps.flatMap(step=>step.geometry.coordinates));
+    return {code:'Ok',source:'dijkstra-osm',routes:[{distance:full,duration:full/1.3,legs,
+      geometry:{type:'LineString',coordinates:allCoords}}],waypoints:locs};
+  }
+  function graphRadius(requestedKm){return Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));}
+  function graphKey(start,requestedKm){
+    const radius=graphRadius(requestedKm);
+    return bbox(start,radius).map(v=>v.toFixed(3)).join(':')+':'+radius;
+  }
+  function hasWarmGraph(start,requestedKm=3){
+    try{const item=graphCache.get(graphKey(start,requestedKm));return !!item&&item.expires>Date.now();}
+    catch(e){return false;}
   }
   async function loadGraph(start,requestedKm){
-    const radius=Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));
-    const area=bbox(start,radius),key=area.map(v=>v.toFixed(2)).join(':')+':'+radius;
-    if(cached.value&&cached.key===key&&cached.expires>Date.now())return cached.value;
-    if(cached.unavailableUntil>Date.now())throw Error('OSMUnavailable');
-    if(cached.promise&&cached.key===key)return cached.promise;
-    cached.key=key;
-    cached.promise=(async()=>{
+    const radius=graphRadius(requestedKm),area=bbox(start,radius),key=graphKey(start,requestedKm);
+    const item=graphCache.get(key);
+    if(item&&item.expires>Date.now())return item.graph;
+    if(pending.has(key))return pending.get(key);
+    if(unavailableUntil>Date.now())throw Error('OSMUnavailable');
+    const work=(async()=>{
       const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
       let lastError;
       for(const endpoint of ENDPOINTS){
-        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4500);
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
         try{
           const response=await fetch(endpoint+urlQuery,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/json'}});
           if(!response.ok)throw Error('Overpass '+response.status);
           const result=await response.json();
           const graph=makeGraph(result?.elements?.filter(e=>e.type==='way')||[]);
-          cached.value=graph;cached.expires=Date.now()+5*60*1000;
+          graphCache.delete(key);graphCache.set(key,{graph,expires:Date.now()+30*60*1000});
+          while(graphCache.size>2)graphCache.delete(graphCache.keys().next().value);
           return graph;
         }catch(e){lastError=e;}
         finally{clearTimeout(timer);}
       }
-      cached.unavailableUntil=Date.now()+2*60*1000;
+      unavailableUntil=Date.now()+20*1000;
       throw lastError||Error('OSMUnavailable');
     })();
-    try{return await cached.promise;}finally{cached.promise=null;}
-  }
-  function graphKey(start,requestedKm){
-    const radius=Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));
-    return bbox(start,radius).map(v=>v.toFixed(2)).join(':')+':'+radius;
-  }
-  function hasWarmGraph(start,requestedKm=3){
-    try{return !!cached.value&&cached.expires>Date.now()&&cached.key===graphKey(start,requestedKm);}
-    catch(e){return false}
+    pending.set(key,work);
+    try{return await work;}finally{pending.delete(key);}
   }
   function preload(start,requestedKm=3){
     if(Number(requestedKm)>12)return Promise.resolve(false);

@@ -1,5 +1,5 @@
 /* OSM fallback for the Yakutsk explorer when Yandex JS maps do not initialize.
- * Shows the real routed geometry from the existing Valhalla engine; no fake roads.
+ * Shows the real street geometry returned by the OSM Dijkstra engine; no fake roads.
  * Tile use is online only and always attributed.
  */
 (function(){
