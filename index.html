@@ -2683,7 +2683,22 @@ try {
         $('#gpsBtn').onclick=finishGps;
       } else {
         showLeg(Math.max(0,rr.current-1),false);resetPointUI();
-        if(['photo','photo_ready','verified'].includes(savedStage)){gpsAccepted(rr.startMode==='gps').then(()=>{if(savedStage==='verified'){rr.stage='verified';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';$('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');$('#lockLabel').textContent='Следующий участок готов';loadHistory();saveSession()}})}
+        if(['photo','photo_ready','photo_unavailable','verified'].includes(savedStage)){
+          const verifiedKey=(rr.routeId||'legacy')+':point:'+rr.current;
+          const provedPhoto=savedStage==='verified'&&!!rr.currentPoi?.tags?.name
+            && ((demoMode||isDeveloperMode())||window.__hasVerifiedEvent?.('photo_verified',verifiedKey)===true);
+          // An old "verified" GPS-only skip is not a completed photo task.
+          // On reload retry selecting the photo checkpoint instead of
+          // fabricating "Фото подтверждено" and an empty history/mini-quest.
+          gpsAccepted(rr.startMode==='gps'&&!demoMode&&!isDeveloperMode()).then(()=>{
+            if(provedPhoto){
+              rr.stage='verified';$('#photoCheck').className='check ok';
+              $('#photoCheck b').textContent='Подтверждено';
+              $('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');
+              $('#lockLabel').textContent='Следующий участок готов';loadHistory();saveSession();
+            }
+          }).catch(e=>console.warn('Photo checkpoint restore',e));
+        }
       }
     }
     showScreen(rr.activeScreen,{restoreScroll:true});
