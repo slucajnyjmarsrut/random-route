@@ -257,6 +257,7 @@ try {
 <div class="rr-osm-credit">Дорожные данные: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© участники OpenStreetMap</a> (ODbL)</div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
+<div class="hint" id="rrPhotoPlanStatus" aria-live="polite" style="margin:6px 0 10px;padding:10px 12px">Фотозадания: проверяем наличие эталонных снимков. Награды доступны только после проверки настоящего фото и GPS.</div>
 <details class="rr-create-details rr-route-extras" id="rrRouteExtras">
 <summary>⚙️ Изменить маршрут или исключить улицы</summary>
 <div class="rr-route-extra-content">
@@ -1314,18 +1315,21 @@ try {
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
       let usePhotoOptional=false;
-      if(near.length<2){
-        const routeOnly=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).map((p,i)=>({
-          type:'tourist_guide',id:'curated:'+i,_lat:Number(p.lat),_lng:Number(p.lng),
-          _isTouristGuide:true,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
-          _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
-          tags:{name:p.name||''}
-        }));
-        const known=new Set(near.map(p=>normalizeOcrText(p.tags?.name)));
-        near=near.concat(routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p)&&!known.has(normalizeOcrText(p.tags?.name))));
-        // Reference retrieval may still be in progress. Defer photo eligibility
-        // to each checkpoint instead of disabling photo rewards for the whole walk.
-      }
+      // Include additional known pedestrian destinations even when a few
+      // photo-backed places exist. With only two neighbouring photo locations,
+      // Dijkstra could not build a 3 km loop and always fell back to OSM nodes.
+      const routeOnly=YAKUTSK_GUIDE_SEEDS.filter(p=>p&&p.enabled!==false
+        &&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).map((p,i)=>({
+        type:'tourist_guide',id:'curated:'+i,_lat:Number(p.lat),_lng:Number(p.lng),
+        _isTouristGuide:true,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+        _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
+        tags:{name:p.name||''}
+      }));
+      const known=new Set(near.map(p=>normalizeOcrText(p.tags?.name)));
+      near=near.concat(routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p)
+        &&!known.has(normalizeOcrText(p.tags?.name))));
+      // Reference retrieval can still fail, in which case each named
+      // checkpoint shows retry/replace rather than auto-awarding anything.
       // Public tourist POIs may be far from the user's position or isolated
       // from a real walking path. Remove inaccessible/duplicate snapped nodes
       // BEFORE spending 4 Dijkstra attempts on impossible waypoint combinations.
@@ -1353,6 +1357,10 @@ try {
       const mkCandidate=()=>{
         const kMax=Math.min(nMax,near.length),k=kMax===1?1:2+Math.floor(dailyRandom()*(kMax-1));
         const picked=[];
+        // Try at least one verified reference per proposed sightseeing route.
+        // A route still has to pass actual Dijkstra length and connectivity checks.
+        const photoCandidates=near.filter(p=>!!p._referenceUrl);
+        if(photoCandidates.length)picked.push(photoCandidates[Math.floor(dailyRandom()*photoCandidates.length)]);
         for(const p of [...near].sort(()=>dailyRandom()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
         if(picked.length<1)return null;
         const off=dailyRandom()*360,cw=dailyRandom()<.5?1:-1;
@@ -1448,6 +1456,13 @@ try {
       usePhotoOptional=usePhotoOptional||syntheticWalk;
       rr.usePhotoOptional=usePhotoOptional;
       rr.routeSynthetic=syntheticWalk;
+      const backed=chosen.pois.filter(p=>!!p._referenceUrl).length;
+      const photoStatus=$('#rrPhotoPlanStatus');
+      if(photoStatus)photoStatus.textContent=syntheticWalk
+        ?'Это прогулка по дорожкам OSM без достопримечательностей. Фотозадания и фотонаграды не предусмотрены.'
+        :backed>0
+          ?'Фотозадания: '+backed+' из '+chosen.pois.length+' точек имеют предварительно найденные эталонные снимки. Для остальных попробуем загрузить фото при прибытии.'
+          :'Фотозадания: эталонные снимки заранее не найдены. У точек можно повторить поиск, заменить место или пройти без фотонаграды.';
       if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
       else if(usePhotoOptional)toast('Маршрут построен без фотозаданий: эталонные фотографии недоступны.');
       if(chosen.diff>tolAccept)toast('Найден безопасный маршрут длиной '+chosen.actual.toFixed(1).replace('.',',')+' км вместо '+input.toFixed(1).replace('.',',')+' км.');
@@ -1461,7 +1476,6 @@ try {
       $('#distanceInput').value=input.toFixed(1);$('#activeDistanceInput').value=input.toFixed(1);
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
       resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
-      if(!touristPoolPromise)setTimeout(()=>touristPool().catch(()=>{}),1400);
       window.dispatchEvent(new Event('rr:daily-route-built'));
       return true;
     }catch(e){
@@ -1789,7 +1803,8 @@ try {
             "sourceName": "2ГИС",
             "sourceUrl": "https://2gis.ru/yakutsk/geo/7037570202468366",
             "description": "Бронзовая композиция Семёна Дежнёва, Абакаяды и их сына Любима; установлена в 2005 году.",
-            "searchName": "Памятник С. Дежневу и Абакаяде Якутск"
+            "searchName": "Памятник С. Дежневу и Абакаяде Якутск",
+            "wikimediaFile": "Памятник великому землепроходцу Семену Дежневу и его жене Абакаяде ул. Кирова 21 Якутск Саха (Якутия).jpg"
         },
         {
             "name": "Памятник П. А. Ойунскому",
@@ -1850,7 +1865,9 @@ try {
             "lat": 62.0324,
             "lng": 129.7243,
             "sourceName": "туристический белый список",
-            "searchName": "Государственный цирк Республики Саха Якутск"
+            "searchName": "Государственный цирк Республики Саха Якутск",
+            "description": "Здание Государственного цирка Республики Саха в Якутске.",
+            "wikimediaFile": "Государственный цирк Республики Саха (Якутия).jpg"
         },
         {
             "name": "Музей истории города Якутска",
@@ -2246,13 +2263,14 @@ try {
     if(touristResolveCache.has(key))return touristResolveCache.get(key);
     const promise=(async()=>{
       let lat=Number(item.lat),lng=Number(item.lng),ref=item.img||null,wikipedia=item.wikipedia||'',addr=item.address||'';
+      if(!ref&&item.wikimediaFile)ref=await commonsFileThumb(item.wikimediaFile);
       if(item.qid){const m=await wikidataTouristMeta(item.qid);if(!Number.isFinite(lat)&&Number.isFinite(m.lat))lat=m.lat;if(!Number.isFinite(lng)&&Number.isFinite(m.lng))lng=m.lng;if(!ref&&m.img)ref=m.img}
       let wiki=null,description=item.description||'';if(!ref||!Number.isFinite(lat)||!Number.isFinite(lng)||!description){wiki=await wikipediaTouristMatch(item.searchName||item.name);if(wiki){if(!ref)ref=wiki.url;if(!wikipedia)wikipedia=wiki.wikipedia;if(!description)description=wiki.description||'';if(!Number.isFinite(lat)&&Number.isFinite(wiki.lat))lat=wiki.lat;if(!Number.isFinite(lng)&&Number.isFinite(wiki.lng))lng=wiki.lng}}
       if(Number.isFinite(lat)&&Number.isFinite(lng)&&!inYakutskBounds(lat,lng)){lat=NaN;lng=NaN}
       if((!Number.isFinite(lat)||!Number.isFinite(lng))&&/\s\/\s/.test(item.address||'')&&!item.qid)return null;
       if(!Number.isFinite(lat)||!Number.isFinite(lng)){const g=await yandexTouristGeocode(item.name,item.address);if(g){lat=g.lat;lng=g.lng;if(!addr)addr=g.address}}
       if(!ref||!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-      const poi={type:'tourist_guide',id:'guide:'+key,_lat:lat,_lng:lng,_d:0,_hasRef:true,_referenceUrl:ref,_verifyMode:'image',_isTouristGuide:true,_fullAddress:addr,_description:description,_historyText:item.history||'',_sourceName:item.sourceName||'Белый список проекта',_sourceUrl:item.sourceUrl||TOURIST_GUIDE_URL,_sourceText:item.sourceText||'Проверенная публичная туристическая точка',tags:{name:item.name,tourism:'attraction',description,wikipedia,wikidata:item.qid||''}};
+      const poi={type:'tourist_guide',id:'guide:'+key,_lat:lat,_lng:lng,_d:0,_hasRef:true,_referenceUrl:ref,_verifyMode:'image',_isTouristGuide:true,_fullAddress:addr,_description:description,_historyText:item.history||'',_sourceName:item.sourceName||'Белый список проекта',_sourceUrl:item.sourceUrl||TOURIST_GUIDE_URL,_sourceText:item.sourceText||'Проверенная публичная туристическая точка',_commonsFile:item.wikimediaFile||null,tags:{name:item.name,tourism:'attraction',description,wikipedia,wikidata:item.qid||''}};
       return isPhotoSafePoi(poi)?poi:null;
     })().then(r=>{if(!r)touristResolveCache.delete(key);return r});touristResolveCache.set(key,promise);return promise;
   }
@@ -2377,14 +2395,22 @@ try {
   async function preparePoi(forcedPoi=null){
     const checkpoint=rr.checkpoints[rr.current-1],searchCenter=checkpoint,camera=$('#cameraInput');
     resetPhotoTaskUi();
-    if(rr.usePhotoOptional){
+    $('#historyBlock').classList.add('hidden');
+    $('#questBlock').classList.add('hidden');
+    $('#nextBtn').classList.add('hidden');
+    $('#retryPhotoBtn').classList.add('hidden');
+    // A persisted route's usePhotoOptional flag is NOT a reason to skip a
+    // named place: old routes set this flag before media could finish loading.
+    // Only raw OSM walking nodes have no identifiable object to photograph.
+    const streetOnly=rr.routeSynthetic && (!checkpoint?.guideName || /^Прогулочная точка\s+\d+/i.test(checkpoint.guideName));
+    if(streetOnly){
       rr.currentPoi=null;rr.currentCategory='city';rr.stage='verified';
       if(camera)camera.disabled=true;
       $('#photoBlock').classList.add('hidden');
       $('#photoCheck').className='check';
-      $('#photoCheck b').textContent='Пропущено · без RouteCoin';
-      $('#checkpointTitle').textContent=checkpoint?.guideName||'Контрольная точка';
-      $('#checkpointText').textContent='Точка достигнута по GPS. Фотозадание недоступно: перейти дальше можно без награды.';
+      $('#photoCheck b').textContent='Нет объекта · без RouteCoin';
+      $('#checkpointTitle').textContent='Прогулочная точка OSM';
+      $('#checkpointText').textContent='Это обычная точка на пешеходной дороге, не достопримечательность. Фото не требуется и награда не начисляется.';
       $('#replacePointBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');
       $('#lockLabel').textContent='Следующий участок готов';
       saveSession();return false;
@@ -2413,21 +2439,6 @@ try {
     // работать только с проверенным белым списком фототочек.
     if(selected&&!isPhotoSafePoi(selected)){rr.poiAvoidIds.add(selected.type+':'+selected.id);selected=null}
     rr.currentPoi=selected;
-    if(rr.usePhotoOptional && (!rr.currentPoi?._referenceUrl || rr.currentPoi?._verifyMode!=='image')){
-      // Не имитируем фотопроверку: есть GPS-точка, но не подтверждена фотография.
-      // Переход разрешён без монет и без записи photo_verified.
-      rr.currentPoi=null;rr.currentCategory='city';rr.stage='verified';
-      if(camera)camera.disabled=true;
-      $('#photoBlock').classList.add('hidden');
-      $('#photoCheck').className='check';
-      $('#photoCheck b').textContent='Не требуется · без награды';
-      $('#checkpointTitle').textContent=checkpoint?.guideName||'Контрольная точка';
-      $('#checkpointText').textContent='GPS-точка достигнута. Фото объекта недоступно из внешнего источника: можно продолжить без фотобонуса.';
-      $('#replacePointBtn').classList.add('hidden');
-      $('#nextBtn').classList.remove('hidden');
-      $('#lockLabel').textContent='Следующий участок готов';
-      saveSession();return false;
-    }
     if(!rr.currentPoi?.tags?.name||!rr.currentPoi?._referenceUrl||rr.currentPoi?._verifyMode!=='image'||!isPhotoSafePoi(rr.currentPoi)){
       rr.currentPoi=null;rr.currentCategory='city';rr.stage='photo_unavailable';if(camera)camera.disabled=true;
       $('#photoBlock').classList.add('hidden');
@@ -2440,13 +2451,13 @@ try {
       // Важно: полностью очищаем старое задание, чтобы название прошлого объекта
       // не оставалось на экране рядом с сообщением «нужно заменить точку».
       resetPhotoTaskUi();
-      $('#checkpointTitle').textContent='Рядом нет подходящего места для фотозадания';
+      $('#checkpointTitle').textContent=checkpoint?.guideName||'Рядом нет подходящего места для фотозадания';
       $('#photoTaskTitle').textContent='Нужна безопасная публичная точка';
       $('#photoTaskType').textContent='Фототочка не найдена';
       $('#photoTaskAddress').textContent=checkpoint?.fullAddress||'Контрольная точка на карте';
       $('#photoTaskSteps').innerHTML=`<div class="photo-task-step"><i>1</i><span>Эту точку не нужно проходить вслепую.</span></div><div class="photo-task-step"><i>2</i><span>Нажмите «Заменить точку» — приложение найдёт другую точку маршрута с проверяемым объектом.</span></div><div class="photo-task-step"><i>3</i><span>Прогресс маршрута до этой точки не потеряется.</span></div>`;
       $('#taskMessage').textContent='Поблизости нет подходящей фототочки из проверенного белого списка. Случайные здания и неутверждённые объекты приложение не предлагает для съёмки.';
-      $('#checkpointText').textContent='Эталонное фото не загрузилось. Можно повторить поиск, заменить точку или продолжить без RouteCoin.';saveSession();return false;
+      $('#checkpointText').textContent='Для этого места нет проверенного эталонного фото. Можно повторить поиск, заменить точку или продолжить без RouteCoin.';saveSession();return false;
     }
     rr.stage='photo';$('#retryPhotoBtn').classList.add('hidden');
     $('#nextBtn').classList.add('hidden');
@@ -2468,14 +2479,33 @@ try {
     if($('#photoTaskTitle'))$('#photoTaskTitle').textContent=`Найдите и сфотографируйте «${name}»`;
     if($('#photoTaskType'))$('#photoTaskType').textContent=poi._isTouristGuide?'Проверенная фототочка':'Известная достопримечательность';
     if($('#photoTaskSteps'))$('#photoTaskSteps').innerHTML=`<div class="photo-task-step"><i>1</i><span>Дойдите до маркера «<b>${name}</b>» и оставайтесь на тротуаре, площади или другой общедоступной территории.</span></div><div class="photo-task-step"><i>2</i><span>Сверьтесь с <b>эталонной фотографией</b> и снимите сам туристический объект целиком с обычного публичного ракурса.</span></div><div class="photo-task-step"><i>3</i><span>Не заходите внутрь музеев, театров и храмов ради съёмки, не залезайте на скульптуры и мемориалы, не снимайте прохожих крупным планом. Если место закрыто или недоступно — замените точку.</span></div>`;
-    if(poi._referenceUrl&&$('#photoTaskReference')){$('#photoTaskReference').src=poi._referenceUrl;$('#photoTaskReference').classList.add('show');$('#photoTaskRefCaption')?.classList.add('show')}
+    if(poi._referenceUrl&&$('#photoTaskReference')){
+      $('#photoTaskReference').src=poi._referenceUrl;$('#photoTaskReference').classList.add('show');
+      const caption=$('#photoTaskRefCaption');
+      if(caption){
+        caption.classList.add('show');caption.textContent='Эталонный снимок объекта';
+        if(poi._commonsFile){
+          const a=document.createElement('a');
+          a.href='https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(poi._commonsFile);
+          a.target='_blank';a.rel='noopener noreferrer';a.textContent=' · Wikimedia Commons (автор и лицензия)';
+          caption.appendChild(a);
+        }
+      }
+    }
     $('#taskMessage').textContent='Точка выбрана из проверенного белого списка. Проверка: GPS + именно этот объект на фотографии.';
     setLocalVisionStatus('Проверка: GPS + конкретная достопримечательность','warn');
     $('#checkpointText').textContent=`GPS подтверждён. Теперь найдите «${name}». До объекта примерно ${meters} м.`;
     saveSession();return true;
   }
   async function gpsAccepted(real){
-    rr.stage='photo';rr.autoGpsBusy=false;$('#gpsBadge').textContent=real?'GPS: подтверждён':'GPS: вручную';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Подтверждён';$('#photoBlock').classList.remove('hidden');$('#replacePointBtn').classList.remove('hidden');$('#checkpointText').textContent='Вы в зоне точки. Подбираем объект для фотоконтроля…';await preparePoi();$('#gpsBtn').textContent='GPS подтверждён ✓';$('#gpsBtn').disabled=true;saveSession();toast('GPS подтверждён')
+    rr.stage='photo';rr.autoGpsBusy=false;
+    $('#gpsBadge').textContent=real?'GPS: подтверждён':'GPS: ТЕСТ, без проверки';
+    $('#gpsCheck').className=real?'check ok':'check';
+    $('#gpsCheck b').textContent=real?'Подтверждён':'Тестовое прибытие';
+    $('#photoBlock').classList.remove('hidden');$('#replacePointBtn').classList.remove('hidden');
+    $('#checkpointText').textContent=real?'Вы в зоне точки. Подбираем объект для фотоконтроля…':'Пробное прибытие без проверки GPS. Подбираем фотозадание для демонстрации…';
+    try{await preparePoi()}catch(e){console.warn('Photo target lookup',e);$('#checkpointText').textContent='Не удалось проверить наличие эталонного фото. Можно попробовать повторно или заменить точку.';$('#retryPhotoBtn').classList.remove('hidden');$('#nextBtn').classList.remove('hidden');}
+    $('#gpsBtn').textContent=real?'GPS подтверждён ✓':'Прибытие имитировано (без GPS)';$('#gpsBtn').disabled=true;saveSession();toast(real?'GPS подтверждён':'Тестовое прибытие — GPS не проверен')
   }
   function checkGps(){
     const target=rr.checkpoints[rr.current-1];if(!target){toast('Сначала постройте маршрут');return}
@@ -2490,6 +2520,11 @@ try {
 
   $('#cameraInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;rr.currentPhotoFile=f;$('#verificationMessage').className='hidden';$('#verificationMessage').textContent='';const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');$('#photoCheck').className='check';$('#photoCheck b').textContent='Готово к проверке';$('#verifyBtn').classList.remove('hidden');rr.stage='photo_ready';saveSession()};
   async function loadHistory(){
+    if(!rr.currentPoi?.tags?.name){
+      $('#historyBlock').classList.add('hidden');
+      $('#questBlock').classList.add('hidden');
+      return;
+    }
     const block=$('#historyBlock'),title=$('#historyTitle'),text=$('#historyText'),source=$('#historySource');block.classList.remove('hidden');$('#questBlock').classList.remove('hidden');const poi=rr.currentPoi,name=poi?.tags?.name||`Точка ${rr.current}`;title.textContent='История: '+name;
     let body=poi?._historyText||poi?._description||'Вы открыли место из проверенного белого списка. Для него пока нет короткой исторической справки.';source.textContent=poi?._sourceName?('Источник точки: '+poi._sourceName):'Карточка места';const wp=poi?.tags?.wikipedia;
     if(wp&&!poi?._historyText){try{const parts=wp.split(':'),lang=parts.length>1?parts[0]:'ru',page=parts.length>1?parts.slice(1).join(':'):parts[0],r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page)}`);if(r.ok){const d=await r.json();if(d.extract){body=d.extract.split(/(?<=[.!?])\s+/).slice(0,3).join(' ');source.textContent='История: Wikipedia'+(poi?._sourceName?' · точка: '+poi._sourceName:'')}}}catch(e){}}
@@ -2663,7 +2698,25 @@ try {
         $('#gpsBtn').onclick=finishGps;
       } else {
         showLeg(Math.max(0,rr.current-1),false);resetPointUI();
-        if(['photo','photo_ready','verified'].includes(savedStage)){gpsAccepted(rr.startMode==='gps').then(()=>{if(savedStage==='verified'){rr.stage='verified';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';$('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');$('#lockLabel').textContent='Следующий участок готов';loadHistory();saveSession()}})}
+        if(['photo','photo_ready','photo_unavailable','verified'].includes(savedStage)){
+          const verifiedKey=(rr.routeId||'legacy')+':point:'+rr.current;
+          const provedPhoto=savedStage==='verified'&&!!rr.currentPoi?.tags?.name
+            && ((demoMode||isDeveloperMode())||window.__hasVerifiedEvent?.('photo_verified',verifiedKey)===true);
+          // An old "verified" GPS-only skip is not a completed photo task.
+          // On reload retry selecting the photo checkpoint instead of
+          // fabricating "Фото подтверждено" and an empty history/mini-quest.
+          if(provedPhoto){
+            rr.stage='verified';$('#gpsCheck').className='check ok';
+            $('#gpsCheck b').textContent=(demoMode||isDeveloperMode())?'Тестовое прибытие':'Ранее подтверждён';
+            $('#photoCheck').className='check ok';$('#photoCheck b').textContent='Подтверждено';
+            $('#photoBlock').classList.add('hidden');
+            $('#nextBtn').classList.remove('hidden');$('#verifyBtn').classList.add('hidden');
+            $('#lockLabel').textContent='Следующий участок готов';loadHistory();saveSession();
+          }else{
+            gpsAccepted(rr.startMode==='gps'&&!demoMode&&!isDeveloperMode())
+              .catch(e=>console.warn('Photo checkpoint restore',e));
+          }
+        }
       }
     }
     showScreen(rr.activeScreen,{restoreScroll:true});
