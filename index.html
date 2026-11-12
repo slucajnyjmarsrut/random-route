@@ -230,6 +230,7 @@ try {
  </div>
 </details>
 <button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
+<p id="routeBuildStatus" class="rr-build-status" role="status" aria-live="polite" hidden></p>
 <p class="rr-create-final-note">Нужен интернет. Для настоящей прогулки разрешите GPS. Всегда проверяйте дорожные условия.</p>
 <details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
@@ -1020,8 +1021,14 @@ try {
     if(id==='profile' && !isUserSignedIn()){authState.pendingProfileOpen=true;openProfileAuth('login');return}
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
+    if(id==='create'&&(rr.gpsFresh||rr.startMode==='demo'||rr.startMode==='developer')){
+      const p=rr.livePos||rr.start,km=Number($('#distanceInput').value)||3;
+      if(insidePilot(p)&&km<=12)setTimeout(()=>{
+        window.RRWalkingDijkstra?.preload?.(p,km)?.catch?.(()=>{});
+      },200);
+    }
     rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Пешеходный маршрут построен через Valhalla. Дейкстра включится, когда будет готов дорожный граф OSM.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1162,7 +1169,8 @@ try {
       directions_options:{units:'kilometers',language:'ru-RU'}
     };
     const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
+    const maxWait=Number.isFinite(Number(opts.timeoutMs))?Math.max(900,Math.min(6000,Number(opts.timeoutMs))):16000;
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),maxWait);
     let res;
     try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
     finally {clearTimeout(timer);}
@@ -1181,13 +1189,15 @@ try {
     return {code:'Ok',source:'valhalla',routes:[{distance,duration,legs,geometry:{type:'LineString',coordinates:allCoords}}],waypoints};
   }
   async function requestFootRoute(points,opts={}){
-    try{
-      if(!window.RRWalkingDijkstra?.requestRoute)throw new Error('DijkstraUnavailable');
-      return await window.RRWalkingDijkstra.requestRoute(points,{distanceKm:opts.distanceKm||Number($('#distanceInput').value)||3,zones:rr.noGoZones});
-    }catch(e){
-      console.info('OSM Dijkstra unavailable for this route, using pedestrian Valhalla:',e?.message||e);
-      return await requestValhallaFootRoute(points,opts);
+    // Only run Dijkstra synchronously when a complete real OSM graph is ALREADY
+    // in memory. Do not block each attempt on public Overpass HTTP requests.
+    const engine=window.RRWalkingDijkstra;
+    const km=opts.distanceKm||Number($('#distanceInput').value)||3;
+    if(engine?.hasWarmGraph?.(points[0],km)){
+      try{return await engine.requestRoute(points,{distanceKm:km,zones:rr.noGoZones});}
+      catch(e){console.info('Cached pedestrian graph has no suitable path, using Valhalla:',e?.message||e);}
     }
+    return requestValhallaFootRoute(points,opts);
   }
   function legCoords(leg){
     const out=[];(leg?.steps||[]).forEach(step=>(step.geometry?.coordinates||[]).forEach(c=>{const p=[c[1],c[0]],last=out[out.length-1];if(!last||Math.abs(last[0]-p[0])>1e-8||Math.abs(last[1]-p[1])>1e-8)out.push(p)}));return out;
@@ -1331,17 +1341,26 @@ try {
     if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return false}
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
     else if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
-    const btn=$('#buildBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Подбираем '+input.toFixed(1).replace('.',',')+' км…';
+    const btn=$('#buildBtn'),old=btn.textContent,statusEl=$('#routeBuildStatus');
+    const startedAt=performance.now(),routeBudgetMs=12000,maxAttempts=4;
+    const report=message=>{
+      btn.textContent=message;
+      if(statusEl){statusEl.hidden=false;statusEl.textContent=message+' Можно продолжать пользоваться телефоном.';}
+    };
+    btn.disabled=true;report('Подбираем интересные места…');
     try{
       // v10.7: контрольные точки — это сами туристические места из белого списка.
       // Раньше маршрут строился по случайным точкам-«спицам», и фототочка искалась рядом уже потом —
       // из-за этого игроку показывали адреса случайных зданий.
       // Сначала пробуем фотоквест с проверяемыми местами. Если недоступны
       // Wikipedia/изображения, сохраняем маршрут как обычную экскурсию без наград за фото.
-      const photoPool=await Promise.race([
-        touristPool().catch(()=>[]),
-        new Promise(resolve=>setTimeout(()=>resolve([]),8500))
-      ]);
+      // Never block route creation on dozens of external Wikipedia/Wikidata
+      // requests. Use resolved photo POIs when available; otherwise take the
+      // locally curated points and fetch photo references in the background.
+      const photoPool=touristPoolPromise
+        ?await Promise.race([touristPoolPromise.catch(()=>[]),new Promise(resolve=>setTimeout(()=>resolve([]),250))])
+        :[];
+      // The photo catalog can load later; avoid flooding the network while routing.
       const targetM=input*1000,maxR=Math.max(600,targetM*.5);
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
@@ -1372,9 +1391,12 @@ try {
         return {pois:picked,raw,key:picked.map(p=>p.id).join('|')};
       };
       let best=null,factor=1.35,rejectedByZones=0,rejectedAsSame=0;const tried=new Set();
-      for(let iter=0;iter<14;iter++){
+      for(let iter=0;iter<maxAttempts;iter++){
+        const elapsed=performance.now()-startedAt;
+        if(elapsed>=routeBudgetMs-950)break;
+        report('Строим пешеходный маршрут · попытка '+(iter+1)+' из '+maxAttempts);
         let cands=[],seen=new Set();
-        for(let i=0;i<350;i++){const c=mkCandidate();if(c&&!tried.has(c.key)&&!seen.has(c.key)){seen.add(c.key);cands.push(c)}}
+        for(let i=0;i<140;i++){const c=mkCandidate();if(c&&!tried.has(c.key)&&!seen.has(c.key)){seen.add(c.key);cands.push(c)}}
         if(options.requireDifferentFirst&&options.avoidFirstPoint){
           const old=options.avoidFirstPoint,oldB=bearingDeg(rr.start,old),minAngle=Number(options.minDirectionChangeDeg||42);
           const f=cands.filter(c=>distMeters(ll(c.pois[0]),old)>=150&&bearingDiff(oldB,bearingDeg(rr.start,ll(c.pois[0])))>=minAngle);
@@ -1392,7 +1414,8 @@ try {
         const c=cands[iter===0?Math.floor(dailyRandom()*Math.min(4,cands.length)):0];
         tried.add(c.key);
         try{
-          const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80,distanceKm:input}),route=data.routes[0];
+          const remainingMs=Math.max(900,Math.min(6000,routeBudgetMs-(performance.now()-startedAt)-100));
+          const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80,distanceKm:input,timeoutMs:remainingMs}),route=data.routes[0];
           factor=route.distance/Math.max(200,c.raw);
           const snapOk=c.pois.every((p,i)=>{const sp=waypointPoint(data.waypoints[i+1]);return sp&&distMeters(sp,ll(p))<=120});
           if(!snapOk)continue;
@@ -1404,7 +1427,7 @@ try {
           // Do not trade a valid distance for an unacceptable one to satisfy a theme.
           if(!best||((diff<=tolAccept||best.diff>tolAccept)&&candidateRank<best.rank))
             best={data,route,pois:c.pois,diff,actual:route.distance/1000,rank:candidateRank};
-          if(diff<=tolOk&&(data.source==='dijkstra-osm'||iter>=5))break;
+          if(diff<=tolAccept)break; // The route is already within the accepted distance tolerance.
         }catch(e){console.warn('route candidate',e)}
       }
       const chosen=best;
@@ -1427,6 +1450,7 @@ try {
       $('#distanceInput').value=input.toFixed(1);$('#activeDistanceInput').value=input.toFixed(1);
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
       resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
+      if(!touristPoolPromise)setTimeout(()=>touristPool().catch(()=>{}),1400);
       window.dispatchEvent(new Event('rr:daily-route-built'));
       return true;
     }catch(e){
@@ -1436,9 +1460,13 @@ try {
       else if(e?.message==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
       else if(e?.message==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
       else if(e?.message==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут, который отображается как '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км. Попробуйте другую дистанцию или ещё раз.');}
-      else toast('Маршрут не построен. Проверьте интернет и попробуйте ещё раз.');
+      else toast('Не удалось быстро построить подходящий маршрут. Измените расстояние и попробуйте ещё раз.');
+      if(statusEl){statusEl.hidden=false;statusEl.textContent='Не удалось быстро найти подходящий маршрут. Попробуйте другую дистанцию или повторите попытку.';}
       return false;
-    }finally{btn.disabled=false;btn.textContent=old}
+    }finally{
+      btn.disabled=false;btn.textContent=old;
+      if(statusEl&&rr.legs.length&&rr.stage!=='idle')statusEl.hidden=true;
+    }
   }
   window.__buildDailyRoute=async function(offer){
     const valid=window.DailyRouteQuests?.offersForDay?.(window.DailyRouteQuests.dayKey(Date.now()))?.find(o=>o.id===offer?.id);
@@ -2602,7 +2630,7 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=1.0"></script>
+<script src="walking-dijkstra.js?v=1.1"></script>
 <script src="route-navigation.js?v=1.0"></script>
 </body>
 </html>

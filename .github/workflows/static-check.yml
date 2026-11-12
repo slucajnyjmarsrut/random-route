@@ -31,6 +31,7 @@ jobs:
           node tests/dijkstra-lab.test.cjs
           node --check walking-dijkstra.js
           node tests/walking-dijkstra.test.cjs
+          node tests/fast-route-building.test.cjs
           node --check map-fallback.js
           node --check smart-route-chat.js
           node tests/chat-intent.test.cjs

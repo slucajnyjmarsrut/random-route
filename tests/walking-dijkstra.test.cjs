@@ -40,3 +40,22 @@ const chosen=route.shortest(manual,'A','B');assert.deepEqual(chosen.ids,['A','C'
 const costly=new Map([['A:C',1],['B:C',1]]);
 assert.deepEqual(route.shortest(manual,'A','B',[],costly).ids,['A','B'],'repeat penalty should avoid used physical edges');
 console.log('OSM walking Dijkstra: graph creation, pedestrian tags, shortest path, no-go zones, route geometry OK');
+
+// First tap can use a cached graph without any repeat HTTP requests.
+(async()=>{
+  const prior=global.fetch;
+  let requests=0;
+  try{
+    global.fetch=async()=>{requests++;return {ok:true,json:async()=>({elements:ways})};};
+    assert.equal(route.hasWarmGraph(start,3),false);
+    assert.equal(await route.preload(start,3),true);
+    assert.equal(route.hasWarmGraph(start,3),true);
+    const count=requests;
+    const fast=await route.requestRoute([start,finish],{distanceKm:3});
+    assert.equal(fast.source,'dijkstra-osm');
+    assert.equal(requests,count,'warm graph should not fetch OSM again');
+    assert.equal(await route.preload(start,3),true);
+    assert.equal(requests,count,'repeated graph prewarm uses the cached graph');
+    console.log('Dijkstra warm-cache: no second Overpass request required');
+  }finally{global.fetch=prior;}
+})().catch(e=>{console.error(e);process.exitCode=1});
