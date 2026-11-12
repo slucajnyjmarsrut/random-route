@@ -167,3 +167,8 @@
 @media(prefers-reduced-motion:reduce){
  .rr-create-go,.rr-welcome-start,.rr-distance-options button,.rr-wish-buttons button{transition:none!important}
 }
+
+/* Always disclose the origin of the walking-road geometry. */
+.rr-osm-credit{font-size:12px;line-height:1.45;color:var(--muted);margin:0 0 12px;padding:0 3px}
+.rr-osm-credit a{color:#87dcb6;text-decoration:underline;text-underline-offset:2px}
+html[data-rr-theme="light"] .rr-osm-credit a{color:#176947}
