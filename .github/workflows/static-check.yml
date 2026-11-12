@@ -104,3 +104,10 @@ jobs:
           NODE
       - name: Verify a real Yakutsk walking loop from saved OSM data
         run: node tests/live-osm-smoke.test.cjs
+      - name: Test mobile screen and full Dijkstra route in headless Chromium
+        timeout-minutes: 5
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/rr-mobile-test-server.log 2>&1 &
+          node tests/mobile-browser-smoke.cjs
