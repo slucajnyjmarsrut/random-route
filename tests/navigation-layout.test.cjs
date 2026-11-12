@@ -34,7 +34,7 @@ assert.ok(motion.includes('.app button:not(:disabled):active')&&motion.includes(
 assert.ok(daily.includes('getElementById("rrDailyCreateMount")'),'daily routes belong in the creation screen');
 assert.ok(html.includes('data-rr-screen="home"')&&html.includes('dataset.rrScreen=id'),'screen-specific simple layout stays synchronized');
 assert.ok(html.includes("$$('[data-distance-km]').forEach")&&html.includes('syncRouteChoiceButtons'),'distance presets remain interactive');
-assert.ok(html.includes('smart-safety.js?v=1.1')&&safety.includes('renderHomeWeather'),'home weather uses actual safety service observations');
+assert.ok(html.includes('yakutsk-weather.js?v=1.0')&&html.includes('smart-safety.js?v=1.2')&&safety.includes('RRYakutskWeather.subscribe'),'home auto-weather should be independent and synchronized with safety');
 assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety panel belongs to its screen');
 assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]")'),'settings synchronized with safety');
 assert.ok(css.includes('.rr-settings-trigger')&&css.includes('@media (max-width:599px)'));
