@@ -137,7 +137,7 @@
   function route(graph,points,options={}){
     if(!Array.isArray(points)||points.length<2)throw Error('NoPoints');
     const zones=(options.zones||[]).map(z=>({lat:Number(z.lat),lng:Number(z.lng),radius:Number(z.radius||300)})).filter(z=>Number.isFinite(z.lat)&&Number.isFinite(z.lng)&&z.radius>0);
-    const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?75:120));
+    const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?145:180));
     if(ids.some(id=>id===null))throw Error('NoNearbyFootpath');
     const legs=[];let full=0;const usedEdges=new Map();
     for(let i=1;i<ids.length;i++){
@@ -153,7 +153,46 @@
     return {code:'Ok',source:'dijkstra-osm',routes:[{distance:full,duration:full/1.3,legs,
       geometry:{type:'LineString',coordinates:allCoords}}],waypoints:locs};
   }
-  function graphRadius(requestedKm){return Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));}
+  function reachableNodes(graph,start,zones=[],maxSnap=145){
+    const origin=nearestNode(graph,start,maxSnap);
+    if(origin===null)throw Error('NoNearbyFootpath');
+    const visited=new Set([origin]),stack=[origin];
+    while(stack.length){
+      const id=stack.pop(),a=graph.nodes.get(id);
+      for(const edge of graph.adj.get(id)||[]){
+        if(visited.has(edge.to))continue;
+        if(zones.length&&zones.some(z=>intersectZone(a,graph.nodes.get(edge.to),z)))continue;
+        visited.add(edge.to);stack.push(edge.to);
+      }
+    }
+    return {origin,visited};
+  }
+  function reachableStops(graph,start,pois,opts={}){
+    const zones=opts.zones||[],reachable=reachableNodes(graph,start,zones);
+    const used=new Set([reachable.origin]),items=[];
+    for(const poi of pois||[]){
+      const ll={lat:Number(poi._lat??poi.lat),lng:Number(poi._lng??poi.lng)};
+      if(!Number.isFinite(ll.lat)||!Number.isFinite(ll.lng))continue;
+      const id=nearestNode(graph,ll,opts.maxSnap||180);
+      if(id===null||!reachable.visited.has(id)||used.has(id))continue;
+      used.add(id);items.push(poi);
+    }
+    return items;
+  }
+  function walkingWaypoints(graph,start,requestedKm,opts={}){
+    const zones=opts.zones||[],reachable=reachableNodes(graph,start,zones);
+    const target=Math.max(1,Number(requestedKm)||3)*1000,minimum=Math.min(400,target*.20),maximum=Math.min(2400,target*.46);
+    const points=[];let index=0;
+    for(const id of reachable.visited){
+      if(index++%17!==0)continue;
+      const p=graph.nodes.get(id),m=distance(p,start);
+      if(m<minimum||m>maximum)continue;
+      points.push({id,lat:p.lat,lng:p.lng,straightM:m});
+    }
+    points.sort((a,b)=>a.id.localeCompare(b.id));
+    return points;
+  }
+  function graphRadius(requestedKm){return Math.min(3000,Math.max(1850,Math.ceil(requestedKm*670)));}
   function graphKey(start,requestedKm){
     const radius=graphRadius(requestedKm);
     return bbox(start,radius).map(v=>v.toFixed(3)).join(':')+':'+radius;
@@ -172,7 +211,7 @@
       const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
       let lastError;
       for(const endpoint of ENDPOINTS){
-        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10500);
         try{
           const response=await fetch(endpoint+urlQuery,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/json'}});
           if(!response.ok)throw Error('Overpass '+response.status);
@@ -201,5 +240,5 @@
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,loadGraph,hasWarmGraph,preload,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,reachableNodes,reachableStops,walkingWaypoints,loadGraph,hasWarmGraph,preload,requestRoute};
 });
