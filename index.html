@@ -1028,7 +1028,7 @@ try {
       },200);
     }
     rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Пешеходный маршрут построен через Valhalla. Дейкстра включится, когда будет готов дорожный граф OSM.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1169,7 +1169,8 @@ try {
       directions_options:{units:'kilometers',language:'ru-RU'}
     };
     const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),Math.max(900,Math.min(6000,Number(opts.timeoutMs)||6000)));
+    const maxWait=Number.isFinite(Number(opts.timeoutMs))?Math.max(900,Math.min(6000,Number(opts.timeoutMs))):16000;
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),maxWait);
     let res;
     try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
     finally {clearTimeout(timer);}
@@ -1359,7 +1360,7 @@ try {
       const photoPool=touristPoolPromise
         ?await Promise.race([touristPoolPromise.catch(()=>[]),new Promise(resolve=>setTimeout(()=>resolve([]),250))])
         :[];
-      if(!touristPoolPromise)setTimeout(()=>touristPool().catch(()=>{}),100);
+      // The photo catalog can load later; avoid flooding the network while routing.
       const targetM=input*1000,maxR=Math.max(600,targetM*.5);
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
@@ -1449,6 +1450,7 @@ try {
       $('#distanceInput').value=input.toFixed(1);$('#activeDistanceInput').value=input.toFixed(1);
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
       resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
+      if(!touristPoolPromise)setTimeout(()=>touristPool().catch(()=>{}),1400);
       window.dispatchEvent(new Event('rr:daily-route-built'));
       return true;
     }catch(e){
@@ -1458,11 +1460,12 @@ try {
       else if(e?.message==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
       else if(e?.message==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
       else if(e?.message==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут, который отображается как '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км. Попробуйте другую дистанцию или ещё раз.');}
-      else toast('Маршрут не построен. Проверьте интернет и попробуйте ещё раз.');
+      else toast('Не удалось быстро построить подходящий маршрут. Измените расстояние и попробуйте ещё раз.');
+      if(statusEl){statusEl.hidden=false;statusEl.textContent='Не удалось быстро найти подходящий маршрут. Попробуйте другую дистанцию или повторите попытку.';}
       return false;
     }finally{
       btn.disabled=false;btn.textContent=old;
-      if(statusEl)statusEl.hidden=true;
+      if(statusEl&&rr.legs.length&&rr.stage!=='idle')statusEl.hidden=true;
     }
   }
   window.__buildDailyRoute=async function(offer){
