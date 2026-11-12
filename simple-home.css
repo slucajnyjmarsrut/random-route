@@ -1,0 +1,163 @@
+/* Simple, senior-friendly entry and route wizard. Added after all theme styles.
+ * Keep the Yandex map inside an expandable panel; never cover map controls.
+ */
+.app[data-rr-screen="home"] .stats-top,.app[data-rr-screen="create"] .stats-top{display:none}
+.app[data-rr-screen="home"] .nav,.app[data-rr-screen="create"] .nav{display:none!important}
+.app[data-rr-screen="home"] .content,.app[data-rr-screen="create"] .content{
+ padding-bottom:calc(28px + env(safe-area-inset-bottom))!important;
+}
+.rr-welcome-screen{max-width:710px;margin:0 auto;padding:clamp(5px,2vh,24px) 0 10px}
+.rr-home-weather{padding:19px 22px;margin:0 0 18px;border-radius:24px;
+ background:linear-gradient(140deg,#283b43,#243a38);color:#f1f7f3;
+ border:1px solid #4a625f;box-shadow:0 12px 26px rgba(0,0,0,.14)}
+.rr-home-weather-header{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.rr-weather-kicker{font-size:12px;letter-spacing:.1em;font-weight:800;color:#c4d8d1}
+.rr-home-weather h2{font-size:22px;line-height:1.2;margin:4px 0 0;color:#f3faf5}
+.rr-home-weather-header button{min-height:48px;padding:8px 13px;border:1px solid #57776e;
+ background:#334b4d;border-radius:13px;color:#e8f7ec;font-weight:800;font-size:14px;cursor:pointer}
+.rr-home-weather-value{font-size:clamp(25px,5vw,36px);line-height:1.2;font-weight:900;margin:14px 0 4px;letter-spacing:-.04em}
+.rr-home-weather-detail{font-size:15px;line-height:1.5;margin:0;color:#dceae3}
+.rr-home-weather-advice{font-size:14px;line-height:1.48;margin:13px 0 0;padding:10px 12px;
+ background:rgba(3,17,17,.19);border:1px solid rgba(224,246,237,.14);
+ border-radius:12px;color:#e1ece4}
+.rr-home-weather-advice[data-severity="critical"]{background:#5c3639;color:#ffe2dc;border-color:#a77977}
+.rr-home-weather-advice[data-severity="warn"]{background:#55452d;color:#ffe5b2;border-color:#866b40}
+#home.rr-welcome-screen .hero{padding:24px 25px 44px!important;min-height:0!important;margin:0 0 17px}
+#home.rr-welcome-screen .hero h1{font-size:clamp(27px,4vw,38px);line-height:1.12;margin:7px 0 10px}
+#home.rr-welcome-screen .hero p{font-size:clamp(15px,2vw,17px);line-height:1.5;max-width:510px}
+#home.rr-welcome-screen .hero small{font-size:12px;letter-spacing:.08em}
+.rr-welcome-mascot{display:flex;align-items:center;min-height:140px;padding:12px 20px!important;
+ border:1px solid #59786b!important;border-radius:23px!important;margin:0 0 20px!important}
+.rr-welcome-mascot img{width:112px!important;height:125px!important;flex:0 0 112px!important;object-fit:contain}
+.rr-welcome-mascot strong{display:block;font-size:clamp(19px,3vw,23px)!important;line-height:1.25}
+.rr-welcome-mascot span{font-size:clamp(14px,2vw,16px)!important;line-height:1.48}
+.rr-welcome-start{width:100%;min-height:74px!important;border-radius:20px!important;
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:20px 26px!important;font-size:clamp(19px,3vw,23px)!important;
+ background:linear-gradient(130deg,#27805f,#1e725d)!important;color:#fff!important;letter-spacing:-.01em}
+.rr-welcome-start span{font-size:29px;line-height:1}
+.rr-create-screen{max-width:830px;margin:0 auto;padding:2px 0 20px}
+.rr-create-back{display:inline-block;min-height:49px;padding:12px 15px;margin:2px 0 16px;
+ border:1px solid #536c62;background:#2b3e42;color:#e6f5eb;border-radius:14px;
+ font-weight:800;font-size:15px;cursor:pointer}
+.rr-create-heading{margin:0 0 21px}
+.rr-create-heading>span{font-size:12px;letter-spacing:.12em;color:#8dc7ae;font-weight:900}
+.rr-create-heading h1{font-size:clamp(27px,4vw,36px);line-height:1.12;margin:6px 0 9px;color:var(--ink)}
+.rr-create-heading p{font-size:16px;line-height:1.52;max-width:600px;color:var(--muted);margin:0}
+.rr-create-panel{margin:0 0 14px;padding:20px 21px;border-radius:23px;
+ background:linear-gradient(152deg,#29363d,#243036);border:1px solid #475b58;color:#eaf4ed;
+ box-shadow:0 8px 25px rgba(0,0,0,.11)}
+.rr-create-panel h2{display:flex;align-items:center;gap:12px;font-size:clamp(18px,2.7vw,22px);
+ font-weight:850;line-height:1.35;margin:0 0 16px;color:#eaf5ee}
+.rr-create-step-number{background:#2f7559;display:grid;place-items:center;color:#f4fff7;font-size:17px;
+ border-radius:50%;width:36px;height:36px;min-width:36px}
+.rr-distance-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.rr-distance-options button{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+ min-height:81px;padding:14px 17px;border-radius:17px;background:#35434a;color:#f0f7f1;
+ border:2px solid #53655f;text-align:left;cursor:pointer}
+.rr-distance-options button strong{font-size:23px;font-weight:900;line-height:1.2}
+.rr-distance-options button small{font-size:13px;color:#c3d5cb;line-height:1.45;margin-top:5px}
+.rr-distance-options button.active,.rr-distance-options button[aria-pressed="true"]{background:#244d40;border-color:#76ce9b;box-shadow:inset 0 0 0 1px #76ce9b}
+.rr-distance-options button[aria-pressed="true"]:before{content:"✓ Выбрано";font-size:12px;font-weight:800;color:#a8f0c6;margin-bottom:2px}
+.rr-wish-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.rr-wish-buttons button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+ min-height:118px;padding:12px 8px!important;border-radius:18px!important;
+ border:2px solid #53655f!important;background:#35434a!important;color:#e6f4ea!important;cursor:pointer}
+.rr-wish-buttons button span{font-size:32px!important;margin:0!important}
+.rr-wish-buttons button b{font-size:15px;line-height:1.4;font-weight:850}
+.rr-wish-buttons button.active,.rr-wish-buttons button[aria-pressed="true"]{background:#245445!important;border-color:#79d4a3!important;color:#d7ffe4!important;box-shadow:inset 0 0 0 1px #79d4a3!important}
+.rr-create-intro{font-size:16px;line-height:1.55;color:#d6e7db;margin:0 0 12px}
+.rr-create-note{font-size:14px;line-height:1.55;color:#bacdc1;margin:12px 0 0}
+.rr-create-field-label{display:block;font-size:15px;font-weight:700;color:#d3e8da;margin:12px 0 8px}
+.rr-create-details{margin:13px 0 0;border-radius:16px;border:1px solid #52645d;
+ background:#2c3b41;color:#e5f3eb;overflow:hidden}
+.rr-create-details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;
+ padding:14px 16px;min-height:52px;font-size:15px;line-height:1.45;font-weight:800}
+.rr-create-details>summary::-webkit-details-marker{display:none}
+.rr-create-details>summary:after{content:"⌄";margin-left:auto;font-size:22px;line-height:1}
+.rr-create-details[open]>summary:after{content:"⌃"}
+.rr-create-details>summary:focus-visible{outline:3px solid #7de0ad;outline-offset:-3px}
+.rr-create-details .distance-wrap,.rr-create-details .rr-create-field-label{margin-left:16px;margin-right:16px}
+.rr-create-details .distance-wrap{margin-bottom:16px}
+.rr-create-details .distance{background:#202d34;color:#e8f2ed;border-color:#5a766b;font-size:20px}
+.rr-create-details .unit{color:#d6e7dc}
+.rr-create-gps-actions{display:flex;gap:10px;flex-wrap:wrap;margin:13px 0 0}
+.rr-create-gps-actions button{flex:1;min-width:170px;min-height:55px;border-radius:15px;font-size:15px}
+.rr-create-panel .location-status{border-radius:14px;padding:13px 15px;font-size:15px;line-height:1.45}
+.rr-create-panel .gps-quality{font-size:13px;margin:11px 0}
+.rr-map-inner{padding:0 13px 12px}
+.rr-map-inner #homeMap{height:260px;min-height:240px}
+.rr-map-details .avoid-card{margin:7px 10px 12px}
+.rr-map-details .map-credit{font-size:12px}
+.rr-more-wishes{margin-bottom:17px}
+.rr-extra-wishes{padding:3px 17px 17px}
+.rr-extra-wishes p{font-size:14px;line-height:1.5;color:#c1d2c8;margin:0 0 15px}
+.rr-extra-wishes .row{font-size:16px;font-weight:800}
+.rr-extra-wishes .toggle{flex:0 0 48px}
+.rr-create-go{min-height:72px!important;border-radius:19px!important;font-size:clamp(18px,3vw,21px)!important;
+ display:flex;align-items:center;justify-content:space-between;padding:19px 22px!important}
+.rr-create-go span{font-size:27px}
+.rr-create-final-note{font-size:14px;line-height:1.55;color:var(--muted);margin:11px 4px 18px}
+.rr-daily-details{margin-top:12px}
+.rr-daily-details #rrDailyCreateMount{padding:0 10px 10px}
+.rr-daily-details .rdq-card{margin:0}
+.rr-welcome-screen button:focus-visible,.rr-create-screen button:focus-visible{
+ outline:3px solid #7de0ad!important;outline-offset:3px!important}
+@media(hover:hover){
+ .rr-distance-options button:hover,.rr-wish-buttons button:hover{border-color:#8ed9ae!important}
+}
+@media(max-width:599px){
+ .rr-welcome-screen{padding:4px 0 0}
+ .rr-home-weather{padding:16px 17px;margin-bottom:13px;border-radius:20px}
+ .rr-home-weather-value{font-size:27px;margin-top:12px}
+ .rr-home-weather-header h2{font-size:19px}
+ .rr-home-weather-header button{font-size:13px;padding:8px 10px}
+ #home.rr-welcome-screen .hero{padding:20px 18px 39px!important;margin-bottom:13px}
+ #home.rr-welcome-screen .hero h1{font-size:28px}
+ .rr-welcome-mascot{min-height:105px;padding:9px 12px!important;gap:10px!important;margin-bottom:15px!important}
+ .rr-welcome-mascot img{width:78px!important;height:100px!important;flex:0 0 78px!important}
+ .rr-welcome-mascot strong{font-size:18px!important}
+ .rr-welcome-mascot span{font-size:14px!important}
+ .rr-welcome-start{min-height:68px!important;font-size:20px!important;padding:17px 20px!important}
+ .rr-create-panel{padding:17px 15px;border-radius:20px}
+ .rr-wish-buttons{gap:7px}
+ .rr-wish-buttons button{min-height:105px;padding:9px 3px!important}
+ .rr-wish-buttons button b{font-size:13px}
+ .rr-wish-buttons button span{font-size:27px!important}
+ .rr-distance-options button{padding:12px;min-height:80px}
+ .rr-distance-options button strong{font-size:22px}
+ .rr-distance-options button small{font-size:12px}
+}
+@media(max-width:350px){
+ .rr-wish-buttons{grid-template-columns:1fr}
+ .rr-wish-buttons button{min-height:60px;flex-direction:row;gap:12px}
+ .rr-wish-buttons button span{font-size:24px!important}
+ .rr-create-panel h2{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){
+ .rr-welcome-screen *,.rr-create-screen *{scroll-behavior:auto!important;transition:none!important}
+}
+/* Light theme remains readable when the user chooses it. */
+html[data-rr-theme="light"] .rr-home-weather{background:linear-gradient(140deg,#dcebe3,#e4edf0);color:#173e32;border-color:#c4dacd}
+html[data-rr-theme="light"] .rr-home-weather h2,
+html[data-rr-theme="light"] .rr-home-weather-value{color:#173e32}
+html[data-rr-theme="light"] .rr-weather-kicker,
+html[data-rr-theme="light"] .rr-home-weather-detail{color:#36574b}
+html[data-rr-theme="light"] .rr-home-weather-header button{background:#f7faf8;color:#204c39;border-color:#aecbbb}
+html[data-rr-theme="light"] .rr-home-weather-advice{background:#edf4ef;color:#385b4b;border-color:#c5dbd0}
+html[data-rr-theme="light"] .rr-create-panel{background:#fff;border-color:#d6e5dc;color:#163e2d}
+html[data-rr-theme="light"] .rr-create-panel h2{color:#163e2d}
+html[data-rr-theme="light"] .rr-create-back,
+html[data-rr-theme="light"] .rr-create-details{background:#eff6f2;color:#194d35;border-color:#cedfd3}
+html[data-rr-theme="light"] .rr-create-intro{color:#375a47}
+html[data-rr-theme="light"] .rr-create-note,
+html[data-rr-theme="light"] .rr-extra-wishes p,
+html[data-rr-theme="light"] .rr-create-field-label{color:#49695a}
+html[data-rr-theme="light"] .rr-distance-options button,
+html[data-rr-theme="light"] .rr-wish-buttons button{background:#f4f9f6!important;color:#143f2b!important;border-color:#bfd6c7!important}
+html[data-rr-theme="light"] .rr-distance-options button small{color:#587766}
+html[data-rr-theme="light"] .rr-distance-options button.active,
+html[data-rr-theme="light"] .rr-wish-buttons button.active{background:#e0f5e9!important;border-color:#39976c!important;color:#165538!important}
+html[data-rr-theme="light"] .rr-distance-options button[aria-pressed="true"]:before{color:#165538}
+html[data-rr-theme="light"] .rr-create-details .distance{background:#fff;color:#1b402f}
+html[data-rr-theme="light"] .rr-create-details .unit{color:#3b5f4e}
