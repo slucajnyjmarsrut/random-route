@@ -1387,6 +1387,39 @@ try {
           if(diff<=tolAccept)break; // The route is already within the accepted distance tolerance.
         }catch(e){console.warn('route candidate',e)}
       }
+      // If a sightseeing route cannot match the user's requested distance,
+      // attempt a simple walking loop using only REAL OSM road nodes. It will
+      // never claim to visit monuments or unlock a photograph reward.
+      if((!best||best.diff>tolAccept)&&!syntheticWalk){
+        const streetNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
+        const toPoi=(n,i)=>({
+          type:'walk_node',id:'osm-walk:'+n.id,_lat:n.lat,_lng:n.lng,
+          _isTouristGuide:false,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+          _fullAddress:'Пешеходная дорожка OpenStreetMap',tags:{name:'Прогулочная точка '+(i+1)}
+        });
+        if(streetNodes.length){
+          report('Пробуем прогулку по настоящим улицам без обязательных достопримечательностей…');
+          for(let tryIndex=0;tryIndex<6;tryIndex++){
+            const first=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            let second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            for(let n=0;n<6&&second&&first&&second.id===first.id;n++)
+              second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            if(!first||!second||first.id===second.id)continue;
+            const pois=[toPoi(first,1),toPoi(second,2)],pts=[rr.start,...pois.map(ll),rr.start];
+            try{
+              const data=await requestFootRoute(pts,{distanceKm:input}),route=data.routes[0];
+              if(routeHitsNoGo(route))continue;
+              const diff=Math.abs(route.distance-targetM);
+              if(!best||diff<best.diff){
+                best={data,route,pois,diff,actual:route.distance/1000,rank:diff,synthetic:true};
+              }
+              if(diff<=tolAccept)break;
+            }catch(e){console.info('OSM street-loop candidate',e?.message||e);}
+            // Give the browser a chance to paint feedback between attempts.
+            await new Promise(resolve=>setTimeout(resolve,0));
+          }
+        }
+      }
       const chosen=best;
       if(!chosen){
         if(options.requireDifferentFirst&&rejectedAsSame)throw new Error('NoDifferentDirection');
@@ -1400,6 +1433,8 @@ try {
         const err=new Error('DistanceMismatch');err.bestKm=chosen.actual;err.requestedKm=input;throw err;
       }
       const {data,route}=chosen;
+      syntheticWalk=syntheticWalk||!!chosen.synthetic;
+      usePhotoOptional=usePhotoOptional||syntheticWalk;
       rr.usePhotoOptional=usePhotoOptional;
       rr.routeSynthetic=syntheticWalk;
       if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
