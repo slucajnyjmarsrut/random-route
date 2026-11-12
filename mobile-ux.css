@@ -1,0 +1,174 @@
+/* Mobile one-hand usability; preserve screen reader, browser zoom and native map gestures.
+ * Loaded last so the route builder and Yandex navigation remain consistent.
+ */
+@media(max-width:599px){
+  .app{height:100dvh;min-height:0}
+  .app .topbar{
+    height:calc(62px + env(safe-area-inset-top));
+    min-height:calc(62px + env(safe-area-inset-top));
+    padding:calc(8px + env(safe-area-inset-top)) 14px 8px;
+    gap:12px;
+  }
+  .app .topbar .brand{font-size:clamp(16px,5vw,20px);line-height:1.17;white-space:normal}
+  .app .topbar .subtitle{font-size:11px;line-height:1.2;margin-top:2px;max-width:none}
+  .app .rr-settings-trigger{
+    width:48px!important;min-width:48px!important;flex:0 0 48px!important;
+    height:48px!important;display:grid;place-items:center;font-size:22px;border-radius:15px;
+  }
+  .app .content{
+    height:calc(100dvh - 62px - env(safe-area-inset-top));
+    padding:12px 13px calc(104px + env(safe-area-inset-bottom));
+    scrollbar-gutter:stable;
+    -webkit-overflow-scrolling:touch;
+    scroll-padding-bottom:105px;
+  }
+  .app[data-rr-screen="home"] .content,.app[data-rr-screen="create"] .content{
+    padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
+  }
+  .app .content :is(button,a,summary,label[for],select){touch-action:manipulation}
+  .app .content :is(button,.rr-settings-trigger,summary){-webkit-tap-highlight-color:transparent}
+  .app .content :is(input:not([type="checkbox"]),select,textarea){
+    font-size:16px!important;min-height:48px;
+  }
+  .app .content :is(button,.primary,.secondary,.danger-lite,.buy-btn,.feature-action,.store-tab,.quest-option,.route-exit-btn){
+    min-height:48px;
+    line-height:1.35;
+  }
+  /* Only four blocks on the initial screen, and no horizontal overscroll. */
+  .rr-welcome-screen{max-width:520px;padding:0}
+  .rr-home-weather{padding:15px 17px;margin-bottom:12px;border-radius:20px}
+  .rr-home-weather h2{font-size:20px}
+  .rr-home-weather-value{font-size:clamp(24px,6.6vw,31px);overflow-wrap:anywhere}
+  .rr-home-weather-detail{font-size:14px}
+  .rr-home-weather-advice{font-size:13px;margin-top:10px}
+  #home.rr-welcome-screen .hero{
+    margin-bottom:12px!important;
+    padding:17px 18px 24px!important;
+    min-height:0!important;
+  }
+  #home.rr-welcome-screen .hero h1{font-size:clamp(27px,7.4vw,34px)}
+  #home.rr-welcome-screen .hero p{font-size:15px;line-height:1.4}
+  .rr-welcome-mascot{
+    gap:12px!important;min-height:98px!important;
+    padding:9px 12px!important;margin-bottom:12px!important;
+  }
+  .rr-welcome-mascot img{width:75px!important;height:92px!important;flex-basis:75px!important}
+  .rr-welcome-mascot strong{font-size:18px!important}
+  .rr-welcome-mascot span{font-size:14px!important;line-height:1.4}
+  .rr-welcome-start{min-height:68px!important;padding:14px 20px!important;font-size:20px!important}
+  /* Route setup is scrollable with a visible, bottom-attached action. */
+  .rr-create-screen{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .rr-create-heading{margin:4px 0 16px}
+  .rr-create-heading h1{font-size:29px}
+  .rr-create-heading p{font-size:15px}
+  .rr-create-panel{padding:17px 15px;margin-bottom:12px}
+  .rr-create-panel h2{font-size:18px;margin-bottom:14px;gap:9px}
+  .rr-create-step-number{width:34px;height:34px;min-width:34px}
+  .rr-distance-options{gap:9px}
+  .rr-distance-options button{min-height:91px;padding:12px 14px}
+  .rr-distance-options button strong{font-size:23px}
+  .rr-distance-options button small{font-size:13px}
+  .rr-wish-buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .rr-wish-buttons button{min-height:91px!important;padding:11px 10px!important}
+  .rr-wish-buttons button b{font-size:14px!important}
+  .rr-wish-buttons button span{font-size:28px!important}
+  .rr-wish-buttons button:last-child{
+    grid-column:1/-1;min-height:62px!important;
+    flex-direction:row;gap:14px
+  }
+  .rr-create-gps-actions{flex-direction:column;gap:9px}
+  .rr-create-gps-actions button{width:100%;min-height:56px;font-size:16px}
+  .rr-create-details>summary{min-height:56px;padding:15px}
+  .rr-create-go{
+    position:sticky;
+    bottom:calc(10px + env(safe-area-inset-bottom));
+    z-index:12;
+    min-height:68px!important;
+    border:2px solid rgba(255,255,255,.23)!important;
+    box-shadow:0 11px 26px rgba(3,10,9,.48),0 0 0 5px rgba(16,25,29,.28)!important;
+  }
+  #routeBuildStatus{margin:13px 0 7px}
+  .rr-daily-details{margin-bottom:16px}
+  /* Compact navigation highlights first, real map beneath. */
+  #route .rr-nav-panel{padding:13px;margin-bottom:10px}
+  #route .rr-nav-direction{gap:11px;margin:11px 0}
+  #route .rr-nav-arrow{width:54px;height:54px;flex:0 0 54px;font-size:36px}
+  #route .rr-nav-title strong{font-size:18px}
+  #route .rr-nav-title span{font-size:13px}
+  #route .rr-nav-counters small{font-size:11px;min-height:31px}
+  #route .rr-nav-counters strong{font-size:17px}
+  #route .rr-nav-disclaimer{font-size:11px}
+  #route .map{height:clamp(285px,44dvh,480px)!important;min-height:285px!important}
+  #route .map .map-label,#route .map .gps-state{
+    top:10px;font-size:11px;line-height:1.3;
+    max-width:calc(50% - 15px);white-space:normal;overflow-wrap:anywhere;
+  }
+  #route .map .map-label{left:10px}
+  #route .map .gps-state{right:10px}
+  #route .map .map-follow{
+    width:54px!important;height:54px!important;
+    min-width:54px!important;min-height:54px!important;
+    font-size:26px!important;bottom:15px!important;right:13px!important;
+    display:grid;place-items:center;z-index:5;
+  }
+  #route .route-summary{gap:7px}
+  #route .summary{padding:11px 7px}
+  #route .summary b{font-size:17px}
+  #route .summary span{font-size:11px}
+  #route .checkpoint{padding:16px;border-radius:20px}
+  #route .checkpoint h3{font-size:21px;line-height:1.2}
+  #route .checkpoint p{font-size:15px;line-height:1.45}
+  #route #gpsBtn,#route #nextBtn,#route #verifyBtn{min-height:60px;font-size:17px}
+  #route .route-control-grid{gap:9px}
+  #route .route-control-grid button{min-height:58px;font-size:14px;white-space:normal}
+  #route .rr-route-extras summary{font-size:15px}
+  #route .rr-route-extras .route-edit-row{flex-wrap:wrap}
+  #route .rr-route-extras .route-edit-row button{min-height:52px}
+  .app .nav{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    padding:7px 4px calc(6px + env(safe-area-inset-bottom));
+    gap:2px;
+  }
+  .app .nav button{min-width:0;min-height:55px!important;font-size:11px!important;line-height:1.25;word-break:normal;padding:7px 2px}
+  .app .nav i{font-size:22px;margin-bottom:4px}
+  .app .toast{
+    width:calc(100vw - 28px);
+    max-width:460px;white-space:normal;text-align:center;
+    font-size:14px;line-height:1.4;padding:12px 16px;
+    bottom:calc(78px + env(safe-area-inset-bottom));
+    border-radius:16px;
+  }
+  .app .modal-backdrop,.app .auth-backdrop{padding-top:env(safe-area-inset-top)}
+  .app :is(.purchase-modal,.info-modal,.badge-detail-sheet,.auth-sheet){
+    max-height:calc(100dvh - env(safe-area-inset-top) - 10px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .app :is(.message,.hint,.sub,.store-note,.rank-main span,.reward-main span,.pstat span){
+    font-size:clamp(12px,3.3vw,14px);line-height:1.45;
+  }
+  .app :is(.feature-card,.reward-row,.rank-row,.pstat,.card){overflow-wrap:anywhere}
+}
+@media(max-width:350px){
+  .rr-wish-buttons{grid-template-columns:1fr}
+  .rr-wish-buttons button,.rr-wish-buttons button:last-child{
+    grid-column:1;min-height:62px!important;flex-direction:row;justify-content:flex-start
+  }
+  .rr-distance-options button{padding:10px}
+  .rr-home-weather-header button{font-size:13px}
+  .rr-welcome-mascot img{width:66px!important;flex-basis:66px!important}
+}
+@media(orientation:landscape) and (max-height:600px) and (max-width:899px){
+  .app .topbar{height:58px;min-height:58px;padding-top:5px}
+  .app .content{height:calc(100dvh - 58px);padding-bottom:calc(73px + env(safe-area-inset-bottom))}
+  #route .map{min-height:215px;height:70dvh}
+  .rr-create-go{position:relative;bottom:auto}
+  .app .nav button{min-height:48px}
+}
+@media(prefers-reduced-motion:reduce){
+ .rr-create-go,.rr-welcome-start,.rr-distance-options button,.rr-wish-buttons button{transition:none!important}
+}
+
+/* Always disclose the origin of the walking-road geometry. */
+.rr-osm-credit{font-size:12px;line-height:1.45;color:var(--muted);margin:0 0 12px;padding:0 3px}
+.rr-osm-credit a{color:#87dcb6;text-decoration:underline;text-underline-offset:2px}
+html[data-rr-theme="light"] .rr-osm-credit a{color:#176947}

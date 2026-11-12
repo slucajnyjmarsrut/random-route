@@ -9,11 +9,41 @@
   if(root)root.RRWalkingDijkstra=api;
 })(typeof window!=='undefined'?window:null,function(){
   'use strict';
-  const ENDPOINTS=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+  // Public Overpass can be overloaded or refuse requests. The bundled OSM
+  // snapshot below is authoritative for its downtown bounding box.
+  const ENDPOINTS=['https://overpass.private.coffee/api/interpreter'];
   const ROAD_TYPES='footway|path|pedestrian|steps|living_street|residential|service|unclassified|tertiary|secondary|primary|track|cycleway';
   const LIMIT_NODES=55000,LIMIT_EDGES=145000;
   // Two bounded cached graphs allow route length changes without reloading OSM.
   const graphCache=new Map(),pending=new Map();let unavailableUntil=0;
+  const STATIC_PATH='./data/yakutsk-center-walking.json?v=1';
+  const STATIC_BOUNDS={south:62.016,west:129.708,north:62.046,east:129.760};
+  let staticGraph=null,staticPromise=null,staticUnavailableUntil=0;
+  function canUseStatic(start,requestedKm){
+    const p=start||{},km=Number(requestedKm);
+    return Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&km>=1&&km<=6
+      &&p.lat>=STATIC_BOUNDS.south+.002&&p.lat<=STATIC_BOUNDS.north-.002
+      &&p.lng>=STATIC_BOUNDS.west+.004&&p.lng<=STATIC_BOUNDS.east-.004;
+  }
+  async function loadStaticGraph(){
+    if(staticGraph)return staticGraph;
+    if(staticPromise)return staticPromise;
+    if(staticUnavailableUntil>Date.now())throw Error('StaticGraphUnavailable');
+    staticPromise=(async()=>{
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+      try{
+        const response=await fetch(STATIC_PATH,{signal:controller.signal,cache:'force-cache'});
+        if(!response.ok)throw Error('StaticGraphHTTP'+response.status);
+        const data=await response.json();
+        if(data.version!==1||!Array.isArray(data.ways)||data.ways.length<100)throw Error('StaticGraphInvalid');
+        if(data.bbox?.south!==STATIC_BOUNDS.south||data.bbox?.north!==STATIC_BOUNDS.north)throw Error('StaticGraphBoundsMismatch');
+        staticGraph=makeGraph(data.ways);
+        return staticGraph;
+      }catch(e){staticUnavailableUntil=Date.now()+15000;throw e;}
+      finally{clearTimeout(timer);}
+    })();
+    try{return await staticPromise;}finally{staticPromise=null;}
+  }
   function distance(a,b){
     const lat=(a.lat+b.lat)*Math.PI/360;
     return Math.hypot((a.lat-b.lat)*111195,(a.lng-b.lng)*111195*Math.cos(lat));
@@ -137,7 +167,7 @@
   function route(graph,points,options={}){
     if(!Array.isArray(points)||points.length<2)throw Error('NoPoints');
     const zones=(options.zones||[]).map(z=>({lat:Number(z.lat),lng:Number(z.lng),radius:Number(z.radius||300)})).filter(z=>Number.isFinite(z.lat)&&Number.isFinite(z.lng)&&z.radius>0);
-    const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?75:120));
+    const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?145:180));
     if(ids.some(id=>id===null))throw Error('NoNearbyFootpath');
     const legs=[];let full=0;const usedEdges=new Map();
     for(let i=1;i<ids.length;i++){
@@ -153,16 +183,60 @@
     return {code:'Ok',source:'dijkstra-osm',routes:[{distance:full,duration:full/1.3,legs,
       geometry:{type:'LineString',coordinates:allCoords}}],waypoints:locs};
   }
-  function graphRadius(requestedKm){return Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));}
+  function reachableNodes(graph,start,zones=[],maxSnap=145){
+    const origin=nearestNode(graph,start,maxSnap);
+    if(origin===null)throw Error('NoNearbyFootpath');
+    const visited=new Set([origin]),stack=[origin];
+    while(stack.length){
+      const id=stack.pop(),a=graph.nodes.get(id);
+      for(const edge of graph.adj.get(id)||[]){
+        if(visited.has(edge.to))continue;
+        if(zones.length&&zones.some(z=>intersectZone(a,graph.nodes.get(edge.to),z)))continue;
+        visited.add(edge.to);stack.push(edge.to);
+      }
+    }
+    return {origin,visited};
+  }
+  function reachableStops(graph,start,pois,opts={}){
+    const zones=opts.zones||[],reachable=reachableNodes(graph,start,zones);
+    const used=new Set([reachable.origin]),items=[];
+    for(const poi of pois||[]){
+      const ll={lat:Number(poi._lat??poi.lat),lng:Number(poi._lng??poi.lng)};
+      if(!Number.isFinite(ll.lat)||!Number.isFinite(ll.lng))continue;
+      const id=nearestNode(graph,ll,opts.maxSnap||180);
+      if(id===null||!reachable.visited.has(id)||used.has(id))continue;
+      used.add(id);items.push(poi);
+    }
+    return items;
+  }
+  function walkingWaypoints(graph,start,requestedKm,opts={}){
+    const zones=opts.zones||[],reachable=reachableNodes(graph,start,zones);
+    const target=Math.max(1,Number(requestedKm)||3)*1000,minimum=Math.min(400,target*.20),maximum=Math.min(2400,target*.46);
+    const points=[];let index=0;
+    for(const id of reachable.visited){
+      if(index++%17!==0)continue;
+      const p=graph.nodes.get(id),m=distance(p,start);
+      if(m<minimum||m>maximum)continue;
+      points.push({id,lat:p.lat,lng:p.lng,straightM:m});
+    }
+    points.sort((a,b)=>a.id.localeCompare(b.id));
+    return points;
+  }
+  function graphRadius(requestedKm){return Math.min(3000,Math.max(1850,Math.ceil(requestedKm*670)));}
   function graphKey(start,requestedKm){
     const radius=graphRadius(requestedKm);
     return bbox(start,radius).map(v=>v.toFixed(3)).join(':')+':'+radius;
   }
   function hasWarmGraph(start,requestedKm=3){
+    if(staticGraph&&canUseStatic(start,requestedKm))return true;
     try{const item=graphCache.get(graphKey(start,requestedKm));return !!item&&item.expires>Date.now();}
     catch(e){return false;}
   }
   async function loadGraph(start,requestedKm){
+    if(canUseStatic(start,requestedKm)){
+      try{return await loadStaticGraph();}
+      catch(e){console.warn('Local OSM street snapshot is unavailable:',e?.message||e);}
+    }
     const radius=graphRadius(requestedKm),area=bbox(start,radius),key=graphKey(start,requestedKm);
     const item=graphCache.get(key);
     if(item&&item.expires>Date.now())return item.graph;
@@ -172,7 +246,7 @@
       const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
       let lastError;
       for(const endpoint of ENDPOINTS){
-        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10500);
         try{
           const response=await fetch(endpoint+urlQuery,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/json'}});
           if(!response.ok)throw Error('Overpass '+response.status);
@@ -201,5 +275,5 @@
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,loadGraph,hasWarmGraph,preload,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,reachableNodes,reachableStops,walkingWaypoints,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
 });

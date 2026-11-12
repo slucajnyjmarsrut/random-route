@@ -155,6 +155,7 @@ try {
 <link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
 <link rel="stylesheet" href="simple-home.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
+<link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 </head>
 <body>
 <div class="app" data-rr-screen="home">
@@ -253,8 +254,12 @@ try {
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
+<div class="rr-osm-credit">Дорожные данные: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© участники OpenStreetMap</a> (ODbL)</div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
+<details class="rr-create-details rr-route-extras" id="rrRouteExtras">
+<summary>⚙️ Изменить маршрут или исключить улицы</summary>
+<div class="rr-route-extra-content">
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
 <div class="route-edit-row"><div class="distance-wrap"><input class="distance" id="activeDistanceInput" inputmode="decimal" max="12" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div><button class="secondary" id="applyDistanceBtn" type="button">Перестроить</button></div>
@@ -265,6 +270,8 @@ try {
 <div class="avoid-zone-list" id="avoidListRoute"></div>
 <button class="secondary hidden" id="avoidRerouteBtn" type="button" style="margin-top:8px">Перестроить с учётом зон</button>
 </div>
+</div>
+</details>
 <div class="checkpoint">
 <div class="eyebrow">Текущая контрольная точка</div><h3 id="checkpointTitle">Найдите объект рядом</h3><p id="checkpointText">Когда подойдёте к точке, приложение проверит GPS и откроет фотозадание.</p>
 <div class="checkpoint-address" id="checkpointAddressBox"><div>📍</div><div><b>Адрес точки</b><span id="checkpointAddress">Определяем адрес…</span></div></div>
@@ -666,7 +673,7 @@ try {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.legs||[]), checkpoints:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.checkpoints||[]), current:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?1:(saved?.current||1),
     routeDistance:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?0:(saved?.routeDistance||0), routeEngine:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'':(saved?.routeEngine||''), routeTheme:saved?.routeTheme||'city', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||3), stage:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'idle':(saved?.stage||'idle'), currentPoi:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?null:(saved?.currentPoi||null),
-    currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
+    currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,routeSynthetic:saved?.routeSynthetic===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
     watchId:null, activeScreen:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?'home':(saved?.activeScreen||localStorage.getItem('rr_active_screen')||'home'),
@@ -855,7 +862,7 @@ try {
   }
 
   const saveSession=()=>{
-    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true};
+    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true,routeSynthetic:rr.routeSynthetic===true};
     try{localStorage.setItem('rr_no_go_zones',JSON.stringify(rr.noGoZones||[]))}catch(e){}
     try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
   };
@@ -995,12 +1002,12 @@ try {
     status(mode==='gps'?(insidePilot(p)?'Местоположение определено. Маршрут начнётся от вашей текущей позиции.':'GPS определён. Вы сейчас за пределами Якутска.'):'Используется точка в центре Якутска.',mode==='gps');
     saveSession();
   }
-  function requestLocation(center=true){
+  function requestLocation(center=true,afterSuccess=null){
     if(isDeveloperMode()){setDeveloperMode(true);return}
     status('Определяем ваше местоположение…');
     if(!navigator.geolocation){status('Геолокация недоступна на этом устройстве.');return}
     navigator.geolocation.getCurrentPosition(pos=>{
-      rr.gpsRetryCount=0;const p=gpsPoint(pos);rr.gpsFresh=true;gpsSanity(p);if(rr.legs.length&& !['idle','completed'].includes(rr.stage)){updateMarkers(p,center);status(`GPS подключён · маршрут продолжается · точность ±${Math.round(p.accuracy)} м`,true)}else setStart(p,'gps',center);toast('GPS подключён');
+      rr.gpsRetryCount=0;const p=gpsPoint(pos);rr.gpsFresh=true;gpsSanity(p);if(rr.legs.length&& !['idle','completed'].includes(rr.stage)){updateMarkers(p,center);status(`GPS подключён · маршрут продолжается · точность ±${Math.round(p.accuracy)} м`,true)}else setStart(p,'gps',center);toast('GPS подключён');if(typeof afterSuccess==='function')afterSuccess();
     },async err=>{await explainGeoState();if(nativeApkMode&&err.code===1&&(rr.gpsRetryCount||0)<6){rr.gpsRetryCount=(rr.gpsRetryCount||0)+1;status('Разрешите доступ к геопозиции. После подтверждения GPS подключится автоматически.');setTimeout(()=>requestLocation(center),2200);return}if(window.isSecureContext||nativeApkMode)status(err.code===1?'Доступ к GPS не разрешён. Разрешите геолокацию для приложения.':'Не удалось получить GPS. Выйдите на открытое место и попробуйте ещё раз.');}, {enableHighAccuracy:true,timeout:15000,maximumAge:1000});
   }
   function startWatching(){
@@ -1267,9 +1274,18 @@ try {
     const dailyOffer=options.dailyOffer?todayDailyOffers.find(o=>o.id===options.dailyOffer.id&&o.day===options.dailyOffer.day):null;
     const dailyRandom=dailyOffer?window.DailyRouteQuests.rngForOffer(dailyOffer.seed):Math.random;
     const input=Number(options.distanceKm??parseFloat($('#distanceInput').value.replace(',','.')));if(!input||input<1||input>12){toast('Дейкстра: дистанция от 1 до 12 км');return false}
-    if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return false}
+    if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){
+      toast('Сейчас определим ваше местоположение и автоматически построим маршрут.');
+      requestLocation(true,()=>buildYakutsk(options));
+      return false;
+    }
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
     else if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
+    if(!demoMode&&!isDeveloperMode()&&!insidePilot(rr.start)){
+      const msg='Пока приложение строит маршруты только в Якутске. Вы находитесь за пределами города. Для знакомства нажмите «Пробный маршрут».';
+      status(msg);toast('Маршруты доступны в Якутске; попробуйте демонстрационный режим.');
+      return false;
+    }
     const btn=$('#buildBtn'),old=btn.textContent,statusEl=$('#routeBuildStatus');
     const startedAt=performance.now(),routeBudgetMs=12000,maxAttempts=4;
     const report=message=>{
@@ -1292,8 +1308,8 @@ try {
       // The photo catalog can load later; avoid flooding the network while routing.
       report('Загружаем настоящие пешеходные дороги OSM…');
       if(!window.RRWalkingDijkstra?.loadGraph)throw new Error('DijkstraUnavailable');
-      await window.RRWalkingDijkstra.loadGraph(rr.start,input);
-      const targetM=input*1000,maxR=Math.min(2450,Math.max(600,targetM*.42));
+      const streetGraph=await window.RRWalkingDijkstra.loadGraph(rr.start,input);
+      const targetM=input*1000,maxR=Math.min(2450,Math.max(800,targetM*.55));
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
       let usePhotoOptional=false;
@@ -1307,16 +1323,35 @@ try {
         near=routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
         usePhotoOptional=true;
       }
-      if(near.length<2)throw new Error('NoTouristPois');
+      // Public tourist POIs may be far from the user's position or isolated
+      // from a real walking path. Remove inaccessible/duplicate snapped nodes
+      // BEFORE spending 4 Dijkstra attempts on impossible waypoint combinations.
+      near=window.RRWalkingDijkstra.reachableStops(streetGraph,rr.start,near,{zones:rr.noGoZones,maxSnap:180});
+      let syntheticWalk=false;
+      if(near.length<2){
+        // Honest fallback: a walk through ACTUAL OSM road nodes, not fabricated
+        // monuments. GPS checkpoints still work, but photo rewards are disabled.
+        const walkNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
+        const generated=walkNodes.filter((_,i)=>i%Math.max(1,Math.ceil(walkNodes.length/90))===0).map((n,i)=>({
+          type:'walk_node',id:'osm-walk:'+n.id,_lat:n.lat,_lng:n.lng,
+          _isTouristGuide:false,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+          _fullAddress:'Пешеходная дорожка OpenStreetMap',tags:{name:'Прогулочная точка '+(i+1)}
+        }));
+        if(generated.length>=2){
+          near=generated;syntheticWalk=true;usePhotoOptional=true;
+          report('Подбираем прогулку по доступным пешеходным улицам…');
+        }else if(near.length===0)throw new Error('NoNearbyFootpath');
+      }
+      if(near.length===0)throw new Error('NoTouristPois');
       const selectedTheme=$('#typeChoices .choice.active')?.dataset.type||'city';
       const nMax=input<=2?3:Math.max(3,Math.min(8,Math.round(input/1.35)));
       const tolOk=Math.max(150,targetM*.08),tolAccept=Math.max(350,targetM*.18);
       const ll=p=>({lat:p._lat,lng:p._lng});
       const mkCandidate=()=>{
-        const kMax=Math.min(nMax,near.length),k=2+Math.floor(dailyRandom()*(kMax-1));
+        const kMax=Math.min(nMax,near.length),k=kMax===1?1:2+Math.floor(dailyRandom()*(kMax-1));
         const picked=[];
         for(const p of [...near].sort(()=>dailyRandom()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
-        if(picked.length<2)return null;
+        if(picked.length<1)return null;
         const off=dailyRandom()*360,cw=dailyRandom()<.5?1:-1;
         const ang=p=>((bearingDeg(rr.start,ll(p))-off)*cw+720)%360;
         picked.sort((x,y)=>ang(x)-ang(y));
@@ -1359,16 +1394,60 @@ try {
           if(diff<=tolAccept)break; // The route is already within the accepted distance tolerance.
         }catch(e){console.warn('route candidate',e)}
       }
+      // If a sightseeing route cannot match the user's requested distance,
+      // attempt a simple walking loop using only REAL OSM road nodes. It will
+      // never claim to visit monuments or unlock a photograph reward.
+      if((!best||best.diff>tolAccept)&&!syntheticWalk){
+        const allStreetNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
+        const streetNodes=allStreetNodes.filter((_,i)=>i%Math.max(1,Math.ceil(allStreetNodes.length/120))===0);
+        const toPoi=(n,i)=>({
+          type:'walk_node',id:'osm-walk:'+n.id,_lat:n.lat,_lng:n.lng,
+          _isTouristGuide:false,_hasRef:false,_referenceUrl:null,_verifyMode:'none',
+          _fullAddress:'Пешеходная дорожка OpenStreetMap',tags:{name:'Прогулочная точка '+(i+1)}
+        });
+        if(streetNodes.length){
+          report('Пробуем прогулку по настоящим улицам без обязательных достопримечательностей…');
+          for(let tryIndex=0;tryIndex<6;tryIndex++){
+            const first=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            let second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            for(let n=0;n<6&&second&&first&&second.id===first.id;n++)
+              second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
+            if(!first||!second||first.id===second.id)continue;
+            const pois=[toPoi(first,1),toPoi(second,2)],pts=[rr.start,...pois.map(ll),rr.start];
+            try{
+              const data=await requestFootRoute(pts,{distanceKm:input}),route=data.routes[0];
+              if(routeHitsNoGo(route))continue;
+              const diff=Math.abs(route.distance-targetM);
+              if(!best||diff<best.diff){
+                best={data,route,pois,diff,actual:route.distance/1000,rank:diff,synthetic:true};
+              }
+              if(diff<=tolAccept)break;
+            }catch(e){console.info('OSM street-loop candidate',e?.message||e);}
+            // Give the browser a chance to paint feedback between attempts.
+            await new Promise(resolve=>setTimeout(resolve,0));
+          }
+        }
+      }
       const chosen=best;
       if(!chosen){
         if(options.requireDifferentFirst&&rejectedAsSame)throw new Error('NoDifferentDirection');
         if(rejectedByZones)throw new Error('NoRouteOutsideZones');
         throw new Error('NoRoute')
       }
-      if(chosen.diff>tolAccept){const err=new Error('DistanceMismatch');err.bestKm=chosen.actual;err.requestedKm=input;throw err}
+      // Do not discard a safe, fully routed walking path just because its
+      // length missed a very tight target. Show the ACTUAL distance to the user.
+      // Reject routes wildly different from their request.
+      if(chosen.diff>Math.max(700,targetM*.42)){
+        const err=new Error('DistanceMismatch');err.bestKm=chosen.actual;err.requestedKm=input;throw err;
+      }
       const {data,route}=chosen;
+      syntheticWalk=syntheticWalk||!!chosen.synthetic;
+      usePhotoOptional=usePhotoOptional||syntheticWalk;
       rr.usePhotoOptional=usePhotoOptional;
-      if(usePhotoOptional)toast('Фотографии недоступны: построен прогулочный маршрут без наград за пропущенные фототочки.');
+      rr.routeSynthetic=syntheticWalk;
+      if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
+      else if(usePhotoOptional)toast('Маршрут построен без фотозаданий: эталонные фотографии недоступны.');
+      if(chosen.diff>tolAccept)toast('Найден безопасный маршрут длиной '+chosen.actual.toFixed(1).replace('.',',')+' км вместо '+input.toFixed(1).replace('.',',')+' км.');
       rr.legs=route.legs;
       rr.routeEngine='dijkstra-osm';rr.routeTheme=selectedTheme;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
@@ -1392,7 +1471,16 @@ try {
       else if(e?.message==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
       else if(e?.message==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут, который отображается как '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км. Попробуйте другую дистанцию или ещё раз.');}
       else toast('Дейкстра не нашла подходящий маршрут. Измените расстояние или попробуйте снова.');
-      if(statusEl){statusEl.hidden=false;statusEl.textContent='По графу OSM не удалось проложить прогулку. Попробуйте другую дистанцию или повторите запрос.';}
+      if(statusEl){
+        statusEl.hidden=false;
+        statusEl.textContent=(
+          ['OSMUnavailable','GraphIncomplete','GraphTooLarge','DijkstraUnavailable'].includes(e?.message)
+            ?'Не загружаются дорожные данные OpenStreetMap. Проверьте интернет и нажмите «Повторить».'
+            :e?.message==='NoNearbyFootpath'||e?.message==='DisconnectedWalkingGraph'
+              ?'Нет соединённого пешеходного пути возле старта. Попробуйте переместиться ближе к улице или выбрать другое расстояние.'
+              :'Маршрут не найден. Попробуйте выбрать другую длину прогулки.'
+        );
+      }
       return false;
     }finally{
       btn.disabled=false;btn.textContent=old;
@@ -2416,7 +2504,7 @@ try {
   function setFinish(){
     rr.current=rr.checkpoints.length+1;rr.stage='finish';showLeg(rr.checkpoints.length,true);$('#pointNumber').textContent='F';$('#checkpointTitle').textContent='Финиш — вернитесь к старту';$('#checkpointText').textContent='Последний участок ведёт к месту старта. На финише нужен только GPS.';$('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#lockLabel').textContent='Финиш открыт';$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Ожидается';$('#photoCheck').className='check ok';$('#photoCheck b').textContent='Не требуется';$('#gpsBtn').textContent='Подтвердить возвращение к старту';$('#gpsBtn').disabled=false;saveSession();
   }
-  function finishGps(){if(isDeveloperMode()){rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0};updateMarkers(rr.livePos,false);rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Режим разработчика: маршрут завершён без GPS. Статистика и страйк не изменены.';saveSession();toast('Маршрут завершён в режиме разработчика');return}navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);if(!sane){toast('GPS изменился слишком резко. Подождите.');return}if(p.accuracy>90){toast('Недостаточная точность GPS: ±'+Math.round(p.accuracy)+' м');return}const d=distMeters(p,rr.start);if(d<=85){const finishKey=(rr.routeId||('legacy-'+(rr.routeStartedAt||Date.now())))+':finish';const added=window.__recordVerifiedEvent?.('route_completed',finishKey,{routeId:rr.routeId,routeDistanceM:Math.max(0,Number(rr.routeDistance||0)),gpsTrackedDistanceM:Math.max(0,Math.round(Number(rr.trackedDistanceM||0))),checkpoints:rr.checkpoints.length,startedAt:rr.routeStartedAt||null,finishedAt:Date.now(),dailyEligible:!demoMode&&!isDeveloperMode()&&rr.startMode==='gps',dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null})!==false;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';let st={changed:false,text:'Маршрут уже был засчитан.'};if(added){st=window.__completeStreakDay?window.__completeStreakDay():{changed:false,text:'Маршрут завершён'};window.__addBadgeProgress?.();window.RRRouteAI?.learnCompleted?.(rr.checkpoints,rr.routeTheme||'city')}$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Кольцевой маршрут завершён. Подтверждено '+(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км.'+(rr.trackedDistanceM?` GPS-трек: ${(rr.trackedDistanceM/1000).toFixed(1).replace('.',',')} км.`:'')+' '+st.text;saveSession();toast(added?(st.changed?'Страйк засчитан':'Маршрут завершён'):'Маршрут уже засчитан')}else toast('До стартовой зоны ещё '+Math.round(d)+' м')},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+  function finishGps(){if(isDeveloperMode()){rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0};updateMarkers(rr.livePos,false);rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Режим разработчика: маршрут завершён без GPS. Статистика и страйк не изменены.';saveSession();toast('Маршрут завершён в режиме разработчика');return}navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);if(!sane){toast('GPS изменился слишком резко. Подождите.');return}if(p.accuracy>90){toast('Недостаточная точность GPS: ±'+Math.round(p.accuracy)+' м');return}const d=distMeters(p,rr.start);if(d<=85){const finishKey=(rr.routeId||('legacy-'+(rr.routeStartedAt||Date.now())))+':finish';const added=window.__recordVerifiedEvent?.('route_completed',finishKey,{routeId:rr.routeId,routeDistanceM:Math.max(0,Number(rr.routeDistance||0)),gpsTrackedDistanceM:Math.max(0,Math.round(Number(rr.trackedDistanceM||0))),checkpoints:rr.checkpoints.length,startedAt:rr.routeStartedAt||null,finishedAt:Date.now(),dailyEligible:!demoMode&&!isDeveloperMode()&&rr.startMode==='gps',dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null})!==false;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';let st={changed:false,text:'Маршрут уже был засчитан.'};if(added){st=window.__completeStreakDay?window.__completeStreakDay():{changed:false,text:'Маршрут завершён'};window.__addBadgeProgress?.();if(!rr.routeSynthetic)window.RRRouteAI?.learnCompleted?.(rr.checkpoints,rr.routeTheme||'city')}$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Кольцевой маршрут завершён. Подтверждено '+(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км.'+(rr.trackedDistanceM?` GPS-трек: ${(rr.trackedDistanceM/1000).toFixed(1).replace('.',',')} км.`:'')+' '+st.text;saveSession();toast(added?(st.changed?'Страйк засчитан':'Маршрут завершён'):'Маршрут уже засчитан')}else toast('До стартовой зоны ещё '+Math.round(d)+' м')},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
 
   $('#nextBtn').onclick=()=>{
     if(rr.current>=rr.checkpoints.length){setFinish();$('#gpsBtn').onclick=finishGps;$('#demoGpsBtn').onclick=()=>{if(!demoMode)return;rr.stage='completed';$('#gpsCheck').className='check ok';$('#gpsCheck b').textContent='Финиш подтверждён';$('#verificationMessage').className='message success';$('#verificationMessage').textContent='Маршрут завершён. Страйк и рейтинг не изменены.';saveSession();toast('Маршрут завершён')};return}
@@ -2468,12 +2556,12 @@ try {
     if(rerouteBusy)return false;rerouteBusy=true;
     const oldFirst=explicitOldPoint||(rr.checkpoints?.[Math.max(0,rr.current-1)]?{lat:rr.checkpoints[Math.max(0,rr.current-1)].lat,lng:rr.checkpoints[Math.max(0,rr.current-1)].lng}:null);
     const backup={
-      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional
+      start:rr.start?{...rr.start}:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi,currentCategory:rr.currentCategory,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId,dailyOfferDay:rr.dailyOfferDay,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt,replacementsUsed:rr.replacementsUsed,legProgress:{...(rr.legProgress||{})},routeVariant:rr.routeVariant,usePhotoOptional:rr.usePhotoOptional,routeSynthetic:rr.routeSynthetic
     };
     try{
       if(rr.livePos){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode=isDeveloperMode()?'developer':'gps'}
       rr.routeVariant+=(kind==='direction'?11:kind==='point'?23:kind==='distance'?13:kind==='avoid'?19:17);
-      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
+      rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.usePhotoOptional=false;rr.routeSynthetic=false;rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};saveSession();
       const startMsg=kind==='direction'?'Ищем действительно другое направление…':kind==='point'?'Переносим контрольную точку в другое место…':kind==='distance'?'Меняем километраж…':kind==='avoid'?'Строим маршрут в обход зон…':'Генерируем новый маршрут…';
       toast(startMsg);
       const requireDifferent=kind==='direction'||kind==='point'||kind==='new';
@@ -2561,7 +2649,7 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=2.0"></script>
+<script src="walking-dijkstra.js?v=2.1"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 </body>
