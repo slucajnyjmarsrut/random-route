@@ -161,3 +161,6 @@ html[data-rr-theme="light"] .rr-wish-buttons button.active{background:#e0f5e9!im
 html[data-rr-theme="light"] .rr-distance-options button[aria-pressed="true"]:before{color:#165538}
 html[data-rr-theme="light"] .rr-create-details .distance{background:#fff;color:#1b402f}
 html[data-rr-theme="light"] .rr-create-details .unit{color:#3b5f4e}
+
+/* The forecast now has its own card; do not duplicate weather text over the headline. */
+#home.rr-welcome-screen .rr-weather-label{display:none!important}
