@@ -995,12 +995,12 @@ try {
     status(mode==='gps'?(insidePilot(p)?'Местоположение определено. Маршрут начнётся от вашей текущей позиции.':'GPS определён. Вы сейчас за пределами Якутска.'):'Используется точка в центре Якутска.',mode==='gps');
     saveSession();
   }
-  function requestLocation(center=true){
+  function requestLocation(center=true,afterSuccess=null){
     if(isDeveloperMode()){setDeveloperMode(true);return}
     status('Определяем ваше местоположение…');
     if(!navigator.geolocation){status('Геолокация недоступна на этом устройстве.');return}
     navigator.geolocation.getCurrentPosition(pos=>{
-      rr.gpsRetryCount=0;const p=gpsPoint(pos);rr.gpsFresh=true;gpsSanity(p);if(rr.legs.length&& !['idle','completed'].includes(rr.stage)){updateMarkers(p,center);status(`GPS подключён · маршрут продолжается · точность ±${Math.round(p.accuracy)} м`,true)}else setStart(p,'gps',center);toast('GPS подключён');
+      rr.gpsRetryCount=0;const p=gpsPoint(pos);rr.gpsFresh=true;gpsSanity(p);if(rr.legs.length&& !['idle','completed'].includes(rr.stage)){updateMarkers(p,center);status(`GPS подключён · маршрут продолжается · точность ±${Math.round(p.accuracy)} м`,true)}else setStart(p,'gps',center);toast('GPS подключён');if(typeof afterSuccess==='function')afterSuccess();
     },async err=>{await explainGeoState();if(nativeApkMode&&err.code===1&&(rr.gpsRetryCount||0)<6){rr.gpsRetryCount=(rr.gpsRetryCount||0)+1;status('Разрешите доступ к геопозиции. После подтверждения GPS подключится автоматически.');setTimeout(()=>requestLocation(center),2200);return}if(window.isSecureContext||nativeApkMode)status(err.code===1?'Доступ к GPS не разрешён. Разрешите геолокацию для приложения.':'Не удалось получить GPS. Выйдите на открытое место и попробуйте ещё раз.');}, {enableHighAccuracy:true,timeout:15000,maximumAge:1000});
   }
   function startWatching(){
@@ -1267,9 +1267,18 @@ try {
     const dailyOffer=options.dailyOffer?todayDailyOffers.find(o=>o.id===options.dailyOffer.id&&o.day===options.dailyOffer.day):null;
     const dailyRandom=dailyOffer?window.DailyRouteQuests.rngForOffer(dailyOffer.seed):Math.random;
     const input=Number(options.distanceKm??parseFloat($('#distanceInput').value.replace(',','.')));if(!input||input<1||input>12){toast('Дейкстра: дистанция от 1 до 12 км');return false}
-    if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return false}
+    if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){
+      toast('Сейчас определим ваше местоположение и автоматически построим маршрут.');
+      requestLocation(true,()=>buildYakutsk(options));
+      return false;
+    }
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
     else if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
+    if(!demoMode&&!isDeveloperMode()&&!insidePilot(rr.start)){
+      const msg='Пока приложение строит маршруты только в Якутске. Вы находитесь за пределами города. Для знакомства нажмите «Пробный маршрут».';
+      status(msg);toast('Маршруты доступны в Якутске; попробуйте демонстрационный режим.');
+      return false;
+    }
     const btn=$('#buildBtn'),old=btn.textContent,statusEl=$('#routeBuildStatus');
     const startedAt=performance.now(),routeBudgetMs=12000,maxAttempts=4;
     const report=message=>{
