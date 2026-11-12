@@ -1005,7 +1005,7 @@ try {
     if(isDeveloperMode()){setDeveloperMode(true);return}
     if(!navigator.geolocation||rr.watchId!==null)return;
     rr.watchId=navigator.geolocation.watchPosition(pos=>{
-      const p=gpsPoint(pos);rr.gpsFresh=true;const sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);updateLiveRouteProgress(p);
+      const p=gpsPoint(pos);rr.gpsFresh=true;const sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);updateLiveRouteProgress(p,sane);
       if(rr.startMode==='pending'){rr.start={lat:p.lat,lng:p.lng};rr.startMode='gps'}status(`GPS подключён · точность ±${Math.round(p.accuracy)} м`,true)
       if(rr.stage==='walking'&&rr.checkpoints[rr.current-1]){
         const d=distMeters(p,rr.checkpoints[rr.current-1]);$('#gpsBadge').textContent=(sane?'':'⚠ ')+(d<1000?`До точки: ${Math.round(d)} м`:`До точки: ${(d/1000).toFixed(1)} км`);
@@ -1024,7 +1024,7 @@ try {
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
-      if(id==='route'){if(yMap)try{yMap.container.fitToViewport()}catch(e){} if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false)}
+      if(id==='route'){if(yMap)try{yMap.container.fitToViewport()}catch(e){} if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false);if(followGps)autoFollow(rr.livePos||rr.start,true)}
       if(id==='create'&&$('#createMapDetails')?.open&&yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
@@ -1045,7 +1045,11 @@ try {
     badge.textContent=demoMode?'🧪 ДЕМОНСТРАЦИЯ: маршрут строится из центра Якутска, реальное местоположение не подтверждено.':'📍 Для настоящей прогулки разрешите GPS. Можно также открыть пробный маршрут.';
   }
   updateDemoBanner();
-  $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;if(yMap)yMap.setCenter([p.lat,p.lng],17,{duration:220});};
+  $('#mapFollowBtn').onclick=()=>{
+    followGps=!followGps;syncFollowButton();
+    if(followGps)autoFollow(rr.livePos||rr.start,true);
+  };
+  syncFollowButton();
   function syncRouteChoiceButtons(){
     const km=Number($('#distanceInput').value),type=$('#typeChoices .choice.active')?.dataset.type;
     $$('[data-distance-km]').forEach(b=>{
@@ -1260,12 +1264,44 @@ try {
     rr.legProgress=rr.legProgress||{};rr.legProgress[index]=Math.max(prev,best.scalar);
     const rem=[best.point,...pts.slice(best.i+1)];
     let remaining=0;for(let i=0;i<rem.length-1;i++)remaining+=distMeters({lat:rem[i][0],lng:rem[i][1]},{lat:rem[i+1][0],lng:rem[i+1][1]});
-    return {pts:rem,remainingM:remaining,distanceToLine:best.d};
+    const passed=pts.slice(0,best.i+1).concat([best.point]);
+    return {pts:rem,passedPts:passed,remainingM:remaining,distanceToLine:best.d};
   }
-  function updateLiveRouteProgress(p){
-    if(!rr.legs.length||!p)return;const index=Math.min(Math.max(0,rr.current-1),rr.legs.length-1);const pr=projectProgressOnLeg(index,p);if(!pr||pr.pts.length<2)return;
-    if(yRouteCasing)yRouteCasing.geometry.setCoordinates(pr.pts);if(yRouteLine)yRouteLine.geometry.setCoordinates(pr.pts);
+  function paintNavigation(index,remainingPts,remainingM,quality='gps'){
+    const nav=window.RRRouteNavigation;
+    if(!nav||!rr.legs[index])return;
+    const later=rr.legs.slice(index+1).reduce((sum,leg)=>sum+Math.max(0,Number(leg.distance)||0),0);
+    const info=nav.guidance(remainingPts,later);
+    const current=remainingM===undefined?info.segmentMetres:remainingM;
+    const total=current+later;
+    $('#rrNavArrow').textContent=quality==='off'?'!':quality==='poor'?'◎':info.symbol;
+    $('#rrNavInstruction').textContent=quality==='off'?'Вы отошли от линии маршрута':
+      quality==='poor'?'Уточняем ваше положение по GPS':info.instruction;
+    $('#rrNavStepDistance').textContent=quality==='off'?'Вернитесь к выделенной линии на карте':
+      quality==='poor'?'Точность GPS пока недостаточна для подсказок':'Следуйте зелёной линии к следующей точке';
+    $('#rrNavNext').textContent=quality==='off'?'—':nav.formatDistance(current);
+    $('#rrNavTotal').textContent=quality==='off'?'—':nav.formatDistance(total);
+    $('#rrNavTime').textContent=quality==='off'?'—':'≈ '+nav.minutes(total)+' мин';
+    $('#rrNavGpsStatus').textContent=quality==='poor'?'GPS неточный':quality==='off'?'Вне маршрута':rr.gpsFresh?'GPS активен':'GPS ожидается';
+    $('#rrNavPanel').classList.toggle('rr-nav-offtrack',quality==='off');
+    const full=Math.max(1,rr.routeDistance||rr.legs.reduce((sum,leg)=>sum+(leg.distance||0),0));
+    $('#rrNavProgress').style.width=Math.max(0,Math.min(100,(full-total)/full*100))+'%';
+  }
+  function updateLiveRouteProgress(p,sane=true){
+    if(!rr.legs.length||!p)return;
+    const index=Math.min(Math.max(0,rr.current-1),rr.legs.length-1),leg=rr.legs[index];
+    if(Number(p.accuracy)>80||!sane){paintNavigation(index,legCoords(leg),leg.distance,'poor');return;}
+    const pr=projectProgressOnLeg(index,p);
+    if(!pr||pr.pts.length<2){paintNavigation(index,legCoords(leg),leg.distance,'off');return;}
+    if(yRouteCasing)yRouteCasing.geometry.setCoordinates(pr.pts);
+    if(yRouteLine)yRouteLine.geometry.setCoordinates(pr.pts);
+    if(pr.passedPts.length>=2){
+      if(yPassedLine)yPassedLine.geometry.setCoordinates(pr.passedPts);
+      else if(yMap&&window.ymaps){yPassedLine=new ymaps.Polyline(pr.passedPts,{}, {strokeColor:'#889a9b',strokeWidth:5,strokeOpacity:.82});yMap.geoObjects.add(yPassedLine)}
+    }
     $('#pointDistance').textContent='осталось '+formatMeters(pr.remainingM);
+    paintNavigation(index,pr.pts,pr.remainingM);
+    autoFollow(p,false);
   }
   function showLeg(index,fit=true){
     const leg=rr.legs[index];if(!leg)return;
@@ -1273,7 +1309,9 @@ try {
     const progress=(rr.livePos&&index===Math.max(0,rr.current-1))?projectProgressOnLeg(index,rr.livePos):null;
     const visiblePts=progress?.pts?.length>1?progress.pts:pts;
     $('#pointDistance').textContent='осталось '+formatMeters(progress?.remainingM??leg.distance);
-    showYandexLeg(index,fit,visiblePts);
+    showYandexLeg(index,fit,visiblePts,progress?.passedPts||null);
+    paintNavigation(index,visiblePts,progress?.remainingM??leg.distance);
+    if(followGps&&rr.activeScreen==='route')setTimeout(()=>autoFollow(rr.livePos||rr.start,true),400);
     if(index<rr.checkpoints.length)ensureCheckpointAddress(index);
   }
 
@@ -2502,8 +2540,8 @@ try {
 
   function clearActiveRoute(){
     rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
-    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;rr.routeEngine='';
-    if(yMap){[yRouteLine,yRouteCasing,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yCheckpointMarker=null}
+    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;rr.routeEngine='';followGps=true;mapFollowLast=0;mapFollowLastPos=null;syncFollowButton();
+    if(yMap){[yRouteLine,yRouteCasing,yPassedLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yPassedLine=null;yCheckpointMarker=null}
     if(window.state){window.state.current=1;window.state.gps=false;window.state.photo=false;window.state.verified=false}
     $('#cameraInput').value='';$('#photoPreview').src='';$('#photoPreview').classList.remove('show');
     try{localStorage.removeItem(SESSION_KEY);localStorage.setItem('rr_active_screen','home')}catch(e){}
