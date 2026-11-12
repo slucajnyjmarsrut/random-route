@@ -152,7 +152,7 @@ try {
 <link rel="stylesheet" href="weather-background.css?v=1.0"/>
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
-<link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
+<link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
 <link rel="stylesheet" href="simple-home.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
@@ -2715,6 +2715,14 @@ try {
       const geometryDistance=routeLegsDistanceM(rr.legs);
       if(geometryDistance>0)rr.routeDistance=geometryDistance;
       const savedStage=rr.stage;
+      // Migrate proven real photos from earlier versions: the ledger, not a
+      // stale 'verified' stage, determines whether to restore the history.
+      if(savedStage==='verified'&&!rr.photoProof&&rr.currentPoi?.tags?.name
+        &&rr.routeId&&window.__hasVerifiedEvent?.('photo_verified',rr.routeId+':point:'+rr.current)===true){
+        rr.photoProof={routeId:rr.routeId,point:rr.current,
+          poiId:String(rr.currentPoi.type||'')+':'+String(rr.currentPoi.id||'')};
+      }
+      const photoWasProved=savedStage==='verified'&&hasCurrentPhotoProof();
       $('#sumDistance').textContent=(rr.routeDistance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;$('#pointNumber').textContent=rr.current<=rr.checkpoints.length?rr.current:'F';$('#activeDistanceInput').value=Number(rr.requestedDistance||window.state?.distance||rr.routeDistance/1000||6.5).toFixed(1);
       if(savedStage==='finish'||savedStage==='completed'){
         setFinish();
@@ -2723,7 +2731,7 @@ try {
       } else {
         showLeg(Math.max(0,rr.current-1),false);resetPointUI();
         if(['photo','photo_ready','photo_unavailable','verified'].includes(savedStage)){
-          const provedPhoto=savedStage==='verified'&&hasCurrentPhotoProof();
+          const provedPhoto=photoWasProved;
           // An old "verified" GPS-only skip is not a completed photo task.
           // On reload retry selecting the photo checkpoint instead of
           // fabricating "Фото подтверждено" and an empty history/mini-quest.
