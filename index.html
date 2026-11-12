@@ -1788,7 +1788,8 @@ try {
             "sourceName": "2ГИС",
             "sourceUrl": "https://2gis.ru/yakutsk/geo/7037570202468366",
             "description": "Бронзовая композиция Семёна Дежнёва, Абакаяды и их сына Любима; установлена в 2005 году.",
-            "searchName": "Памятник С. Дежневу и Абакаяде Якутск"
+            "searchName": "Памятник С. Дежневу и Абакаяде Якутск",
+            "wikimediaFile": "Памятник великому землепроходцу Семену Дежневу и его жене Абакаяде ул. Кирова 21 Якутск Саха (Якутия).jpg"
         },
         {
             "name": "Памятник П. А. Ойунскому",
@@ -1849,7 +1850,9 @@ try {
             "lat": 62.0324,
             "lng": 129.7243,
             "sourceName": "туристический белый список",
-            "searchName": "Государственный цирк Республики Саха Якутск"
+            "searchName": "Государственный цирк Республики Саха Якутск",
+            "description": "Здание Государственного цирка Республики Саха в Якутске.",
+            "wikimediaFile": "Государственный цирк Республики Саха (Якутия).jpg"
         },
         {
             "name": "Музей истории города Якутска",
@@ -2245,13 +2248,14 @@ try {
     if(touristResolveCache.has(key))return touristResolveCache.get(key);
     const promise=(async()=>{
       let lat=Number(item.lat),lng=Number(item.lng),ref=item.img||null,wikipedia=item.wikipedia||'',addr=item.address||'';
+      if(!ref&&item.wikimediaFile)ref=await commonsFileThumb(item.wikimediaFile);
       if(item.qid){const m=await wikidataTouristMeta(item.qid);if(!Number.isFinite(lat)&&Number.isFinite(m.lat))lat=m.lat;if(!Number.isFinite(lng)&&Number.isFinite(m.lng))lng=m.lng;if(!ref&&m.img)ref=m.img}
       let wiki=null,description=item.description||'';if(!ref||!Number.isFinite(lat)||!Number.isFinite(lng)||!description){wiki=await wikipediaTouristMatch(item.searchName||item.name);if(wiki){if(!ref)ref=wiki.url;if(!wikipedia)wikipedia=wiki.wikipedia;if(!description)description=wiki.description||'';if(!Number.isFinite(lat)&&Number.isFinite(wiki.lat))lat=wiki.lat;if(!Number.isFinite(lng)&&Number.isFinite(wiki.lng))lng=wiki.lng}}
       if(Number.isFinite(lat)&&Number.isFinite(lng)&&!inYakutskBounds(lat,lng)){lat=NaN;lng=NaN}
       if((!Number.isFinite(lat)||!Number.isFinite(lng))&&/\s\/\s/.test(item.address||'')&&!item.qid)return null;
       if(!Number.isFinite(lat)||!Number.isFinite(lng)){const g=await yandexTouristGeocode(item.name,item.address);if(g){lat=g.lat;lng=g.lng;if(!addr)addr=g.address}}
       if(!ref||!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-      const poi={type:'tourist_guide',id:'guide:'+key,_lat:lat,_lng:lng,_d:0,_hasRef:true,_referenceUrl:ref,_verifyMode:'image',_isTouristGuide:true,_fullAddress:addr,_description:description,_historyText:item.history||'',_sourceName:item.sourceName||'Белый список проекта',_sourceUrl:item.sourceUrl||TOURIST_GUIDE_URL,_sourceText:item.sourceText||'Проверенная публичная туристическая точка',tags:{name:item.name,tourism:'attraction',description,wikipedia,wikidata:item.qid||''}};
+      const poi={type:'tourist_guide',id:'guide:'+key,_lat:lat,_lng:lng,_d:0,_hasRef:true,_referenceUrl:ref,_verifyMode:'image',_isTouristGuide:true,_fullAddress:addr,_description:description,_historyText:item.history||'',_sourceName:item.sourceName||'Белый список проекта',_sourceUrl:item.sourceUrl||TOURIST_GUIDE_URL,_sourceText:item.sourceText||'Проверенная публичная туристическая точка',_commonsFile:item.wikimediaFile||null,tags:{name:item.name,tourism:'attraction',description,wikipedia,wikidata:item.qid||''}};
       return isPhotoSafePoi(poi)?poi:null;
     })().then(r=>{if(!r)touristResolveCache.delete(key);return r});touristResolveCache.set(key,promise);return promise;
   }
@@ -2460,7 +2464,19 @@ try {
     if($('#photoTaskTitle'))$('#photoTaskTitle').textContent=`Найдите и сфотографируйте «${name}»`;
     if($('#photoTaskType'))$('#photoTaskType').textContent=poi._isTouristGuide?'Проверенная фототочка':'Известная достопримечательность';
     if($('#photoTaskSteps'))$('#photoTaskSteps').innerHTML=`<div class="photo-task-step"><i>1</i><span>Дойдите до маркера «<b>${name}</b>» и оставайтесь на тротуаре, площади или другой общедоступной территории.</span></div><div class="photo-task-step"><i>2</i><span>Сверьтесь с <b>эталонной фотографией</b> и снимите сам туристический объект целиком с обычного публичного ракурса.</span></div><div class="photo-task-step"><i>3</i><span>Не заходите внутрь музеев, театров и храмов ради съёмки, не залезайте на скульптуры и мемориалы, не снимайте прохожих крупным планом. Если место закрыто или недоступно — замените точку.</span></div>`;
-    if(poi._referenceUrl&&$('#photoTaskReference')){$('#photoTaskReference').src=poi._referenceUrl;$('#photoTaskReference').classList.add('show');$('#photoTaskRefCaption')?.classList.add('show')}
+    if(poi._referenceUrl&&$('#photoTaskReference')){
+      $('#photoTaskReference').src=poi._referenceUrl;$('#photoTaskReference').classList.add('show');
+      const caption=$('#photoTaskRefCaption');
+      if(caption){
+        caption.classList.add('show');caption.textContent='Эталонный снимок объекта';
+        if(poi._commonsFile){
+          const a=document.createElement('a');
+          a.href='https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(poi._commonsFile);
+          a.target='_blank';a.rel='noopener noreferrer';a.textContent=' · Wikimedia Commons (автор и лицензия)';
+          caption.appendChild(a);
+        }
+      }
+    }
     $('#taskMessage').textContent='Точка выбрана из проверенного белого списка. Проверка: GPS + именно этот объект на фотографии.';
     setLocalVisionStatus('Проверка: GPS + конкретная достопримечательность','warn');
     $('#checkpointText').textContent=`GPS подтверждён. Теперь найдите «${name}». До объекта примерно ${meters} м.`;
