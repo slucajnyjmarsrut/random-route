@@ -257,6 +257,7 @@ try {
 <div class="rr-osm-credit">Дорожные данные: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© участники OpenStreetMap</a> (ODbL)</div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
+<div class="hint" id="rrPhotoPlanStatus" aria-live="polite" style="margin:6px 0 10px;padding:10px 12px">Фотозадания: проверяем наличие эталонных снимков. Награды доступны только после проверки настоящего фото и GPS.</div>
 <details class="rr-create-details rr-route-extras" id="rrRouteExtras">
 <summary>⚙️ Изменить маршрут или исключить улицы</summary>
 <div class="rr-route-extra-content">
@@ -1455,6 +1456,13 @@ try {
       usePhotoOptional=usePhotoOptional||syntheticWalk;
       rr.usePhotoOptional=usePhotoOptional;
       rr.routeSynthetic=syntheticWalk;
+      const backed=chosen.pois.filter(p=>!!p._referenceUrl).length;
+      const photoStatus=$('#rrPhotoPlanStatus');
+      if(photoStatus)photoStatus.textContent=syntheticWalk
+        ?'Это прогулка по дорожкам OSM без достопримечательностей. Фотозадания и фотонаграды не предусмотрены.'
+        :backed>0
+          ?'Фотозадания: '+backed+' из '+chosen.pois.length+' точек имеют предварительно найденные эталонные снимки. Для остальных попробуем загрузить фото при прибытии.'
+          :'Фотозадания: эталонные снимки заранее не найдены. У точек можно повторить поиск, заменить место или пройти без фотонаграды.';
       if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
       else if(usePhotoOptional)toast('Маршрут построен без фотозаданий: эталонные фотографии недоступны.');
       if(chosen.diff>tolAccept)toast('Найден безопасный маршрут длиной '+chosen.actual.toFixed(1).replace('.',',')+' км вместо '+input.toFixed(1).replace('.',',')+' км.');
