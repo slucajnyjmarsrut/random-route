@@ -1,5 +1,5 @@
 /* Research laboratory: real Dijkstra implementation on a documented illustrative graph.
- * Isolated from production Valhalla routing and GPS / rewards.
+ * Isolated from the production OSM graph, GPS and rewards.
  */
 (function(root,factory){
   "use strict";
