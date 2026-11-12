@@ -1,0 +1,52 @@
+/* Walking navigation without disguising geometry hints as verified turn restrictions. */
+#route .rr-nav-panel{margin:0 0 14px;padding:17px 19px 13px;border-radius:22px;
+ background:linear-gradient(125deg,#204637,#263e44);color:#f0f8f3;
+ border:1px solid #52746a;box-shadow:0 9px 22px rgba(0,0,0,.13)}
+.rr-nav-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rr-nav-eyebrow{font-size:11px;font-weight:850;letter-spacing:.09em;color:#bbdecf}
+.rr-nav-gps-status{font-size:11px;color:#daf7e4;font-weight:800;background:#367155;padding:5px 9px;border-radius:99px;white-space:nowrap}
+.rr-nav-direction{display:flex;align-items:center;gap:17px;margin:13px 0}
+.rr-nav-arrow{width:72px;height:72px;flex:0 0 72px;display:grid;place-items:center;
+ font-size:48px;line-height:1;background:rgba(39,155,107,.24);color:#abf3cc;
+ border:2px solid #67b993;border-radius:21px;box-shadow:0 0 16px rgba(74,193,134,.12);
+ animation:rr-nav-glow 3s ease-in-out infinite}
+.rr-nav-title{min-width:0;display:grid;gap:6px}
+.rr-nav-title strong{font-size:clamp(19px,2.8vw,24px);line-height:1.24;color:#effcf2}
+.rr-nav-title span{font-size:14px;line-height:1.42;color:#bfddcc}
+.rr-nav-counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+.rr-nav-counters div{padding:10px 9px;background:rgba(5,22,20,.24);border:1px solid rgba(190,236,215,.16);border-radius:14px}
+.rr-nav-counters small{display:block;font-size:12px;color:#c7e7d9;line-height:1.4;min-height:33px}
+.rr-nav-counters strong{display:block;margin-top:5px;font-size:clamp(17px,2.7vw,22px);color:#f0fff6;line-height:1.25}
+.rr-nav-progress{height:6px;border-radius:10px;background:#4c6560;overflow:hidden;margin-top:7px}
+.rr-nav-progress span{height:100%;width:0;display:block;background:#69d6a5;transition:width .65s ease}
+.rr-nav-disclaimer{font-size:11px;line-height:1.45;color:#bdd3c5;margin:10px 0 0}
+.rr-nav-panel.rr-nav-offtrack{border-color:#c18a5d;background:linear-gradient(130deg,#5a3931,#403a37)}
+.rr-nav-panel.rr-nav-offtrack .rr-nav-arrow{border-color:#e4ad7e;color:#ffe7bd}
+#route .map-follow.following{background:#195f4a;color:#fff;box-shadow:0 3px 14px rgba(36,145,102,.26)}
+@keyframes rr-nav-glow{50%{box-shadow:0 0 22px rgba(74,193,134,.35)}}
+@media(max-width:599px){
+ #route .rr-nav-panel{padding:14px 13px 11px;border-radius:18px}
+ .rr-nav-arrow{width:56px;height:56px;flex:0 0 56px;font-size:40px;border-radius:16px}
+ .rr-nav-direction{gap:12px;margin:12px 0}
+ .rr-nav-title strong{font-size:18px}
+ .rr-nav-title span{font-size:12px}
+ .rr-nav-counters{gap:6px}
+ .rr-nav-counters div{padding:9px 6px}
+ .rr-nav-counters small{font-size:10px;min-height:31px}
+ .rr-nav-counters strong{font-size:16px}
+ .rr-nav-disclaimer{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .rr-nav-arrow{animation:none!important}
+ .rr-nav-progress span{transition:none!important}
+}
+html[data-rr-theme="light"] #route .rr-nav-panel{background:linear-gradient(125deg,#e6f5ed,#d9e9e7);border-color:#b9d8c7;color:#204c38}
+html[data-rr-theme="light"] .rr-nav-eyebrow,
+html[data-rr-theme="light"] .rr-nav-title span,
+html[data-rr-theme="light"] .rr-nav-disclaimer{color:#456654}
+html[data-rr-theme="light"] .rr-nav-title strong,
+html[data-rr-theme="light"] .rr-nav-counters strong{color:#16432e}
+html[data-rr-theme="light"] .rr-nav-counters div{background:#f7fcf8;border-color:#bad3c5}
+html[data-rr-theme="light"] .rr-nav-counters small{color:#41634f}
+html[data-rr-theme="light"] .rr-nav-arrow{color:#215e45;background:#cde7d7}
+html[data-rr-theme="light"] .rr-nav-gps-status{color:#fff}

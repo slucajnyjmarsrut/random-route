@@ -20,6 +20,9 @@ jobs:
           node --check responsive-layout.js
           node tests/responsive-layout.test.cjs
           node tests/navigation-layout.test.cjs
+          node tests/simple-home.test.cjs
+          node --check route-navigation.js
+          node tests/route-navigation.test.cjs
           node --check graphite-theme.js
           node tests/graphite-theme.test.cjs
           node --check dijkstra-lab.js
@@ -45,7 +48,7 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
+          for(const name of ['smart-safety.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','route-navigation.js','route-navigation.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
@@ -62,7 +65,7 @@ jobs:
           const safetyCode=fs.readFileSync('smart-safety.js','utf8');
           if(!safetyCode.includes('weather_code,is_day')||!safetyCode.includes('RRWeatherBackground.setConditions'))throw new Error('Weather visual state disconnected from real forecast');
           if(!html.includes('demoYakutskBtn'))throw new Error('No preview mode');
-          if(!html.includes('smartChatForm') || !html.includes('smartRouteChatForm'))throw new Error('Chat UI missing');
+          if(html.includes('id="smartChatForm"') || html.includes('id="smartRouteChatForm"'))throw new Error('Chat should not appear in the simple interface');
           if(!html.includes('street-audit.js') || !html.includes('street-audit.css'))throw new Error('OSM audit missing');
           if(!html.includes('daily-quests.js') || !html.includes('daily-quests.css'))throw new Error('Daily quests UI missing');
           if(!html.includes('dailyOfferId:rr.dailyOfferId||null'))throw new Error('Daily route ID missing from verified completion event');
@@ -76,11 +79,9 @@ jobs:
           const tapCode=fs.readFileSync('tap-targets.js','utf8');
           if(!tapCode.includes('controls.length!==1'))throw new Error('Unsafe card multi-action guard missing');
           if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
-          if(!html.includes('smart-route-chat.js?v=1.1'))throw new Error('Chat regression fix version missing');
+          if(!html.includes('simple-home.css?v=1.0')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
           if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
-          const chatCss=fs.readFileSync('smart-route-chat.css','utf8');
-          if(chatCss.includes('#home.schat-compact #quickInfoGrid{display:none}'))throw new Error('Informational cards must remain visible');
-          if(!chatCss.includes('#home.schat-compact .schat-legacy{display:none}'))throw new Error('Manual settings should remain collapsible');
+          if(!html.includes('id="rrHomeWeatherValue"') || !html.includes('id="homeOpenCreateBtn"') || !html.includes('id="rrNavPanel"'))throw new Error('Simple home or GPS navigation missing');
           const expected = ["costing:'pedestrian'","walkway_factor:0.65","sidewalk_factor:0.70","alley_factor:6.0","driveway_factor:9.0"];
           expected.forEach(value => { if (!html.includes(value)) throw new Error('Pedestrian preference missing: '+value); });
           const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));

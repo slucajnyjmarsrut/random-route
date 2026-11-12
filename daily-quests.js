@@ -80,8 +80,8 @@ function award(day,event){
  return offer.reward;
 }
 function mount(doc){
- const home=doc.getElementById("home"),route=doc.getElementById("route");
- if(!home||!route)return;
+ const create=doc.getElementById("create"),route=doc.getElementById("route");
+ if(!create||!route)return;
  function panel(name){
   const root=doc.createElement("section");root.className="rdq-card";root.id="rdq-"+name;root.setAttribute("aria-label","Маршруты дня");
   const head=doc.createElement("div");head.className="rdq-heading";
@@ -97,8 +97,8 @@ function mount(doc){
   foot.textContent="Варианты обновляются в полночь по Якутску. Маршрут строится после выбора, поэтому фактическая длина может немного отличаться. Один бонус за день. В мороз выходить ради монет не нужно.";
   root.append(foot);return root;
  }
- const a=panel("home"),b=panel("route"),intro=doc.getElementById("smartChat")||doc.getElementById("quickInfoGrid");
- if(intro)intro.insertAdjacentElement("afterend",a);else home.prepend(a);
+ const a=panel("home"),b=panel("route"),target=doc.getElementById("rrDailyCreateMount");
+ if(target)target.append(a);else create.append(a);
  const anchor=doc.getElementById("srs-route")||doc.querySelector("#route .route-summary");
  if(anchor)anchor.insertAdjacentElement("afterend",b);else route.prepend(b);
  let shownDay="",busy=false;

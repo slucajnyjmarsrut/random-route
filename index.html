@@ -144,7 +144,7 @@ try {
   }
 } catch(e) {}
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
-<link href="smart-route-chat.css?v=1.1" rel="stylesheet"/>
+
 <link rel="stylesheet" href="street-audit.css?v=1.0"/>
 <link rel="stylesheet" href="daily-quests.css?v=2.1"/>
 <link rel="stylesheet" href="tap-targets.css?v=1.0"/>
@@ -153,9 +153,11 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
+<link rel="stylesheet" href="simple-home.css?v=1.0"/>
+<link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 </head>
 <body>
-<div class="app">
+<div class="app" data-rr-screen="home">
 <header class="topbar">
 <div class="topbar-main"><div class="brand">Случайный маршрут</div><div class="subtitle">Каждый день — новый путь!</div></div>
 <div class="stats-top">
@@ -165,68 +167,92 @@ try {
 <button type="button" class="rr-settings-trigger" data-open-screen="settings" aria-label="Открыть настройки" title="Настройки">⚙️</button>
 </header>
 <main class="content">
-<section class="screen active" id="home">
-<div class="hero"><h1>Исследуем весь Якутск</h1><p>Расскажите, куда и насколько хотите погулять: помощник настроит маршрут по пешеходным дорогам.</p></div>
-<div class="rr-home-links" aria-label="Другие разделы">
-<button type="button" data-open-screen="settings">⚙️ Настройки маршрута</button>
-<button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button>
-<button type="button" data-open-screen="help">ℹ️ О приложении</button>
-</div>
-<section class="schat-card" id="smartChat" aria-label="Чат для создания прогулки">
- <div class="schat-heading"><h2>💬 Куда пойдём?</h2><span>Работает без AI API</span></div>
- <p class="schat-description">Опишите прогулку обычными словами: «Построй 3 км через парки, без дворов» или «Хочу погулять 40 минут».</p>
- <div class="schat-log" id="smartChatLog" role="log" aria-live="polite" aria-relevant="additions">
- <div class="schat-bubble schat-bot">Привет! Расскажите, что хотите увидеть и сколько готовы пройти. Я помогу подобрать параметры пешеходного маршрута.</div>
- </div>
- <form id="smartChatForm" class="schat-form">
-   <label for="smartChatInput">Ваше пожелание</label>
-   <textarea id="smartChatInput" maxlength="450" rows="2" placeholder="Например: построй кольцо 3 км через парки" autocomplete="off"></textarea>
-   <button class="schat-send" type="submit">✦ Отправить пожелание</button>
- </form>
- <p class="schat-summary" id="smartChatSummary">Настройки маршрута загружаются…</p>
- <button id="smartChatSettings" type="button" class="schat-settings">⚙️ Открыть настройки маршрута</button>
- <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
+<section class="screen active rr-welcome-screen" id="home" aria-label="Главная страница">
+<section class="rr-home-weather" aria-label="Погода в Якутске">
+ <div class="rr-home-weather-header"><div><span class="rr-weather-kicker">ПОГОДА СЕГОДНЯ</span><h2>Якутск</h2></div><button type="button" id="rrHomeWeatherRefresh" aria-label="Обновить погоду">↻ Обновить</button></div>
+ <div class="rr-home-weather-value" id="rrHomeWeatherValue" role="status" aria-live="polite">Получаем прогноз…</div>
+ <p class="rr-home-weather-detail" id="rrHomeWeatherDetail">Проверяем температуру и ветер</p>
+ <p class="rr-home-weather-advice" id="rrHomeWeatherAdvice">Учитывайте погоду перед прогулкой.</p>
 </section>
-<div class="card">
-<div class="city-chip">Якутск</div>
-<div class="title">Вы на карте</div><div class="sub">При запуске приложение само определяет GPS и ставит старт в вашем текущем месте</div>
-<div aria-label="Карта с текущим положением пользователя" id="homeMap"></div><div class="map-credit" id="homeMapCredit">Карта загружается…</div>
-<div class="gps-auto"><span class="gps-dot"></span>Автоматическое определение местоположения включено</div>
-<div class="location-actions" style="grid-template-columns:1fr"><button class="secondary" id="locateYakutskBtn">Обновить GPS</button><button class="secondary hidden" id="demoYakutskBtn">Центр Якутска</button></div>
-<div class="location-status warn" id="yakutskLocationStatus">Определяем ваше местоположение…</div>
-<div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
-</div>
-<div class="card avoid-card" id="avoidHomeCard">
+<div class="hero rr-welcome-hero"><small>Откройте город пешком</small><h1>Исследуем Якутск</h1><p>Выберите прогулку. Мы покажем пешеходный путь и интересные места.</p></div>
+<aside class="marshik-strip rr-welcome-mascot" aria-label="Маршик — помощник в прогулках">
+ <img src="icons/mascot-marshik.svg" width="110" height="120" alt="Маршик — дружелюбный путешественник с картой" loading="eager"/>
+ <div><strong>Привет! Я Маршик.</strong><span>Помогу выбрать прогулку. Всё просто: несколько кнопок — и можно гулять!</span></div>
+</aside>
+<button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
+</section>
+<section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
+<button type="button" class="rr-create-back" data-open-screen="home">← На главную</button>
+<div class="rr-create-heading"><span>ВАША ПРОГУЛКА</span><h1>Создадим маршрут</h1><p>Выберите расстояние и что хотите увидеть. Вводить пожелания текстом не нужно.</p></div>
+<section class="rr-create-panel" aria-labelledby="rrDistanceTitle">
+ <h2 id="rrDistanceTitle"><span class="rr-create-step-number">1</span> Сколько хотите пройти?</h2>
+ <div class="rr-distance-options" role="group" aria-label="Расстояние прогулки">
+  <button type="button" data-distance-km="2" aria-pressed="false"><strong>2 км</strong><small>Около 30 минут</small></button>
+  <button type="button" data-distance-km="3" aria-pressed="false"><strong>3 км</strong><small>Около 45 минут</small></button>
+  <button type="button" data-distance-km="5" aria-pressed="false"><strong>5 км</strong><small>Около 1 часа 10 минут</small></button>
+  <button type="button" data-distance-km="7" aria-pressed="false"><strong>7 км</strong><small>Около 1 часа 40 минут</small></button>
+ </div>
+ <details class="rr-create-details" id="rrCustomDistance"><summary>Другое расстояние</summary>
+  <label class="rr-create-field-label" for="distanceInput">Расстояние от 1 до 50 км</label>
+  <div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="3"/><div class="unit">км</div></div>
+ </details>
+ <p class="rr-create-note">Время примерное, с учётом обычного шага. Остановки увеличат его.</p>
+</section>
+<section class="rr-create-panel" aria-labelledby="rrTypeTitle">
+ <h2 id="rrTypeTitle"><span class="rr-create-step-number">2</span> Что хотите увидеть?</h2>
+ <div class="rr-wish-buttons" id="typeChoices" role="group" aria-label="Пожелание к прогулке">
+  <button type="button" class="choice active" data-type="parks" aria-pressed="true"><span aria-hidden="true">🌳</span><b>Парки и скверы</b></button>
+  <button type="button" class="choice" data-type="city" aria-pressed="false"><span aria-hidden="true">🏛️</span><b>Город и памятники</b></button>
+  <button type="button" class="choice" data-type="nature" aria-pressed="false"><span aria-hidden="true">🌿</span><b>Природа</b></button>
+ </div>
+ <p class="rr-create-note">Это пожелание: реальные места и пешеходные пути определяются по карте.</p>
+</section>
+<section class="rr-create-panel" aria-labelledby="rrStartTitle">
+ <h2 id="rrStartTitle"><span class="rr-create-step-number">3</span> Откуда начнём?</h2>
+ <p class="rr-create-intro">Начало и конец прогулки — ваше текущее местоположение.</p>
+ <div class="location-status warn" id="yakutskLocationStatus" role="status">Определяем ваше местоположение…</div>
+ <div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
+ <div class="rr-create-gps-actions"><button class="secondary" id="locateYakutskBtn" type="button">📍 Определить, где я</button><button class="secondary hidden" id="demoYakutskBtn" type="button">🧪 Пробный маршрут</button></div>
+ <details id="createMapDetails" class="rr-create-details rr-map-details"><summary>Карта старта и нежелательные улицы</summary>
+  <div class="rr-map-inner"><div class="city-chip">Якутск</div><div id="homeMap" aria-label="Яндекс Карта стартовой точки"></div><div class="map-credit" id="homeMapCredit">Карта загружается…</div></div>
+  <div class="card avoid-card" id="avoidHomeCard">
 <div class="avoid-head"><div><div class="title">Куда не вести маршрут</div><div class="sub" style="margin:3px 0 0">Отметьте на карте зоны, куда вы не хотите идти</div></div><div class="avoid-badge"><span id="avoidCountHome">0</span> зон</div></div>
 <div class="avoid-controls"><select id="avoidRadiusHome" aria-label="Размер запретной зоны"><option value="150">Радиус 150 м</option><option value="300" selected>Радиус 300 м</option><option value="500">Радиус 500 м</option><option value="800">Радиус 800 м</option></select><button class="avoid-map-btn" id="avoidAddHomeBtn" type="button">🚫 Отметить на карте</button></div>
 <div class="avoid-zone-list" id="avoidListHome"></div>
 <div class="avoid-note">После нажатия коснитесь карты. Генератор не будет принимать маршруты, проходящие через выбранные зоны.</div>
 <button class="danger-lite hidden" id="avoidClearHomeBtn" type="button" style="margin-top:9px">Очистить все зоны</button>
 </div>
-<button class="primary orange" id="buildBtn">✦ Построить маршрут по Якутску</button>
-
+ </details>
+</section>
+<details class="rr-create-details rr-more-wishes"><summary>Дополнительные пожелания</summary>
+ <div class="rr-extra-wishes"><p>По возможности добавим остановку в кафе по пути.</p>
+  <div class="row"><span>☕ Кафе по пути</span><button type="button" aria-label="Добавить кафе по пути" aria-pressed="true" class="toggle on" id="partnerToggle"></button></div>
+ </div>
+</details>
+<button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
+<p class="rr-create-final-note">Нужен интернет. Для настоящей прогулки разрешите GPS. Всегда проверяйте дорожные условия.</p>
+<details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
 <section class="screen" id="route">
+<section id="rrNavPanel" class="rr-nav-panel" aria-label="Подсказки для прогулки" aria-live="polite">
+ <div class="rr-nav-heading"><span class="rr-nav-eyebrow">НАВИГАЦИЯ ПО МАРШРУТУ</span><span id="rrNavGpsStatus" class="rr-nav-gps-status">GPS ожидается</span></div>
+ <div class="rr-nav-direction"><span id="rrNavArrow" class="rr-nav-arrow" aria-hidden="true">↑</span><div class="rr-nav-title"><strong id="rrNavInstruction">Идите по выделенной линии</strong><span id="rrNavStepDistance">Готовим путь к первой точке…</span></div></div>
+ <div class="rr-nav-counters">
+  <div><small>До следующей точки</small><strong id="rrNavNext">—</strong></div>
+  <div><small>До конца прогулки</small><strong id="rrNavTotal">—</strong></div>
+  <div><small>Осталось идти</small><strong id="rrNavTime">—</strong></div>
+ </div>
+ <div class="rr-nav-progress"><span id="rrNavProgress" aria-hidden="true"></span></div>
+ <p class="rr-nav-disclaimer">Направление приблизительное: сверяйтесь с картой и реальной обстановкой на улице.</p>
+</section>
 <div class="map">
 <div aria-label="Карта Якутска с текущим открытым участком маршрута" id="realMap"></div>
 <div class="map-label">Точка <span id="pointNumber">1</span> из <span id="pointTotal">5</span> · <span id="pointDistance">—</span></div>
-<div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Показать меня на карте" class="map-follow" id="mapFollowBtn">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
+<div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Следить за мной на карте" aria-pressed="true" class="map-follow" id="mapFollowBtn" title="Карта следует за вашим GPS">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
-<section class="schat-card" id="smartRouteChat" aria-label="Чат для изменения маршрута">
- <div class="schat-heading"><h2>💬 Изменить маршрут</h2><span>В движении</span></div>
- <div class="schat-log" id="smartRouteChatLog" role="log" aria-live="polite" aria-relevant="additions">
- <div class="schat-bubble schat-bot">Можно изменить пожелания: «Перестрой на 4 км по паркам».</div>
- </div>
- <form id="smartRouteChatForm" class="schat-form">
-   <label for="smartRouteChatInput">Что изменить?</label>
-   <textarea id="smartRouteChatInput" maxlength="450" rows="2" placeholder="Например: перестрой на 4 км" autocomplete="off"></textarea>
-   <button type="submit" class="schat-send">↻ Применить и перестроить</button>
- </form>
- <small class="schat-disclaimer">Маршрут будет пересчитан с текущей GPS-позиции, если она доступна. Отсутствие реальных данных о тротуарах не считается подтверждением безопасности.</small>
-</section>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
@@ -373,21 +399,8 @@ try {
 </section>
 
 <section class="screen" id="settings" aria-label="Настройки приложения">
-<div class="hero"><small>Управление приложением</small><h1>⚙️ Настройки</h1><p>Ваши предпочтения сохраняются на этом устройстве. Для прогулки используйте карту на главной.</p></div>
-<h2 class="rr-section-heading">Параметры маршрута</h2>
-<div class="card">
-<div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
-<div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
-<div class="hint">Дистанция маршрута: от 1 до 50 км.</div>
-<div class="hint" style="margin-top:9px;padding:9px 11px;border-radius:12px;background:#e7f2ed;color:#0b5a42;font-weight:800;line-height:1.45">🚶 Только пешком: приоритет тротуаров и пешеходных дорожек. Узкие проезды и дворы по возможности обходим.</div>
-</div>
-<div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
-<button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
-<button class="choice" data-type="city"><span>⌂</span>Город</button>
-<button class="choice" data-type="nature"><span>🌿</span>Природа</button>
-</div></div>
-<div class="card"><div class="row"><div><div class="title" style="margin:0">Кофейня или ресторан</div><div class="sub" style="margin:3px 0 0">Добавить заведение по пути</div></div><button aria-label="Добавить заведение" class="toggle on" id="partnerToggle"></button></div></div>
-
+<div class="hero"><small>Управление приложением</small><h1>⚙️ Настройки</h1><p>Здесь можно настроить оформление и уведомления. Для прогулки нажмите «Создать прогулку».</p></div>
+<div class="card rr-settings-guide"><div class="title">Прогулки и маршруты</div><div class="sub">Расстояние и пожелания выбираются при создании прогулки.</div><button type="button" class="secondary" data-open-screen="create">Создать прогулку →</button></div>
 <div class="card rr-settings-options"><div class="title">Уведомления и оформление</div><div class="sub">Погода относится к Якутску в целом, а не к конкретной улице.</div>
 <label><input type="checkbox" data-srs-pref="weather"/> Погодные предупреждения</label>
 <label><input type="checkbox" data-srs-pref="darkness"/> Предупреждать о темноте</label>
@@ -395,7 +408,7 @@ try {
 <div class="rr-theme-choice"><label for="rrThemeSelect">🎨 Тема оформления</label><select id="rrThemeSelect" aria-label="Тема оформления"><option value="graphite" selected>Графитовые волны</option><option value="light">Светлая</option></select></div>
 </div>
 <div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button><button type="button" data-open-screen="laboratory">🧪 Лаборатория Дейкстры</button></div>
-<button class="primary" type="button" data-open-screen="home">Вернуться к построению маршрута</button>
+<button class="primary" type="button" data-open-screen="create">Создать прогулку</button>
 </section>
 <section class="screen" id="safety" aria-label="Безопасность прогулки">
 <div class="hero"><small>Перед выходом</small><h1>🛡️ Безопасная прогулка</h1><p>Прогноз, предупреждения и дополнительные сведения. Реальные условия на улицах проверяйте самостоятельно.</p></div>
@@ -455,12 +468,12 @@ try {
   <div class="lab-card">
     <h2>Как это связано с проектом</h2>
     <p class="lab-warning">Дейкстра находит кратчайший путь между двумя точками при неотрицательных весах. Кольцевая прогулка заданной длины — другая задача: для неё нужны промежуточные точки, объединение участков и контроль повторов.</p>
-    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении реальные пешеходные маршруты рассчитываются через Valhalla; лаборатория не меняет GPS, маршруты или RouteCoin.</p>
+    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении сначала применяется Дейкстра по OSM, а если граф недоступен — пешеходный Valhalla. Эта учебная лаборатория не меняет GPS, маршруты или RouteCoin.</p>
   </div>
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
 </main>
-<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Карта</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
+<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
 <div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
 <div class="modal-backdrop" id="exitRouteModal"><div class="purchase-modal exit-route-sheet"><div class="grab"></div><div class="exit-icon">↩️</div><h2>Выйти из маршрута?</h2><p>Если выйти сейчас, текущий маршрут будет закрыт.</p><div class="exit-warning"><b>Маршрут не сохраняется.</b><br>Открытые участки, текущая контрольная точка и прогресс незавершённого маршрута будут удалены.</div><div class="purchase-actions"><button class="purchase-cancel" id="exitRouteCancel" type="button">Остаться</button><button class="purchase-confirm exit-confirm" id="exitRouteConfirm" type="button">Выйти</button></div></div></div>
 
@@ -473,7 +486,7 @@ try {
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const nativeApkMode=new URLSearchParams(location.search).get('apk')==='1';
-  const state = window.state = {distance:+(localStorage.getItem('rr_distance')||6.5),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')!=='0',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||0),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||1),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
+  const state = window.state = {distance:+(localStorage.getItem('rr_distance')||3),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')==='1',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||0),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||1),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
   const safeJSON=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}};
   state.badgeStats=Object.assign({photoVerified:0,questsCorrect:0,routesCompleted:0},safeJSON('rr_badge_stats',{}));
   state.earnedBadges=new Set(safeJSON('rr_earned_badges',[]));
@@ -651,7 +664,7 @@ try {
   const rr = window.__yakutskRR = {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:saved?.legs||[], checkpoints:saved?.checkpoints||[], current:saved?.current||1,
-    routeDistance:saved?.routeDistance||0, routeEngine:saved?.routeEngine||'', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||6.5), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
+    routeDistance:saved?.routeDistance||0, routeEngine:saved?.routeEngine||'', requestedDistance:Number(saved?.requestedDistance||localStorage.getItem('rr_distance')||3), stage:saved?.stage||'idle', currentPoi:saved?.currentPoi||null,
     currentCategory:saved?.currentCategory||'city', livePos:saved?.livePos||null, usePhotoOptional:saved?.usePhotoOptional===true,
     discoveries:JSON.parse(localStorage.getItem('rr_yakutsk_discoveries')||'[]'),
     liveMarker:null, homeMarker:null, checkpointMarker:null, routeLine:null, routeCasing:null,
@@ -695,7 +708,8 @@ try {
 
   // Карта приложения отрисовывается Яндекс Картами; пеший маршрут рассчитывается через бесплатный Valhalla demo API.
 
-  let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yCheckpointMarker=null;
+  let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yPassedLine=null,yCheckpointMarker=null;
+  let followGps=true,markerAnimationId=null,mapFollowLast=0,mapFollowLastPos=null;
   // Map canvas must be refreshed when desktop width or phone orientation changes.
   window.__rrResizeMaps=function(){
     [yHomeMap,yMap].forEach(function(m){
@@ -727,6 +741,8 @@ try {
       const p=rr.livePos||rr.start;updateYandexUser(p,true);
       yHomeMap.events.add('click',e=>{if(avoidPickMode!=='home')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
       yMap.events.add('click',e=>{if(avoidPickMode!=='route')return;const c=e.get('coords');addNoGoZone(c[0],c[1])});
+      // Deliberate map gestures pause auto-follow; users can resume with the locator.
+      realEl.addEventListener('pointerdown',()=>{followGps=false;syncFollowButton();},{passive:true});
       renderNoGoZones();
       if(rr.legs.length)showYandexLeg(Math.max(0,rr.current-1),true);
     }catch(e){
@@ -739,19 +755,55 @@ try {
   function updateYandexUser(p,center=false){
     if(!window.ymaps||!yMap||!yHomeMap)return;
     const coords=[p.lat,p.lng],opts={preset:'islands#darkGreenCircleDotIcon',iconColor:'#0c5a42'};
-    if(yUserMarker)yUserMarker.geometry.setCoordinates(coords);else{yUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yMap.geoObjects.add(yUserMarker)}
+    if(yUserMarker){
+      const previous=yUserMarker.geometry.getCoordinates();
+      if(markerAnimationId!==null){cancelAnimationFrame(markerAnimationId);markerAnimationId=null}
+      const change=distMeters({lat:previous[0],lng:previous[1]},p);
+      if(rr.activeScreen==='route'&&change>1&&change<120&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+        const start=performance.now(),duration=650;
+        const animate=(now)=>{
+          const t=Math.min(1,(now-start)/duration),k=1-Math.pow(1-t,2.5);
+          if(yUserMarker)yUserMarker.geometry.setCoordinates([previous[0]+(coords[0]-previous[0])*k,previous[1]+(coords[1]-previous[1])*k]);
+          markerAnimationId=t<1?requestAnimationFrame(animate):null;
+        };
+        markerAnimationId=requestAnimationFrame(animate);
+      }else yUserMarker.geometry.setCoordinates(coords);
+    }else{yUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yMap.geoObjects.add(yUserMarker)}
     if(yHomeUserMarker)yHomeUserMarker.geometry.setCoordinates(coords);else{yHomeUserMarker=new ymaps.Placemark(coords,{hintContent:'Вы здесь'},opts);yHomeMap.geoObjects.add(yHomeUserMarker)}
-    if(center){yHomeMap.setCenter(coords,16,{duration:220});if(rr.activeScreen==='route')yMap.setCenter(coords,17,{duration:220})}
+    if(center&&rr.activeScreen==='create'&&$('#createMapDetails')?.open)yHomeMap.setCenter(coords,16,{duration:220});
+    if(center&&rr.activeScreen==='route')yMap.setCenter(coords,17,{duration:220})
   }
-  function showYandexLeg(index,fit=true,overridePts=null){
+  function syncFollowButton(){
+    const btn=$('#mapFollowBtn');if(!btn)return;
+    btn.setAttribute('aria-pressed',String(followGps));
+    btn.setAttribute('aria-label',followGps?'Карта следует за мной. Нажмите, чтобы остановить':'Включить слежение за моим местоположением');
+    btn.title=followGps?'Карта следует за вами':'Следить за мной';
+    btn.classList.toggle('following',followGps);
+    btn.textContent=followGps?'◉':'◎';
+  }
+  function autoFollow(p,immediate=false){
+    if(!followGps||!yMap||rr.activeScreen!=='route'||!p)return;
+    const now=Date.now();
+    const moved=!mapFollowLastPos||distMeters(mapFollowLastPos,p)>18;
+    if(!immediate&&now-mapFollowLast<2500)return;
+    if(!immediate&&!moved&&now-mapFollowLast<8000)return;
+    mapFollowLast=now;mapFollowLastPos={lat:p.lat,lng:p.lng};
+    try{yMap.setCenter([p.lat,p.lng],Math.max(yMap.getZoom()||16,16),{duration:immediate?180:650});}catch(e){}
+  }
+  function showYandexLeg(index,fit=true,overridePts=null,passedPts=null){
     if(!window.ymaps||!yMap)return;const leg=rr.legs[index];if(!leg)return;const pts=overridePts||legCoords(leg);if(pts.length<2)return;
-    [yRouteCasing,yRouteLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});
+    [yRouteCasing,yRouteLine,yPassedLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});
     yRouteCasing=new ymaps.Polyline(pts,{}, {strokeColor:'#ffffff',strokeWidth:9,strokeOpacity:.9});
-    yRouteLine=new ymaps.Polyline(pts,{}, {strokeColor:'#0c5a42',strokeWidth:5,strokeOpacity:1});yMap.geoObjects.add(yRouteCasing).add(yRouteLine);
+    yRouteLine=new ymaps.Polyline(pts,{}, {strokeColor:'#25bd7d',strokeWidth:6,strokeOpacity:1});yMap.geoObjects.add(yRouteCasing).add(yRouteLine);
+    if(passedPts&&passedPts.length>=2){yPassedLine=new ymaps.Polyline(passedPts,{}, {strokeColor:'#889a9b',strokeWidth:5,strokeOpacity:.82});yMap.geoObjects.add(yPassedLine)}
+    else yPassedLine=null;
     const target=index<rr.checkpoints.length?rr.checkpoints[index]:rr.start,label=index<rr.checkpoints.length?String(index+1):'F';
     const hint=index<rr.checkpoints.length?(target.fullAddress||('Контрольная точка '+label)):'Финиш';
     yCheckpointMarker=new ymaps.Placemark([target.lat,target.lng],{iconContent:label,hintContent:hint},{preset:index<rr.checkpoints.length?'islands#orangeCircleIcon':'islands#darkGreenCircleIcon'});yMap.geoObjects.add(yCheckpointMarker);
-    if(fit){const all=pts.concat([[target.lat,target.lng],[(rr.livePos||rr.start).lat,(rr.livePos||rr.start).lng]]);try{yMap.setBounds(ymaps.util.bounds.fromPoints(all),{checkZoomRange:true,zoomMargin:55,duration:0})}catch(e){}}
+    if(fit){
+      const all=pts.concat([[target.lat,target.lng],[(rr.livePos||rr.start).lat,(rr.livePos||rr.start).lng]]);
+      try{yMap.setBounds(ymaps.util.bounds.fromPoints(all),{checkZoomRange:true,zoomMargin:55,duration:0})}catch(e){}
+    }
   }
   initYandexMaps();
 
@@ -954,7 +1006,7 @@ try {
     if(isDeveloperMode()){setDeveloperMode(true);return}
     if(!navigator.geolocation||rr.watchId!==null)return;
     rr.watchId=navigator.geolocation.watchPosition(pos=>{
-      const p=gpsPoint(pos);rr.gpsFresh=true;const sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);updateLiveRouteProgress(p);
+      const p=gpsPoint(pos);rr.gpsFresh=true;const sane=gpsSanity(p);trackActualMovement(p,sane);updateMarkers(p,false);updateLiveRouteProgress(p,sane);
       if(rr.startMode==='pending'){rr.start={lat:p.lat,lng:p.lng};rr.startMode='gps'}status(`GPS подключён · точность ±${Math.round(p.accuracy)} м`,true)
       if(rr.stage==='walking'&&rr.checkpoints[rr.current-1]){
         const d=distMeters(p,rr.checkpoints[rr.current-1]);$('#gpsBadge').textContent=(sane?'':'⚠ ')+(d<1000?`До точки: ${Math.round(d)} м`:`До точки: ${(d/1000).toFixed(1)} км`);
@@ -968,13 +1020,13 @@ try {
     if(id==='profile' && !isUserSignedIn()){authState.pendingProfileOpen=true;openProfileAuth('login');return}
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
-    rr.activeScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
+    rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
     const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
-      if(id==='route'){if(yMap)try{yMap.container.fitToViewport()}catch(e){} if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false)}
-      if(id==='home'&&yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}
+      if(id==='route'){if(yMap)try{yMap.container.fitToViewport()}catch(e){} if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false);if(followGps)autoFollow(rr.livePos||rr.start,true)}
+      if(id==='create'&&$('#createMapDetails')?.open&&yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
@@ -994,10 +1046,33 @@ try {
     badge.textContent=demoMode?'🧪 ДЕМОНСТРАЦИЯ: маршрут строится из центра Якутска, реальное местоположение не подтверждено.':'📍 Для настоящей прогулки разрешите GPS. Можно также открыть пробный маршрут.';
   }
   updateDemoBanner();
-  $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;if(yMap)yMap.setCenter([p.lat,p.lng],17,{duration:220});};
-  $('#distanceInput').addEventListener('input',()=>{if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance)}});
-  $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}}));
-  $('#partnerToggle').addEventListener('click',()=>setTimeout(()=>{if(window.state){localStorage.setItem('rr_partner',window.state.partner?'1':'0')}},0));
+  $('#mapFollowBtn').onclick=()=>{
+    followGps=!followGps;syncFollowButton();
+    if(followGps)autoFollow(rr.livePos||rr.start,true);
+  };
+  syncFollowButton();
+  function syncRouteChoiceButtons(){
+    const km=Number($('#distanceInput').value),type=$('#typeChoices .choice.active')?.dataset.type;
+    $$('[data-distance-km]').forEach(b=>{
+      const active=Math.abs(Number(b.dataset.distanceKm)-km)<.001;
+      b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+    });
+    $$('#typeChoices .choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.type===type)));
+    const coffee=$('#partnerToggle');if(coffee)coffee.setAttribute('aria-pressed',String(coffee.classList.contains('on')));
+  }
+  $$('[data-distance-km]').forEach(b=>b.addEventListener('click',()=>{
+    $('#distanceInput').value=b.dataset.distanceKm;$('#rrCustomDistance').open=false;$('#distanceInput').dispatchEvent(new Event('input',{bubbles:true}));
+    syncRouteChoiceButtons();
+  }));
+  $('#distanceInput').addEventListener('input',()=>{
+    if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance);}
+    syncRouteChoiceButtons();
+  });
+  $('#createMapDetails').addEventListener('toggle',()=>{
+    if($('#createMapDetails').open&&yHomeMap)setTimeout(()=>{try{yHomeMap.container.fitToViewport()}catch(e){}},100);
+  });
+  $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}syncRouteChoiceButtons();}));
+  $('#partnerToggle').addEventListener('click',()=>setTimeout(()=>{if(window.state){localStorage.setItem('rr_partner',window.state.partner?'1':'0')}syncRouteChoiceButtons()},0));
   $('#avoidAddHomeBtn').onclick=()=>setAvoidPickMode('home');$('#avoidAddRouteBtn').onclick=()=>setAvoidPickMode('route');
   $('#avoidClearHomeBtn').onclick=()=>{rr.noGoZones=[];saveSession();renderNoGoZones();toast('Все запретные зоны удалены')};
   $('#avoidRadiusHome').value=$('#avoidRadiusRoute').value=localStorage.getItem('rr_avoid_radius')||'300';
@@ -1190,12 +1265,44 @@ try {
     rr.legProgress=rr.legProgress||{};rr.legProgress[index]=Math.max(prev,best.scalar);
     const rem=[best.point,...pts.slice(best.i+1)];
     let remaining=0;for(let i=0;i<rem.length-1;i++)remaining+=distMeters({lat:rem[i][0],lng:rem[i][1]},{lat:rem[i+1][0],lng:rem[i+1][1]});
-    return {pts:rem,remainingM:remaining,distanceToLine:best.d};
+    const passed=pts.slice(0,best.i+1).concat([best.point]);
+    return {pts:rem,passedPts:passed,remainingM:remaining,distanceToLine:best.d};
   }
-  function updateLiveRouteProgress(p){
-    if(!rr.legs.length||!p)return;const index=Math.min(Math.max(0,rr.current-1),rr.legs.length-1);const pr=projectProgressOnLeg(index,p);if(!pr||pr.pts.length<2)return;
-    if(yRouteCasing)yRouteCasing.geometry.setCoordinates(pr.pts);if(yRouteLine)yRouteLine.geometry.setCoordinates(pr.pts);
+  function paintNavigation(index,remainingPts,remainingM,quality='gps'){
+    const nav=window.RRRouteNavigation;
+    if(!nav||!rr.legs[index])return;
+    const later=rr.legs.slice(index+1).reduce((sum,leg)=>sum+Math.max(0,Number(leg.distance)||0),0);
+    const info=nav.guidance(remainingPts,later);
+    const current=remainingM===undefined?info.segmentMetres:remainingM;
+    const total=current+later;
+    $('#rrNavArrow').textContent=quality==='off'?'!':quality==='poor'?'◎':info.symbol;
+    $('#rrNavInstruction').textContent=quality==='off'?'Вы отошли от линии маршрута':
+      quality==='poor'?'Уточняем ваше положение по GPS':info.instruction;
+    $('#rrNavStepDistance').textContent=quality==='off'?'Вернитесь к выделенной линии на карте':
+      quality==='poor'?'Точность GPS пока недостаточна для подсказок':'Следуйте зелёной линии к следующей точке';
+    $('#rrNavNext').textContent=quality==='off'?'—':nav.formatDistance(current);
+    $('#rrNavTotal').textContent=quality==='off'?'—':nav.formatDistance(total);
+    $('#rrNavTime').textContent=quality==='off'?'—':'≈ '+nav.minutes(total)+' мин';
+    $('#rrNavGpsStatus').textContent=quality==='poor'?'GPS неточный':quality==='off'?'Вне маршрута':rr.gpsFresh?'GPS активен':'GPS ожидается';
+    $('#rrNavPanel').classList.toggle('rr-nav-offtrack',quality==='off');
+    const full=Math.max(1,rr.routeDistance||rr.legs.reduce((sum,leg)=>sum+(leg.distance||0),0));
+    $('#rrNavProgress').style.width=Math.max(0,Math.min(100,(full-total)/full*100))+'%';
+  }
+  function updateLiveRouteProgress(p,sane=true){
+    if(!rr.legs.length||!p)return;
+    const index=Math.min(Math.max(0,rr.current-1),rr.legs.length-1),leg=rr.legs[index];
+    if(Number(p.accuracy)>80||!sane){paintNavigation(index,legCoords(leg),leg.distance,'poor');return;}
+    const pr=projectProgressOnLeg(index,p);
+    if(!pr||pr.pts.length<2){paintNavigation(index,legCoords(leg),leg.distance,'off');return;}
+    if(yRouteCasing)yRouteCasing.geometry.setCoordinates(pr.pts);
+    if(yRouteLine)yRouteLine.geometry.setCoordinates(pr.pts);
+    if(pr.passedPts.length>=2){
+      if(yPassedLine)yPassedLine.geometry.setCoordinates(pr.passedPts);
+      else if(yMap&&window.ymaps){yPassedLine=new ymaps.Polyline(pr.passedPts,{}, {strokeColor:'#889a9b',strokeWidth:5,strokeOpacity:.82});yMap.geoObjects.add(yPassedLine)}
+    }
     $('#pointDistance').textContent='осталось '+formatMeters(pr.remainingM);
+    paintNavigation(index,pr.pts,pr.remainingM);
+    autoFollow(p,false);
   }
   function showLeg(index,fit=true){
     const leg=rr.legs[index];if(!leg)return;
@@ -1203,7 +1310,9 @@ try {
     const progress=(rr.livePos&&index===Math.max(0,rr.current-1))?projectProgressOnLeg(index,rr.livePos):null;
     const visiblePts=progress?.pts?.length>1?progress.pts:pts;
     $('#pointDistance').textContent='осталось '+formatMeters(progress?.remainingM??leg.distance);
-    showYandexLeg(index,fit,visiblePts);
+    showYandexLeg(index,fit,visiblePts,progress?.passedPts||null);
+    paintNavigation(index,visiblePts,progress?.remainingM??leg.distance);
+    if(followGps&&rr.activeScreen==='route')setTimeout(()=>autoFollow(rr.livePos||rr.start,true),400);
     if(index<rr.checkpoints.length)ensureCheckpointAddress(index);
   }
 
@@ -1338,7 +1447,7 @@ try {
     $('#distanceInput').value=String(valid.distanceKm);
     return await buildYakutsk({distanceKm:valid.distanceKm,dailyOffer:valid});
   };
-  $('#buildBtn').onclick=buildYakutsk;
+  $('#buildBtn').onclick=()=>buildYakutsk();
 
   // ---------- Бесплатный локальный фотоконтроль ----------
   // Модель MobileNet загружается в браузер только при первой проверке.
@@ -2432,8 +2541,8 @@ try {
 
   function clearActiveRoute(){
     rr.legs=[];rr.checkpoints=[];rr.current=1;rr.routeDistance=0;rr.stage='idle';rr.currentPoi=null;rr.currentPhotoFile=null;rr.replacementsUsed=0;rr.routeId=null;rr.dailyOfferId=null;rr.dailyOfferDay=null;rr.routeStartedAt=0;rr.trackedDistanceM=0;rr.trackLastPos=null;rr.trackLastAt=0;rr.legProgress={};rr.autoGpsBusy=false;rr.activeScreen='home';rr.scrolls.route=0;
-    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;rr.routeEngine='';
-    if(yMap){[yRouteLine,yRouteCasing,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yCheckpointMarker=null}
+    rr.routeLine=null;rr.routeCasing=null;rr.checkpointMarker=null;rr.routeEngine='';followGps=true;mapFollowLast=0;mapFollowLastPos=null;syncFollowButton();
+    if(yMap){[yRouteLine,yRouteCasing,yPassedLine,yCheckpointMarker].forEach(o=>{if(o)try{yMap.geoObjects.remove(o)}catch(e){}});yRouteLine=null;yRouteCasing=null;yPassedLine=null;yCheckpointMarker=null}
     if(window.state){window.state.current=1;window.state.gps=false;window.state.photo=false;window.state.verified=false}
     $('#cameraInput').value='';$('#photoPreview').src='';$('#photoPreview').classList.remove('show');
     try{localStorage.removeItem(SESSION_KEY);localStorage.setItem('rr_active_screen','home')}catch(e){}
@@ -2448,7 +2557,7 @@ try {
   $('#exitRouteConfirm').onclick=()=>{$('#exitRouteModal').classList.remove('show');clearActiveRoute()};
 
   function restoreUI(){
-    if(window.state){$('#distanceInput').value=window.state.distance||6.5;$('#activeDistanceInput').value=window.state.distance||6.5;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner)}
+    if(window.state){$('#distanceInput').value=window.state.distance||3;$('#activeDistanceInput').value=window.state.distance||3;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner);syncRouteChoiceButtons();if(!$$('[data-distance-km]').some(b=>Number(b.dataset.distanceKm)===Number($('#distanceInput').value)))$('#rrCustomDistance').open=true;}
     renderNoGoZones();
     if(rr.livePos)updateMarkers(rr.livePos,false);else updateMarkers(rr.start,false);
     if(rr.legs.length){
@@ -2483,7 +2592,7 @@ try {
 </script>
 <script src="smart-safety.js?v=1.1"></script>
 <script src="weather-background.js?v=1.0"></script>
-<script src="smart-route-chat.js?v=1.1"></script>
+
 <script src="developer-diagnostics.js?v=1.0"></script>
 <script src="street-audit.js?v=1.0"></script>
 <script src="daily-quests.js?v=2.1"></script>
@@ -2493,5 +2602,6 @@ try {
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
 <script src="walking-dijkstra.js?v=1.0"></script>
+<script src="route-navigation.js?v=1.0"></script>
 </body>
 </html>

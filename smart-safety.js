@@ -36,7 +36,8 @@ function makeCard(suffix){
     var useRoute=suffix==="route"||activeRoute;
     var target=get(useRoute?"avoidRerouteBtn":"avoidHomeCard");
     if(useRoute&&target)target=target.closest(".route-avoid-inline")||target;
-    if(typeof window.__rrOpenScreen==="function")window.__rrOpenScreen(useRoute?"route":"home",{restoreScroll:false});
+    if(!useRoute){const extra=get("createMapDetails");if(extra)extra.open=true;}
+    if(typeof window.__rrOpenScreen==="function")window.__rrOpenScreen(useRoute?"route":"create",{restoreScroll:false});
     if(target)requestAnimationFrame(function(){target.scrollIntoView({behavior:"smooth",block:"center"});});
   });
   var sos=el("button","srs-action srs-sos","SOS · 112");sos.type="button";sos.addEventListener("click",function(){
@@ -82,8 +83,31 @@ function renderCard(suffix){
   if(prefs.darkness && (c.is_day===0 || c.is_day==="0"))addAlert(a,"warn","Сейчас темно. Проверьте доступные отметки об освещении маршрута по OSM и обязательно оцените реальные условия на месте.");
   if(suffix==="home")addAlert(a,"unknown","Ниже после построения маршрута доступна проверка улиц по данным OpenStreetMap. Состояние снега, льда и происшествия сервис не подтверждает.");
 }
+function renderHomeWeather(){
+  var title=get("rrHomeWeatherValue"),detail=get("rrHomeWeatherDetail"),advice=get("rrHomeWeatherAdvice");
+  if(!title||!detail||!advice)return;
+  advice.removeAttribute("data-severity");
+  if(!latest){
+    title.textContent=busy?"Узнаём погоду…":"Прогноз недоступен";
+    detail.textContent=busy?"Получаем данные для Якутска":"Нажмите «Обновить» или посмотрите прогноз перед выходом";
+    advice.textContent="Погода может влиять на безопасность прогулки.";
+    return;
+  }
+  var c=latest.current||{},temp=n(c.temperature_2m),feels=n(c.apparent_temperature),wind=n(c.wind_speed_10m),gust=n(c.wind_gusts_10m);
+  title.textContent="🌡️ "+fmt(temp);
+  detail.textContent="Ощущается "+fmt(feels)+" · ветер "+(wind===null?"—":Math.round(wind)+" км/ч")+
+    (lastChecked?" · обновлено "+lastChecked:"");
+  var message="Проверьте состояние дорожек и одевайтесь по погоде.",severity="";
+  if(feels!==null&&feels<=-35){message="Очень сильный мороз. Лучше отложить прогулку.";severity="critical";}
+  else if(feels!==null&&feels<=-25){message="Сильный мороз. Не проводите долгое время на улице.";severity="warn";}
+  else if(feels!==null&&feels<=-15){message="Холодно. Одевайтесь тепло и следите за самочувствием.";severity="warn";}
+  if(gust!==null&&gust>=45){message="Сильные порывы ветра. Продумайте, стоит ли выходить.";severity="warn";}
+  if(c.is_day===0||c.is_day==="0")message+=" Сейчас темно.";
+  advice.textContent=message;
+  if(severity)advice.setAttribute("data-severity",severity);
+}
 function render(){
-  renderCard("home");renderCard("route");
+  renderCard("home");renderCard("route");renderHomeWeather();
   // The ambient scene consumes the SAME forecast as safety warnings.
   // If the external service fails, the background becomes neutral.
   if(window.RRWeatherBackground){
@@ -108,6 +132,8 @@ async function refreshForecast(){
 }
 function boot(){
   insert();
+  var homeRefresh=get("rrHomeWeatherRefresh");
+  if(homeRefresh)homeRefresh.addEventListener("click",refreshForecast);
   document.querySelectorAll("#settings [data-srs-pref]").forEach(function(box){
     var key=box.getAttribute("data-srs-pref");
     if(!Object.prototype.hasOwnProperty.call(defaults,key))return;
