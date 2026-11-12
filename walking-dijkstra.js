@@ -161,7 +161,7 @@
       const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
       let lastError;
       for(const endpoint of ENDPOINTS){
-        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8700);
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4500);
         try{
           const response=await fetch(endpoint+urlQuery,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/json'}});
           if(!response.ok)throw Error('Overpass '+response.status);
@@ -177,11 +177,24 @@
     })();
     try{return await cached.promise;}finally{cached.promise=null;}
   }
+  function graphKey(start,requestedKm){
+    const radius=Math.min(3000,Math.max(1200,Math.ceil(requestedKm*570)));
+    return bbox(start,radius).map(v=>v.toFixed(2)).join(':')+':'+radius;
+  }
+  function hasWarmGraph(start,requestedKm=3){
+    try{return !!cached.value&&cached.expires>Date.now()&&cached.key===graphKey(start,requestedKm);}
+    catch(e){return false}
+  }
+  function preload(start,requestedKm=3){
+    if(Number(requestedKm)>12)return Promise.resolve(false);
+    if(hasWarmGraph(start,requestedKm))return Promise.resolve(true);
+    return loadGraph(start,requestedKm).then(()=>true).catch(()=>false);
+  }
   async function requestRoute(points,options={}){
     const lengthKm=Number(options.distanceKm||3);
     if(lengthKm>12)throw Error('GraphRegionTooLarge');
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,loadGraph,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,loadGraph,hasWarmGraph,preload,requestRoute};
 });
