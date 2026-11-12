@@ -103,6 +103,69 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     assert.deepEqual(repeat,{coins:25,photos:1});
     assert.equal(errors.filter(e=>/TypeError|ReferenceError/.test(e)).length,0,errors.join(' | '));
     console.log('PHOTO_GPS_BROWSER_OK wrong photo rejected; matching photo accepted; 25 RC once; next leg unlocked');
+    // Regression: a previously saved "photo optional" route with a NAMED
+    // checkpoint must still try to show a real reference, not auto-skip it.
+    const demo=await context.newPage();
+    await demo.route('**/*',route=>{
+      const url=route.request().url();
+      if(url.includes('commons.wikimedia.org/w/api.php')){
+        return route.fulfill({status:200,contentType:'application/json',
+          headers:{'access-control-allow-origin':'*'},
+          body:JSON.stringify({query:{pages:{1:{imageinfo:[{thumburl:root+'/tests/photo-reference-test.svg'}]}}}})
+        });
+      }
+      if(url.includes('/tests/photo-reference-test.svg')){
+        return route.fulfill({status:200,contentType:'image/svg+xml',body:reference});
+      }
+      return url.startsWith(root+'/')?route.continue():route.abort();
+    });
+    await demo.goto(root+'/index.html?demo=1',{waitUntil:'domcontentloaded',timeout:20000});
+    await demo.waitForFunction(()=>!!window.__yakutskRR);
+    await demo.evaluate(()=>{
+      const rr=window.__yakutskRR;
+      rr.routeId='legacy-optional-circus';rr.usePhotoOptional=true;rr.routeSynthetic=false;
+      rr.current=1;rr.stage='walking';rr.startMode='demo';
+      rr.checkpoints=[{lat:62.0324,lng:129.7243,guideName:'Государственный цирк Республики Саха (Якутия)'}];
+      rr.legs=[{distance:800}];
+      document.querySelector('#demoGpsBtn').click();
+    });
+    await demo.waitForFunction(()=>window.__yakutskRR?.stage==='photo'
+      && document.querySelector('#photoTaskReference')?.classList.contains('show'),null,{timeout:15000});
+    const named=await demo.evaluate(()=>({
+      stage:window.__yakutskRR.stage,
+      title:document.querySelector('#checkpointTitle').textContent,
+      photoVisible:!document.querySelector('#photoBlock').classList.contains('hidden'),
+      gps:document.querySelector('#gpsCheck b').textContent,
+      next:!document.querySelector('#nextBtn').classList.contains('hidden')
+    }));
+    assert.equal(named.stage,'photo');
+    assert.match(named.title,/цирк/i);
+    assert.equal(named.photoVisible,true);
+    assert.equal(named.gps,'Тестовое прибытие');
+    assert.equal(named.next,false);
+    // A named site with NO verifiable reference must show retry/replace,
+    // not "Пропущено" as if the site had no photo requirements.
+    await demo.evaluate(()=>{
+      const rr=window.__yakutskRR;
+      rr.routeId='legacy-optional-fence';rr.currentPoi=null;rr.current=1;
+      rr.usePhotoOptional=true;rr.routeSynthetic=false;rr.stage='walking';
+      rr.checkpoints=[{lat:62.022376,lng:129.724729,guideName:'Памятная ограда Реального училища'}];
+      rr.currentPhotoFile=null;
+      document.querySelector('#demoGpsBtn').click();
+    });
+    await demo.waitForFunction(()=>window.__yakutskRR?.stage==='photo_unavailable',null,{timeout:18000});
+    const noRef=await demo.evaluate(()=>({
+      title:document.querySelector('#checkpointTitle').textContent,
+      photo:document.querySelector('#photoCheck b').textContent,
+      retry:!document.querySelector('#retryPhotoBtn').classList.contains('hidden'),
+      history:!document.querySelector('#historyBlock').classList.contains('hidden')
+    }));
+    assert.match(noRef.title,/Реального училища/);
+    assert.match(noRef.photo,/Нет эталона/);
+    assert.equal(noRef.retry,true);
+    assert.equal(noRef.history,false);
+    console.log('PHOTO_NAMED_CHECKPOINT_OK old optional flag cannot skip an available image, missing image offers retry and fake GPS is labeled');
+    await demo.close();
     await context.close();
   }finally{await browser.close()}
 })().catch(err=>{console.error(err.stack||err);process.exitCode=1});
