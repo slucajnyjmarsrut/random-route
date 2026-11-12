@@ -27,6 +27,8 @@ const output=route.route(graph,[start,finish]);
 assert.equal(output.source,'dijkstra-osm');
 assert.equal(output.routes.length,1);
 assert.equal(output.routes[0].legs.length,1);
+assert.equal(output.routes[0].geometry.type,'LineString');
+assert.equal(output.routes[0].geometry.coordinates.length,24,'zone checks use real Dijkstra geometry');
 assert.equal(output.routes[0].legs[0].steps[0].geometry.coordinates.length,24);
 assert.equal(output.waypoints.length,2);
 const zone={lat:p.lat+.0008,lng:p.lng,radius:20};
@@ -56,6 +58,10 @@ console.log('OSM walking Dijkstra: graph creation, pedestrian tags, shortest pat
     assert.equal(requests,count,'warm graph should not fetch OSM again');
     assert.equal(await route.preload(start,3),true);
     assert.equal(requests,count,'repeated graph prewarm uses the cached graph');
+    // A second radius should coexist without overwriting the first graph.
+    assert.equal(await route.preload(start,5),true);
+    assert.equal(route.hasWarmGraph(start,5),true);
+    assert.equal(route.hasWarmGraph(start,3),true);
     console.log('Dijkstra warm-cache: no second Overpass request required');
   }finally{global.fetch=prior;}
 })().catch(e=>{console.error(e);process.exitCode=1});
