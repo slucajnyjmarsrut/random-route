@@ -233,10 +233,21 @@ try {
 <details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
 <section class="screen" id="route">
+<section id="rrNavPanel" class="rr-nav-panel" aria-label="Подсказки для прогулки" aria-live="polite">
+ <div class="rr-nav-heading"><span class="rr-nav-eyebrow">НАВИГАЦИЯ ПО МАРШРУТУ</span><span id="rrNavGpsStatus" class="rr-nav-gps-status">GPS ожидается</span></div>
+ <div class="rr-nav-direction"><span id="rrNavArrow" class="rr-nav-arrow" aria-hidden="true">↑</span><div class="rr-nav-title"><strong id="rrNavInstruction">Идите по выделенной линии</strong><span id="rrNavStepDistance">Готовим путь к первой точке…</span></div></div>
+ <div class="rr-nav-counters">
+  <div><small>До следующей точки</small><strong id="rrNavNext">—</strong></div>
+  <div><small>До конца прогулки</small><strong id="rrNavTotal">—</strong></div>
+  <div><small>Осталось идти</small><strong id="rrNavTime">—</strong></div>
+ </div>
+ <div class="rr-nav-progress"><span id="rrNavProgress" aria-hidden="true"></span></div>
+ <p class="rr-nav-disclaimer">Направление приблизительное: сверяйтесь с картой и реальной обстановкой на улице.</p>
+</section>
 <div class="map">
 <div aria-label="Карта Якутска с текущим открытым участком маршрута" id="realMap"></div>
 <div class="map-label">Точка <span id="pointNumber">1</span> из <span id="pointTotal">5</span> · <span id="pointDistance">—</span></div>
-<div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Показать меня на карте" class="map-follow" id="mapFollowBtn">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
+<div class="gps-state" id="gpsBadge">GPS: ожидается</div><button aria-label="Следить за мной на карте" aria-pressed="true" class="map-follow" id="mapFollowBtn" title="Карта следует за вашим GPS">◎</button><div class="lock" id="lockLabel">Дальше скрыто</div>
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
@@ -2513,5 +2524,6 @@ try {
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
 <script src="walking-dijkstra.js?v=1.0"></script>
+<script src="route-navigation.js?v=1.0"></script>
 </body>
 </html>
