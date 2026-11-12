@@ -303,6 +303,7 @@ try {
 <div class="hidden" id="verificationMessage"></div>
 <div class="history-card hidden" id="historyBlock"><h4 id="historyTitle">История места</h4><p id="historyText"></p><div class="history-source" id="historySource"></div><div class="quest hidden" id="questBlock"><b id="questQuestion">Мини-квест</b><div class="quest-options" id="questOptions"></div><div class="hint" id="questResult"></div></div></div>
 <button class="primary hidden" id="nextBtn">Продолжить — открыть следующий участок</button>
+<button class="secondary hidden" id="retryPhotoBtn" type="button" style="margin-top:8px">↻ Повторить поиск эталонного фото</button>
 <button class="danger-lite hidden" id="replacePointBtn" style="margin-top:8px">Не могу пройти точку — заменить её</button>
 <div class="route-control-grid">
 <button class="secondary" id="changeDirectionBtn" type="button">↻ Не нравится направление</button>
@@ -980,7 +981,7 @@ try {
     rr.lastGpsPos={lat:p.lat,lng:p.lng};rr.lastGpsAt=now;rr.suspiciousGps=suspicious;showGpsQuality(p.accuracy);return !suspicious
   }
   function trackActualMovement(p,sane){
-    const active=rr.routeId&&rr.legs.length&&['walking','photo','photo_ready','verified','finish'].includes(rr.stage);
+    const active=rr.routeId&&rr.legs.length&&['walking','photo','photo_ready','photo_unavailable','verified','finish'].includes(rr.stage);
     const now=Date.now();
     if(!active||!sane||!Number.isFinite(p.accuracy)||p.accuracy>65){rr.trackLastPos={lat:p.lat,lng:p.lng};rr.trackLastAt=now;return}
     if(rr.trackLastPos&&rr.trackLastAt){
@@ -1264,7 +1265,7 @@ try {
 
   function resetPointUI(){
     $('#pointNumber').textContent=rr.current;$('#gpsCheck').className='check';$('#gpsCheck b').textContent='Не подтверждён';$('#photoCheck').className='check';$('#photoCheck b').textContent='Ожидается';$('#gpsBadge').textContent='GPS: ведём к точке';
-    $('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#verificationMessage').className='hidden';$('#verifyBtn').classList.add('hidden');$('#photoPreview').classList.remove('show');$('#photoPreview').src='';if($('#photoTaskTitle'))$('#photoTaskTitle').textContent='Найдите нужный объект';if($('#photoTaskType'))$('#photoTaskType').textContent='Объект';if($('#photoTaskDistance'))$('#photoTaskDistance').textContent='рядом';if($('#photoTaskAddress'))$('#photoTaskAddress').textContent='Адрес уточняется…';if($('#photoTaskReference')){$('#photoTaskReference').classList.remove('show');$('#photoTaskReference').removeAttribute('src')}if($('#photoTaskRefCaption'))$('#photoTaskRefCaption').classList.remove('show');
+    $('#photoBlock').classList.add('hidden');$('#historyBlock').classList.add('hidden');$('#nextBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#retryPhotoBtn').classList.add('hidden');$('#verificationMessage').className='hidden';$('#verifyBtn').classList.add('hidden');$('#photoPreview').classList.remove('show');$('#photoPreview').src='';if($('#photoTaskTitle'))$('#photoTaskTitle').textContent='Найдите нужный объект';if($('#photoTaskType'))$('#photoTaskType').textContent='Объект';if($('#photoTaskDistance'))$('#photoTaskDistance').textContent='рядом';if($('#photoTaskAddress'))$('#photoTaskAddress').textContent='Адрес уточняется…';if($('#photoTaskReference')){$('#photoTaskReference').classList.remove('show');$('#photoTaskReference').removeAttribute('src')}if($('#photoTaskRefCaption'))$('#photoTaskRefCaption').classList.remove('show');
     $('#lockLabel').textContent='Дальше скрыто';$('#checkpointTitle').textContent='Контрольная точка '+rr.current;$('#checkpointText').textContent='Идите по зелёному маршруту. GPS автоматически откроет фотозадание, когда вы подойдёте.';if($('#checkpointAddress'))$('#checkpointAddress').textContent=rr.checkpoints[rr.current-1]?.fullAddress||'Определяем адрес…';ensureCheckpointAddress(rr.current-1);$('#gpsBtn').textContent='Проверить GPS сейчас';$('#gpsBtn').disabled=false;
     rr.stage='walking';rr.autoGpsBusy=false;saveSession();
   }
@@ -1302,9 +1303,9 @@ try {
       // Never block route creation on dozens of external Wikipedia/Wikidata
       // requests. Use resolved photo POIs when available; otherwise take the
       // locally curated points and fetch photo references in the background.
-      const photoPool=touristPoolPromise
-        ?await Promise.race([touristPoolPromise.catch(()=>[]),new Promise(resolve=>setTimeout(()=>resolve([]),250))])
-        :[];
+      // Resolve nearby reference images while the user is creating the route.
+      // A 250 ms race against the full catalogue previously disabled ALL photo tasks.
+      const photoPool=await prefetchTouristPhotos(rr.start,input);
       // The photo catalog can load later; avoid flooding the network while routing.
       report('Загружаем настоящие пешеходные дороги OSM…');
       if(!window.RRWalkingDijkstra?.loadGraph)throw new Error('DijkstraUnavailable');
@@ -1320,8 +1321,10 @@ try {
           _fullAddress:p.address||'',_sourceName:p.sourceName||'Туристический список',
           tags:{name:p.name||''}
         }));
-        near=routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
-        usePhotoOptional=true;
+        const known=new Set(near.map(p=>normalizeOcrText(p.tags?.name)));
+        near=near.concat(routeOnly.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p)&&!known.has(normalizeOcrText(p.tags?.name))));
+        // Reference retrieval may still be in progress. Defer photo eligibility
+        // to each checkpoint instead of disabling photo rewards for the whole walk.
       }
       // Public tourist POIs may be far from the user's position or isolated
       // from a real walking path. Remove inaccessible/duplicate snapped nodes
@@ -2254,6 +2257,23 @@ try {
     })().then(r=>{if(!r)touristResolveCache.delete(key);return r});touristResolveCache.set(key,promise);return promise;
   }
   let touristPoolPromise=null;
+  function withPhotoDeadline(promise,ms){
+    return Promise.race([promise.catch(()=>null),new Promise(resolve=>setTimeout(()=>resolve(null),ms))]);
+  }
+  function nearbyGuideSeeds(center,radius){
+    return YAKUTSK_GUIDE_SEEDS.filter(item=>item&&item.enabled!==false
+      &&Number.isFinite(Number(item.lat))&&Number.isFinite(Number(item.lng))
+      &&distMeters(center,{lat:Number(item.lat),lng:Number(item.lng)})<=radius)
+      .sort((a,b)=>distMeters(center,{lat:Number(a.lat),lng:Number(a.lng)})
+        -distMeters(center,{lat:Number(b.lat),lng:Number(b.lng)}));
+  }
+  async function prefetchTouristPhotos(center,km){
+    const radius=Math.min(2450,Math.max(800,km*1000*.55));
+    // Only nearby items with known coordinates: no whole-city geocoding on Build.
+    const seeds=nearbyGuideSeeds(center,radius).slice(0,12);
+    const found=await Promise.all(seeds.map(item=>withPhotoDeadline(resolveTouristGuideItem(item),2100)));
+    return found.filter(p=>p&&p._referenceUrl&&p._verifyMode==='image'&&isPhotoSafePoi(p));
+  }
   async function touristPool(){
     if(!touristPoolPromise)touristPoolPromise=(async()=>{
       const guide=await fetchWikivoyageGuide(),out=[];
@@ -2299,8 +2319,13 @@ try {
     return {distanceM:Math.round(route.distance),waypoints:data?.waypoints?.length||0,mode:"pedestrian",engine:data.source};
   };
   async function curatedTouristPois(p,radius=700){
-    const pool=await touristPool();
-    return pool.filter(poi=>isPhotoSafePoi(poi)).map(poi=>{poi._d=distMeters(p,{lat:poi._lat,lng:poi._lng});return poi}).filter(poi=>poi._d<=radius).sort((a,b)=>a._d-b._d);
+    // Resolve only nearby named sites. The full catalogue can take tens of
+    // seconds, making GPS verification appear permanently stuck.
+    const pool=await Promise.all(nearbyGuideSeeds(p,radius).slice(0,12)
+      .map(item=>withPhotoDeadline(resolveTouristGuideItem(item),3500)));
+    return pool.filter(poi=>poi&&poi._referenceUrl&&isPhotoSafePoi(poi))
+      .map(poi=>{poi._d=distMeters(p,{lat:poi._lat,lng:poi._lng});return poi})
+      .filter(poi=>poi._d<=radius).sort((a,b)=>a._d-b._d);
   }
 
   function buildRouteStreetPhotoTarget(){return null}
@@ -2369,7 +2394,10 @@ try {
     // Это устраняет ситуацию, когда карта ведёт в одно место, а фотозадание показывает другое.
     rr.poiAvoidIds=rr.poiAvoidIds||new Set();
     let selected=forcedPoi||null;
-    if(!selected&&checkpoint?.guideName){const pl=await touristPool();selected=pl.find(p=>p.tags?.name===checkpoint.guideName)||null}
+    if(!selected&&checkpoint?.guideName){
+      const matching=YAKUTSK_GUIDE_SEEDS.find(item=>item.enabled!==false&&item.name===checkpoint.guideName);
+      if(matching)selected=await withPhotoDeadline(resolveTouristGuideItem(matching),4500);
+    }
     // 1) Главный источник — туристические места из Викигида. Это именно те
     // объекты, которые путеводитель предлагает путешественнику, а не случайная
     // остановка/магазин возле маршрута.
@@ -2401,7 +2429,14 @@ try {
       saveSession();return false;
     }
     if(!rr.currentPoi?.tags?.name||!rr.currentPoi?._referenceUrl||rr.currentPoi?._verifyMode!=='image'||!isPhotoSafePoi(rr.currentPoi)){
-      rr.currentPoi=null;rr.currentCategory='city';if(camera)camera.disabled=true;
+      rr.currentPoi=null;rr.currentCategory='city';rr.stage='photo_unavailable';if(camera)camera.disabled=true;
+      $('#photoBlock').classList.add('hidden');
+      $('#photoCheck').className='check';
+      $('#photoCheck b').textContent='Нет эталона · без RouteCoin';
+      $('#retryPhotoBtn').classList.remove('hidden');
+      $('#replacePointBtn').classList.remove('hidden');
+      $('#nextBtn').classList.remove('hidden');
+      $('#lockLabel').textContent='Можно продолжить без фотонаграды';
       // Важно: полностью очищаем старое задание, чтобы название прошлого объекта
       // не оставалось на экране рядом с сообщением «нужно заменить точку».
       resetPhotoTaskUi();
@@ -2411,8 +2446,10 @@ try {
       $('#photoTaskAddress').textContent=checkpoint?.fullAddress||'Контрольная точка на карте';
       $('#photoTaskSteps').innerHTML=`<div class="photo-task-step"><i>1</i><span>Эту точку не нужно проходить вслепую.</span></div><div class="photo-task-step"><i>2</i><span>Нажмите «Заменить точку» — приложение найдёт другую точку маршрута с проверяемым объектом.</span></div><div class="photo-task-step"><i>3</i><span>Прогресс маршрута до этой точки не потеряется.</span></div>`;
       $('#taskMessage').textContent='Поблизости нет подходящей фототочки из проверенного белого списка. Случайные здания и неутверждённые объекты приложение не предлагает для съёмки.';
-      $('#checkpointText').textContent='Маршрут сохранён. Подберём другую точку из проверенного белого списка Якутска.';saveSession();return false;
+      $('#checkpointText').textContent='Эталонное фото не загрузилось. Можно повторить поиск, заменить точку или продолжить без RouteCoin.';saveSession();return false;
     }
+    rr.stage='photo';$('#retryPhotoBtn').classList.add('hidden');
+    $('#nextBtn').classList.add('hidden');
     if(camera)camera.disabled=false;const poi=rr.currentPoi,c=categoryFor(poi.tags),name=poi.tags.name;rr.currentCategory=c.key;
     await syncPhotoTargetWithMap(poi);
     const meters=Math.max(0,Math.round(distMeters(rr.livePos||searchCenter,{lat:poi._lat,lng:poi._lng})));
@@ -2446,6 +2483,10 @@ try {
     $('#gpsBadge').textContent='GPS: проверяем…';navigator.geolocation.getCurrentPosition(pos=>{const p=gpsPoint(pos),sane=gpsSanity(p);updateMarkers(p,false);const d=distMeters(p,target);if(!sane){$('#gpsBadge').textContent='GPS: подозрительный скачок';toast('GPS изменился слишком резко. Подождите несколько секунд.');return}if(p.accuracy>80){$('#gpsBadge').textContent='GPS: точность ±'+Math.round(p.accuracy)+' м';toast('Слабая точность GPS. Выйдите на открытое место.');return}if(d<=55)gpsAccepted(true);else{$('#gpsBadge').textContent='До точки: '+Math.round(d)+' м';toast('До контрольной точки ещё '+Math.round(d)+' м')}},()=>toast('Нет доступа к GPS'),{enableHighAccuracy:true,timeout:12000,maximumAge:0});
   }
   $('#gpsBtn').onclick=checkGps;$('#demoGpsBtn').onclick=()=>{if(!demoMode&&!isDeveloperMode())return;gpsAccepted(false)};
+  $('#retryPhotoBtn').onclick=async()=>{
+    const btn=$('#retryPhotoBtn');btn.disabled=true;btn.textContent='Ищем эталонное фото…';
+    try{await preparePoi()}finally{btn.disabled=false;btn.textContent='↻ Повторить поиск эталонного фото'}
+  };
 
   $('#cameraInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;rr.currentPhotoFile=f;const url=URL.createObjectURL(f);$('#photoPreview').src=url;$('#photoPreview').classList.add('show');$('#photoCheck').className='check';$('#photoCheck b').textContent='Готово к проверке';$('#verifyBtn').classList.remove('hidden');rr.stage='photo_ready';saveSession()};
   async function loadHistory(){
@@ -2472,8 +2513,10 @@ try {
     $('#verifyBtn').classList.add('hidden');$('#replacePointBtn').classList.add('hidden');$('#nextBtn').classList.remove('hidden');$('#lockLabel').textContent='Следующий участок готов';
     const poi=rr.currentPoi||{},eventId=(rr.routeId||'legacy')+':point:'+rr.current;
     const legDistanceM=Math.max(0,Number(rr.legs?.[rr.current-1]?.distance||0));
-    const added=window.__recordVerifiedEvent?.('photo_verified',eventId,{routeId:rr.routeId,point:rr.current,poiId:(poi.type||'')+':'+(poi.id||''),poiName:poi.tags?.name||'',similarity,legDistanceM,dailyEligible:!demoMode&&!isDeveloperMode()&&rr.startMode==='gps'})!==false;
+    const eligible=!demoMode&&!isDeveloperMode()&&rr.startMode==='gps';
+    const added=eligible&&window.__recordVerifiedEvent?.('photo_verified',eventId,{routeId:rr.routeId,point:rr.current,poiId:(poi.type||'')+':'+(poi.id||''),poiName:poi.tags?.name||'',similarity,legDistanceM,dailyEligible:true})===true;
     if(added&&window.state){const earned=Math.round(25*window.state.coef);window.state.coins+=earned;localStorage.setItem('rr_coins',window.state.coins);window.__syncApp?.();toast('+'+earned+' RouteCoin')}
+    else if(!eligible)toast('Демонстрация: фото подтверждено без начисления RouteCoin');
     else if(!added)toast('Эта точка уже была засчитана');
     await loadHistory();saveSession();
   }
