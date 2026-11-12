@@ -1,0 +1,66 @@
+/* Large, readable maps for phone and desktop. Loaded after mobile UX. */
+#route .rr-route-map-layout{display:flex;flex-direction:column;gap:0;min-width:0}
+#route .rr-route-map-layout>.map{order:0;flex:0 0 auto}
+#route .rr-route-map-layout>.map-credit{order:1}
+#route .rr-route-map-layout>.rr-nav-panel{order:2;margin-top:8px}
+#route .rr-route-map-layout>.map{
+  height:clamp(490px,66dvh,800px)!important;
+  min-height:0!important;
+  width:100%;
+}
+#home #homeMap,#create #homeMap{height:clamp(335px,48dvh,580px);min-height:335px}
+.rr-map-toggle{
+  position:absolute;left:14px;bottom:16px;z-index:1100;
+  min-width:160px;min-height:48px;border:1px solid #9ec7b3;
+  border-radius:14px;padding:10px 14px;
+  color:#f9fff9;background:rgba(13,71,54,.94);
+  font:800 14px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  box-shadow:0 6px 22px rgba(0,0,0,.24);
+  cursor:pointer;touch-action:manipulation;
+}
+.rr-map-toggle:focus-visible{outline:3px solid #ffdd82;outline-offset:3px}
+.rr-map-toggle:hover{background:#146b4e}
+.app.rr-map-modal-open .content{overflow:hidden!important}
+.app .rr-map-expanded{
+  position:fixed!important;inset:0!important;
+  z-index:2000!important;width:100vw!important;height:100dvh!important;
+  min-height:0!important;max-width:none!important;max-height:none!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  display:block!important;background:#e6eee9!important;
+}
+.app .rr-map-expanded .rr-map-toggle{
+  left:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:2500;
+  min-width:165px;min-height:54px;background:#145b45;
+}
+.app .rr-map-expanded .map-follow{right:15px!important;bottom:calc(18px + env(safe-area-inset-bottom))!important}
+.app .rr-map-expanded .map-label{top:calc(12px + env(safe-area-inset-top))}
+.app .rr-map-expanded .gps-state{top:calc(12px + env(safe-area-inset-top))}
+@media(min-width:900px){
+ #route .rr-route-map-layout{
+   display:grid;grid-template-columns:minmax(0,1.8fr) minmax(300px,.68fr);
+   grid-template-areas:"map nav" "credit nav";
+   column-gap:20px;align-items:start;
+ }
+ #route .rr-route-map-layout>.map{grid-area:map;order:initial}
+ #route .rr-route-map-layout>.map-credit{grid-area:credit;order:initial}
+ #route .rr-route-map-layout>.rr-nav-panel{grid-area:nav;order:initial;margin:0}
+ #route .rr-route-map-layout>.map{height:clamp(560px,73dvh,960px)!important}
+ #home #homeMap,#create #homeMap{height:clamp(470px,62dvh,780px);min-height:470px}
+}
+@media(min-width:600px) and (max-width:899px){
+ #route .rr-route-map-layout>.map{height:clamp(480px,68dvh,720px)!important}
+}
+@media(max-width:599px){
+ #route .rr-route-map-layout>.map{
+   height:clamp(435px,67dvh,700px)!important;min-height:0!important;
+   margin-bottom:7px;
+ }
+ #home #homeMap,#create #homeMap{height:clamp(325px,48dvh,535px);min-height:325px}
+ #route .rr-route-map-layout>.rr-nav-panel{margin-top:9px}
+ .rr-map-toggle{left:11px;bottom:12px;min-height:50px;padding:11px 12px;font-size:13px}
+}
+@media(orientation:landscape) and (max-height:600px) and (max-width:1050px){
+ #route .rr-route-map-layout>.map{height:clamp(270px,76dvh,530px)!important}
+ #home #homeMap,#create #homeMap{height:clamp(235px,67dvh,460px);min-height:235px}
+ .app .rr-map-expanded{height:100dvh!important}
+}
