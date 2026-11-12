@@ -45,7 +45,8 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
         },timestamp:Date.now()})
       });
       const rr=window.__yakutskRR;
-      rr.routeId='photo-e2e-gps-2026';rr.startMode='gps';rr.usePhotoOptional=false;
+      rr.routeId='photo-e2e-gps-2026';rr.routeEngine='dijkstra-osm';
+      rr.startMode='gps';rr.usePhotoOptional=false;
       rr.current=1;rr.stage='photo';rr.currentPhotoFile=null;
       rr.livePos={lat:62.0274,lng:129.732,accuracy:12};
       rr.lastGpsPos=null;rr.lastGpsAt=0;
@@ -130,11 +131,6 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     const repeat=await page.evaluate(()=>({coins:window.state.coins,photos:window.__verifiedStats().photos}));
     assert.deepEqual(repeat,{coins:25,photos:1});
     // A genuinely matched photo and its event-ledger proof survive reload.
-    console.log('PHOTO_BEFORE_RELOAD',JSON.stringify(await page.evaluate(()=>({
-      stage:window.__yakutskRR?.stage,proof:window.__yakutskRR?.photoProof,
-      session:JSON.parse(localStorage.getItem('rr_yakutsk_session_v8')||'null')?.stage,
-      ledger:window.__hasVerifiedEvent?.('photo_verified','photo-e2e-gps-2026:point:1')
-    }))));
     await page.reload({waitUntil:'domcontentloaded',timeout:20000});
     try{
       await page.waitForFunction(()=>window.__yakutskRR?.stage==='verified'
