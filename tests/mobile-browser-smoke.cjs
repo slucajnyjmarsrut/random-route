@@ -28,7 +28,7 @@ async function main(){
   let built=false;
   for(let i=0;i<3;i++){
    try{
-    await page.waitForFunction(()=>document.getElementById('route')?.classList.contains('active'),{timeout:10000});
+    await page.waitForFunction(()=>document.getElementById('route')?.classList.contains('active'),null,{timeout:10000});
     built=true;break;
    }catch(e){
     const msg=await page.locator('#routeBuildStatus').textContent().catch(()=>'');
