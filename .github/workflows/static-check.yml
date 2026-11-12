@@ -20,6 +20,7 @@ jobs:
           node --check responsive-layout.js
           node tests/responsive-layout.test.cjs
           node tests/navigation-layout.test.cjs
+          node tests/simple-home.test.cjs
           node --check graphite-theme.js
           node tests/graphite-theme.test.cjs
           node --check dijkstra-lab.js
@@ -45,7 +46,7 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
+          for(const name of ['smart-safety.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
