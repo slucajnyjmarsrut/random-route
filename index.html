@@ -144,7 +144,7 @@ try {
   }
 } catch(e) {}
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
-<link href="smart-route-chat.css?v=1.1" rel="stylesheet"/>
+
 <link rel="stylesheet" href="street-audit.css?v=1.0"/>
 <link rel="stylesheet" href="daily-quests.css?v=2.1"/>
 <link rel="stylesheet" href="tap-targets.css?v=1.0"/>
@@ -153,9 +153,10 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
+<link rel="stylesheet" href="simple-home.css?v=1.0"/>
 </head>
 <body>
-<div class="app">
+<div class="app" data-rr-screen="home">
 <header class="topbar">
 <div class="topbar-main"><div class="brand">Случайный маршрут</div><div class="subtitle">Каждый день — новый путь!</div></div>
 <div class="stats-top">
@@ -165,46 +166,71 @@ try {
 <button type="button" class="rr-settings-trigger" data-open-screen="settings" aria-label="Открыть настройки" title="Настройки">⚙️</button>
 </header>
 <main class="content">
-<section class="screen active" id="home">
-<div class="hero"><h1>Исследуем весь Якутск</h1><p>Расскажите, куда и насколько хотите погулять: помощник настроит маршрут по пешеходным дорогам.</p></div>
-<div class="rr-home-links" aria-label="Другие разделы">
-<button type="button" data-open-screen="settings">⚙️ Настройки маршрута</button>
-<button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button>
-<button type="button" data-open-screen="help">ℹ️ О приложении</button>
-</div>
-<section class="schat-card" id="smartChat" aria-label="Чат для создания прогулки">
- <div class="schat-heading"><h2>💬 Куда пойдём?</h2><span>Работает без AI API</span></div>
- <p class="schat-description">Опишите прогулку обычными словами: «Построй 3 км через парки, без дворов» или «Хочу погулять 40 минут».</p>
- <div class="schat-log" id="smartChatLog" role="log" aria-live="polite" aria-relevant="additions">
- <div class="schat-bubble schat-bot">Привет! Расскажите, что хотите увидеть и сколько готовы пройти. Я помогу подобрать параметры пешеходного маршрута.</div>
- </div>
- <form id="smartChatForm" class="schat-form">
-   <label for="smartChatInput">Ваше пожелание</label>
-   <textarea id="smartChatInput" maxlength="450" rows="2" placeholder="Например: построй кольцо 3 км через парки" autocomplete="off"></textarea>
-   <button class="schat-send" type="submit">✦ Отправить пожелание</button>
- </form>
- <p class="schat-summary" id="smartChatSummary">Настройки маршрута загружаются…</p>
- <button id="smartChatSettings" type="button" class="schat-settings">⚙️ Открыть настройки маршрута</button>
- <small class="schat-disclaimer">Команды обрабатываются локально. Не все свободные пожелания пока поддерживаются. Текст не отправляется в AI-сервис. Для построения по реальным дорогам требуется интернет.</small>
+<section class="screen active rr-welcome-screen" id="home" aria-label="Главная страница">
+<section class="rr-home-weather" aria-label="Погода в Якутске">
+ <div class="rr-home-weather-header"><div><span class="rr-weather-kicker">ПОГОДА СЕГОДНЯ</span><h2>Якутск</h2></div><button type="button" id="rrHomeWeatherRefresh" aria-label="Обновить погоду">↻ Обновить</button></div>
+ <div class="rr-home-weather-value" id="rrHomeWeatherValue" role="status" aria-live="polite">Получаем прогноз…</div>
+ <p class="rr-home-weather-detail" id="rrHomeWeatherDetail">Проверяем температуру и ветер</p>
+ <p class="rr-home-weather-advice" id="rrHomeWeatherAdvice">Учитывайте погоду перед прогулкой.</p>
 </section>
-<div class="card">
-<div class="city-chip">Якутск</div>
-<div class="title">Вы на карте</div><div class="sub">При запуске приложение само определяет GPS и ставит старт в вашем текущем месте</div>
-<div aria-label="Карта с текущим положением пользователя" id="homeMap"></div><div class="map-credit" id="homeMapCredit">Карта загружается…</div>
-<div class="gps-auto"><span class="gps-dot"></span>Автоматическое определение местоположения включено</div>
-<div class="location-actions" style="grid-template-columns:1fr"><button class="secondary" id="locateYakutskBtn">Обновить GPS</button><button class="secondary hidden" id="demoYakutskBtn">Центр Якутска</button></div>
-<div class="location-status warn" id="yakutskLocationStatus">Определяем ваше местоположение…</div>
-<div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
-</div>
-<div class="card avoid-card" id="avoidHomeCard">
+<div class="hero rr-welcome-hero"><small>Откройте город пешком</small><h1>Исследуем Якутск</h1><p>Выберите прогулку. Мы покажем пешеходный путь и интересные места.</p></div>
+<aside class="marshik-strip rr-welcome-mascot" aria-label="Маршик — помощник в прогулках">
+ <img src="icons/mascot-marshik.svg" width="110" height="120" alt="Маршик — дружелюбный путешественник с картой" loading="eager"/>
+ <div><strong>Привет! Я Маршик.</strong><span>Помогу выбрать прогулку. Всё просто: несколько кнопок — и можно гулять!</span></div>
+</aside>
+<button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
+</section>
+<section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
+<button type="button" class="rr-create-back" data-open-screen="home">← На главную</button>
+<div class="rr-create-heading"><span>ВАША ПРОГУЛКА</span><h1>Создадим маршрут</h1><p>Выберите расстояние и что хотите увидеть. Вводить пожелания текстом не нужно.</p></div>
+<section class="rr-create-panel" aria-labelledby="rrDistanceTitle">
+ <h2 id="rrDistanceTitle"><span class="rr-create-step-number">1</span> Сколько хотите пройти?</h2>
+ <div class="rr-distance-options" role="group" aria-label="Расстояние прогулки">
+  <button type="button" data-distance-km="2" aria-pressed="false"><strong>2 км</strong><small>Около 30 минут</small></button>
+  <button type="button" data-distance-km="3" aria-pressed="false"><strong>3 км</strong><small>Около 45 минут</small></button>
+  <button type="button" data-distance-km="5" aria-pressed="false"><strong>5 км</strong><small>Около 1 часа 10 минут</small></button>
+  <button type="button" data-distance-km="7" aria-pressed="false"><strong>7 км</strong><small>Около 1 часа 40 минут</small></button>
+ </div>
+ <details class="rr-create-details" id="rrCustomDistance"><summary>Другое расстояние</summary>
+  <label class="rr-create-field-label" for="distanceInput">Расстояние от 1 до 50 км</label>
+  <div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="3"/><div class="unit">км</div></div>
+ </details>
+ <p class="rr-create-note">Время примерное, с учётом обычного шага. Остановки увеличат его.</p>
+</section>
+<section class="rr-create-panel" aria-labelledby="rrTypeTitle">
+ <h2 id="rrTypeTitle"><span class="rr-create-step-number">2</span> Что хотите увидеть?</h2>
+ <div class="rr-wish-buttons" id="typeChoices" role="group" aria-label="Пожелание к прогулке">
+  <button type="button" class="choice active" data-type="parks" aria-pressed="true"><span aria-hidden="true">🌳</span><b>Парки и скверы</b></button>
+  <button type="button" class="choice" data-type="city" aria-pressed="false"><span aria-hidden="true">🏛️</span><b>Город и памятники</b></button>
+  <button type="button" class="choice" data-type="nature" aria-pressed="false"><span aria-hidden="true">🌿</span><b>Природа</b></button>
+ </div>
+ <p class="rr-create-note">Это пожелание: реальные места и пешеходные пути определяются по карте.</p>
+</section>
+<section class="rr-create-panel" aria-labelledby="rrStartTitle">
+ <h2 id="rrStartTitle"><span class="rr-create-step-number">3</span> Откуда начнём?</h2>
+ <p class="rr-create-intro">Начало и конец прогулки — ваше текущее местоположение.</p>
+ <div class="location-status warn" id="yakutskLocationStatus" role="status">Определяем ваше местоположение…</div>
+ <div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
+ <div class="rr-create-gps-actions"><button class="secondary" id="locateYakutskBtn" type="button">📍 Определить, где я</button><button class="secondary hidden" id="demoYakutskBtn" type="button">🧪 Пробный маршрут</button></div>
+ <details id="createMapDetails" class="rr-create-details rr-map-details"><summary>Карта старта и нежелательные улицы</summary>
+  <div class="rr-map-inner"><div class="city-chip">Якутск</div><div id="homeMap" aria-label="Яндекс Карта стартовой точки"></div><div class="map-credit" id="homeMapCredit">Карта загружается…</div></div>
+  <div class="card avoid-card" id="avoidHomeCard">
 <div class="avoid-head"><div><div class="title">Куда не вести маршрут</div><div class="sub" style="margin:3px 0 0">Отметьте на карте зоны, куда вы не хотите идти</div></div><div class="avoid-badge"><span id="avoidCountHome">0</span> зон</div></div>
 <div class="avoid-controls"><select id="avoidRadiusHome" aria-label="Размер запретной зоны"><option value="150">Радиус 150 м</option><option value="300" selected>Радиус 300 м</option><option value="500">Радиус 500 м</option><option value="800">Радиус 800 м</option></select><button class="avoid-map-btn" id="avoidAddHomeBtn" type="button">🚫 Отметить на карте</button></div>
 <div class="avoid-zone-list" id="avoidListHome"></div>
 <div class="avoid-note">После нажатия коснитесь карты. Генератор не будет принимать маршруты, проходящие через выбранные зоны.</div>
 <button class="danger-lite hidden" id="avoidClearHomeBtn" type="button" style="margin-top:9px">Очистить все зоны</button>
 </div>
-<button class="primary orange" id="buildBtn">✦ Построить маршрут по Якутску</button>
-
+ </details>
+</section>
+<details class="rr-create-details rr-more-wishes"><summary>Дополнительные пожелания</summary>
+ <div class="rr-extra-wishes"><p>По возможности добавим остановку в кафе по пути.</p>
+  <div class="row"><span>☕ Кафе по пути</span><button type="button" aria-label="Добавить кафе по пути" aria-pressed="true" class="toggle on" id="partnerToggle"></button></div>
+ </div>
+</details>
+<button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
+<p class="rr-create-final-note">Нужен интернет. Для настоящей прогулки разрешите GPS. Всегда проверяйте дорожные условия.</p>
+<details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
 <section class="screen" id="route">
 <div class="map">
@@ -215,18 +241,6 @@ try {
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
-<section class="schat-card" id="smartRouteChat" aria-label="Чат для изменения маршрута">
- <div class="schat-heading"><h2>💬 Изменить маршрут</h2><span>В движении</span></div>
- <div class="schat-log" id="smartRouteChatLog" role="log" aria-live="polite" aria-relevant="additions">
- <div class="schat-bubble schat-bot">Можно изменить пожелания: «Перестрой на 4 км по паркам».</div>
- </div>
- <form id="smartRouteChatForm" class="schat-form">
-   <label for="smartRouteChatInput">Что изменить?</label>
-   <textarea id="smartRouteChatInput" maxlength="450" rows="2" placeholder="Например: перестрой на 4 км" autocomplete="off"></textarea>
-   <button type="submit" class="schat-send">↻ Применить и перестроить</button>
- </form>
- <small class="schat-disclaimer">Маршрут будет пересчитан с текущей GPS-позиции, если она доступна. Отсутствие реальных данных о тротуарах не считается подтверждением безопасности.</small>
-</section>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
@@ -373,21 +387,8 @@ try {
 </section>
 
 <section class="screen" id="settings" aria-label="Настройки приложения">
-<div class="hero"><small>Управление приложением</small><h1>⚙️ Настройки</h1><p>Ваши предпочтения сохраняются на этом устройстве. Для прогулки используйте карту на главной.</p></div>
-<h2 class="rr-section-heading">Параметры маршрута</h2>
-<div class="card">
-<div class="title">Желаемая дистанция</div><div class="sub">Введите расстояние сами</div>
-<div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div>
-<div class="hint">Дистанция маршрута: от 1 до 50 км.</div>
-<div class="hint" style="margin-top:9px;padding:9px 11px;border-radius:12px;background:#e7f2ed;color:#0b5a42;font-weight:800;line-height:1.45">🚶 Только пешком: приоритет тротуаров и пешеходных дорожек. Узкие проезды и дворы по возможности обходим.</div>
-</div>
-<div class="card"><div class="title">Тип прогулки</div><div class="sub">Приложение будет учитывать выбранную атмосферу</div><div class="grid3" id="typeChoices">
-<button class="choice active" data-type="parks"><span>🌳</span>Парки</button>
-<button class="choice" data-type="city"><span>⌂</span>Город</button>
-<button class="choice" data-type="nature"><span>🌿</span>Природа</button>
-</div></div>
-<div class="card"><div class="row"><div><div class="title" style="margin:0">Кофейня или ресторан</div><div class="sub" style="margin:3px 0 0">Добавить заведение по пути</div></div><button aria-label="Добавить заведение" class="toggle on" id="partnerToggle"></button></div></div>
-
+<div class="hero"><small>Управление приложением</small><h1>⚙️ Настройки</h1><p>Здесь можно настроить оформление и уведомления. Для прогулки нажмите «Создать прогулку».</p></div>
+<div class="card rr-settings-guide"><div class="title">Прогулки и маршруты</div><div class="sub">Расстояние и пожелания выбираются при создании прогулки.</div><button type="button" class="secondary" data-open-screen="create">Создать прогулку →</button></div>
 <div class="card rr-settings-options"><div class="title">Уведомления и оформление</div><div class="sub">Погода относится к Якутску в целом, а не к конкретной улице.</div>
 <label><input type="checkbox" data-srs-pref="weather"/> Погодные предупреждения</label>
 <label><input type="checkbox" data-srs-pref="darkness"/> Предупреждать о темноте</label>
@@ -395,7 +396,7 @@ try {
 <div class="rr-theme-choice"><label for="rrThemeSelect">🎨 Тема оформления</label><select id="rrThemeSelect" aria-label="Тема оформления"><option value="graphite" selected>Графитовые волны</option><option value="light">Светлая</option></select></div>
 </div>
 <div class="rr-page-links"><button type="button" data-open-screen="safety">🛡️ Погода и безопасность</button><button type="button" data-open-screen="help">ℹ️ Как работает приложение</button><button type="button" data-open-screen="laboratory">🧪 Лаборатория Дейкстры</button></div>
-<button class="primary" type="button" data-open-screen="home">Вернуться к построению маршрута</button>
+<button class="primary" type="button" data-open-screen="create">Создать прогулку</button>
 </section>
 <section class="screen" id="safety" aria-label="Безопасность прогулки">
 <div class="hero"><small>Перед выходом</small><h1>🛡️ Безопасная прогулка</h1><p>Прогноз, предупреждения и дополнительные сведения. Реальные условия на улицах проверяйте самостоятельно.</p></div>
@@ -460,7 +461,7 @@ try {
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
 </main>
-<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Карта</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
+<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
 <div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
 <div class="modal-backdrop" id="exitRouteModal"><div class="purchase-modal exit-route-sheet"><div class="grab"></div><div class="exit-icon">↩️</div><h2>Выйти из маршрута?</h2><p>Если выйти сейчас, текущий маршрут будет закрыт.</p><div class="exit-warning"><b>Маршрут не сохраняется.</b><br>Открытые участки, текущая контрольная точка и прогресс незавершённого маршрута будут удалены.</div><div class="purchase-actions"><button class="purchase-cancel" id="exitRouteCancel" type="button">Остаться</button><button class="purchase-confirm exit-confirm" id="exitRouteConfirm" type="button">Выйти</button></div></div></div>
 
@@ -2483,7 +2484,7 @@ try {
 </script>
 <script src="smart-safety.js?v=1.1"></script>
 <script src="weather-background.js?v=1.0"></script>
-<script src="smart-route-chat.js?v=1.1"></script>
+
 <script src="developer-diagnostics.js?v=1.0"></script>
 <script src="street-audit.js?v=1.0"></script>
 <script src="daily-quests.js?v=2.1"></script>
