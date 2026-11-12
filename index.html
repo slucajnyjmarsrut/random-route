@@ -155,6 +155,7 @@ try {
 <link rel="stylesheet" href="graphite-theme.css?v=1.0"/>
 <link rel="stylesheet" href="simple-home.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
+<link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 </head>
 <body>
 <div class="app" data-rr-screen="home">
@@ -255,6 +256,9 @@ try {
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
+<details class="rr-create-details rr-route-extras" id="rrRouteExtras">
+<summary>⚙️ Изменить маршрут или исключить улицы</summary>
+<div class="rr-route-extra-content">
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
 <div class="route-edit-row"><div class="distance-wrap"><input class="distance" id="activeDistanceInput" inputmode="decimal" max="12" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div><button class="secondary" id="applyDistanceBtn" type="button">Перестроить</button></div>
@@ -265,6 +269,8 @@ try {
 <div class="avoid-zone-list" id="avoidListRoute"></div>
 <button class="secondary hidden" id="avoidRerouteBtn" type="button" style="margin-top:8px">Перестроить с учётом зон</button>
 </div>
+</div>
+</details>
 <div class="checkpoint">
 <div class="eyebrow">Текущая контрольная точка</div><h3 id="checkpointTitle">Найдите объект рядом</h3><p id="checkpointText">Когда подойдёте к точке, приложение проверит GPS и откроет фотозадание.</p>
 <div class="checkpoint-address" id="checkpointAddressBox"><div>📍</div><div><b>Адрес точки</b><span id="checkpointAddress">Определяем адрес…</span></div></div>
