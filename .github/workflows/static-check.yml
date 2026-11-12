@@ -37,6 +37,7 @@ jobs:
           node tests/route-ai.test.cjs
           node tests/fast-route-building.test.cjs
           node tests/mobile-real-route.test.cjs
+          node --check tests/photo-browser-smoke.cjs
           node --check map-fallback.js
           node --check smart-route-chat.js
           node tests/chat-intent.test.cjs
@@ -111,3 +112,4 @@ jobs:
           npx playwright install --with-deps chromium
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/rr-mobile-test-server.log 2>&1 &
           node tests/mobile-browser-smoke.cjs
+          node tests/photo-browser-smoke.cjs
