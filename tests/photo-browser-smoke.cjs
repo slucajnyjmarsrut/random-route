@@ -130,9 +130,28 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     const repeat=await page.evaluate(()=>({coins:window.state.coins,photos:window.__verifiedStats().photos}));
     assert.deepEqual(repeat,{coins:25,photos:1});
     // A genuinely matched photo and its event-ledger proof survive reload.
+    console.log('PHOTO_BEFORE_RELOAD',JSON.stringify(await page.evaluate(()=>({
+      stage:window.__yakutskRR?.stage,proof:window.__yakutskRR?.photoProof,
+      session:JSON.parse(localStorage.getItem('rr_yakutsk_session_v8')||'null')?.stage,
+      ledger:window.__hasVerifiedEvent?.('photo_verified','photo-e2e-gps-2026:point:1')
+    }))));
     await page.reload({waitUntil:'domcontentloaded',timeout:20000});
-    await page.waitForFunction(()=>window.__yakutskRR?.stage==='verified'
-      &&!document.querySelector('#historyBlock').classList.contains('hidden'),null,{timeout:13000});
+    try{
+      await page.waitForFunction(()=>window.__yakutskRR?.stage==='verified'
+        &&!document.querySelector('#historyBlock').classList.contains('hidden'),null,{timeout:11000});
+    }catch(e){
+      console.error('PHOTO_RESTORE_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({
+        stage:window.__yakutskRR?.stage,proof:window.__yakutskRR?.photoProof,
+        poi:window.__yakutskRR?.currentPoi,routeId:window.__yakutskRR?.routeId,
+        current:window.__yakutskRR?.current,ledger:window.__hasVerifiedEvent?.('photo_verified','photo-e2e-gps-2026:point:1'),
+        historyHidden:document.querySelector('#historyBlock')?.classList.contains('hidden'),
+        historyText:document.querySelector('#historyTitle')?.textContent,
+        photo:document.querySelector('#photoCheck b')?.textContent,
+        screen:document.querySelector('.app')?.dataset.rrScreen,
+        session:JSON.parse(localStorage.getItem('rr_yakutsk_session_v8')||'null')
+      }))));
+      throw e;
+    }
     const resumed=await page.evaluate(()=>({
       proof:window.__yakutskRR.photoProof,
       photos:window.__verifiedStats().photos,
