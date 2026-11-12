@@ -193,8 +193,8 @@ try {
   <button type="button" data-distance-km="7" aria-pressed="false"><strong>7 км</strong><small>Около 1 часа 40 минут</small></button>
  </div>
  <details class="rr-create-details" id="rrCustomDistance"><summary>Другое расстояние</summary>
-  <label class="rr-create-field-label" for="distanceInput">Расстояние от 1 до 50 км</label>
-  <div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="3"/><div class="unit">км</div></div>
+  <label class="rr-create-field-label" for="distanceInput">Расстояние от 1 до 12 км</label>
+  <div class="distance-wrap"><input class="distance" id="distanceInput" inputmode="decimal" max="12" min="1" step="0.1" type="number" value="3"/><div class="unit">км</div></div>
  </details>
  <p class="rr-create-note">Время примерное, с учётом обычного шага. Остановки увеличат его.</p>
 </section>
@@ -257,7 +257,7 @@ try {
 <div class="route-summary"><div class="summary"><b id="sumDistance">6,5 км</b><span>маршрут</span></div><div class="summary"><b id="sumPoints">5</b><span>точек</span></div><div class="summary"><b>×<span id="sumCoef">1.0</span></b><span>страйк</span></div></div>
 <div class="card route-edit-card">
 <div class="title">Изменить километраж</div><div class="sub">Можно изменить дистанцию даже после построения. Маршрут пересчитается от вашего текущего положения.</div>
-<div class="route-edit-row"><div class="distance-wrap"><input class="distance" id="activeDistanceInput" inputmode="decimal" max="50" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div><button class="secondary" id="applyDistanceBtn" type="button">Перестроить</button></div>
+<div class="route-edit-row"><div class="distance-wrap"><input class="distance" id="activeDistanceInput" inputmode="decimal" max="12" min="1" step="0.1" type="number" value="6.5"/><div class="unit">км</div></div><button class="secondary" id="applyDistanceBtn" type="button">Перестроить</button></div>
 </div>
 <div class="card avoid-card route-avoid-inline">
 <div class="avoid-head"><div><div class="title">Не хочу идти туда</div><div class="sub">Поставьте запретную зону прямо на карте и перестройте маршрут</div></div><div class="avoid-badge"><span id="avoidCountRoute">0</span> зон</div></div>
@@ -469,7 +469,7 @@ try {
   <div class="lab-card">
     <h2>Как это связано с проектом</h2>
     <p class="lab-warning">Дейкстра находит кратчайший путь между двумя точками при неотрицательных весах. Кольцевая прогулка заданной длины — другая задача: для неё нужны промежуточные точки, объединение участков и контроль повторов.</p>
-    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем веб-приложении сначала применяется Дейкстра по OSM, а если граф недоступен — пешеходный Valhalla. Эта учебная лаборатория не меняет GPS, маршруты или RouteCoin.</p>
+    <p class="lab-warning"><strong>Важно:</strong> этот граф учебный, а не карта Якутска. В действующем приложении используется только Дейкстра по дорожному графу OpenStreetMap. Если граф не загрузился, другой маршрутизатор не подставляется. Эта лаборатория не меняет GPS, маршруты и RouteCoin.</p>
   </div>
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
@@ -707,7 +707,7 @@ try {
   }
   renderServiceStatus();
 
-  // Карта приложения отрисовывается Яндекс Картами; пеший маршрут рассчитывается через бесплатный Valhalla demo API.
+  // Яндекс Карты только показывают маршрут; расчёт ведётся исключительно алгоритмом Дейкстры по OSM.
 
   let yMap=null,yHomeMap=null,yUserMarker=null,yHomeUserMarker=null,yRouteLine=null,yRouteCasing=null,yPassedLine=null,yCheckpointMarker=null;
   let followGps=true,markerAnimationId=null,mapFollowLast=0,mapFollowLastPos=null;
@@ -951,7 +951,7 @@ try {
 
   // Карточки на главной: кратко на экране, подробно по нажатию.
   const homeCardInfo=[
-    ['Желаемая дистанция','📏','Укажите любую длину прогулки от 1 до 50 км. Приложение построит кольцевой маршрут примерно под выбранную дистанцию и вернёт вас к месту старта.'],
+    ['Желаемая дистанция','📏','Укажите любую длину прогулки от 1 до 12 км. Приложение построит кольцевой маршрут примерно под выбранную дистанцию и вернёт вас к месту старта.'],
     ['Тип прогулки','🌳','Выберите атмосферу маршрута. «Парки» делает упор на зелёные зоны, «Город» — на улицы и городские объекты, «Природа» — на более спокойные и природные участки.'],
     ['Кофейня или ресторан','☕','Если включить эту настройку, генератор постарается провести маршрут рядом с подходящим заведением. В дальнейшем здесь смогут появляться партнёрские точки и купоны.'],
     ['Вы на карте','📍','Старт маршрута определяется по GPS телефона. На карте показывается текущее положение, а во время прогулки оно обновляется автоматически.'],
@@ -1028,7 +1028,7 @@ try {
       },200);
     }
     rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Пешеходный маршрут построен через Valhalla. Дейкстра включится, когда будет готов дорожный граф OSM.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Алгоритм Дейкстры по дорожкам OSM · случайные точки и обучаемый локальный подбор.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1095,12 +1095,6 @@ try {
   }
   const roundedTenth=v=>Math.round(Number(v)*10)/10;
   const sameDisplayedDistance=(a,b)=>roundedTenth(a)===roundedTenth(b);
-  function decodePolyline6(str){
-    let index=0,lat=0,lng=0,out=[];
-    const next=()=>{let result=0,shift=0,b;do{b=str.charCodeAt(index++)-63;result|=(b&0x1f)<<shift;shift+=5}while(b>=0x20&&index<=str.length);return (result&1)?~(result>>1):(result>>1)};
-    while(index<str.length){lat+=next();lng+=next();out.push([lat/1e6,lng/1e6])}
-    return out;
-  }
   function routePolylineDistanceM(coordinates){
     // coordinates are [lng, lat]. Count the length of the routed polyline itself,
     // not the straight-line distance between start and finish.
@@ -1125,79 +1119,14 @@ try {
   function routeLegsDistanceM(legs){
     return Math.max(0,(legs||[]).reduce((sum,leg)=>sum+legRouteDistanceM(leg),0));
   }
-  function valhallaLegToApp(leg){
-    const shape=typeof leg?.shape==='string'?decodePolyline6(leg.shape):[];
-    const coordinates=shape.map(p=>[p[1],p[0]]);
-    const alongRoute=routePolylineDistanceM(coordinates);
-    return {
-      // Source of truth is the real pedestrian line returned by the router.
-      // summary.length is only a fallback if geometry is unexpectedly absent.
-      distance:alongRoute>0?alongRoute:Math.max(0,Number(leg?.summary?.length||0))*1000,
-      duration:Math.max(0,Number(leg?.summary?.time||0)),
-      steps:[{name:'',geometry:{coordinates}}]
-    };
-  }
-  async function requestValhallaFootRoute(points,opts={}){
-    const payload={
-      // Ограничиваем радиус привязки промежуточных точек. Иначе Valhalla может
-      // привязать точку к далёкой пешеходной дороге и визуально отправить человека
-      // совсем в другой квартал.
-      locations:points.map((p,i)=>({
-        lat:Number(p.lat),lon:Number(p.lng),
-        type:(opts.allBreak||i===0||i===points.length-1)?'break':'via',
-        radius:(i===0||i===points.length-1)?90:(opts.radius||140)
-      })),
-      // Strictly request pedestrian routing, not an automobile profile.
-      // Prefer tagged pedestrian paths and sidewalks; discourage alleys,
-      // service roads and driveways (often used inside residential yards).
-      // Valhalla can only honor restrictions present in its OSM graph.
-      costing:'pedestrian',
-      costing_options:{
-        pedestrian:{
-          walkway_factor:0.65,
-          sidewalk_factor:0.70,
-          alley_factor:6.0,
-          driveway_factor:9.0,
-          service_factor:3.0,
-          service_penalty:12,
-          use_tracks:0,
-          use_ferry:0,
-          max_hiking_difficulty:0
-        }
-      },
-      shape_format:'polyline6',
-      directions_options:{units:'kilometers',language:'ru-RU'}
-    };
-    const url='https://valhalla1.openstreetmap.de/route?json='+encodeURIComponent(JSON.stringify(payload));
-    const maxWait=Number.isFinite(Number(opts.timeoutMs))?Math.max(900,Math.min(6000,Number(opts.timeoutMs))):16000;
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),maxWait);
-    let res;
-    try {res=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});}
-    finally {clearTimeout(timer);}
-
-    if(!res.ok)throw new Error('Valhalla '+res.status);
-    const data=await res.json(),trip=data?.trip;
-    if(!trip?.legs?.length||Number(trip.status||0)!==0)throw new Error(trip?.status_message||data?.error||'NoRoute');
-    const legs=trip.legs.map(valhallaLegToApp);
-    const allCoords=legs.flatMap(l=>l.steps?.[0]?.geometry?.coordinates||[]);
-    // IMPORTANT: total kilometres are the sum of all routed pedestrian legs.
-    // We never use start→finish crow-flight distance as route mileage.
-    const distance=routeLegsDistanceM(legs)||Math.max(0,Number(trip.summary?.length||0))*1000;
-    const duration=Math.max(0,Number(trip.summary?.time||0));
-    const locs=(trip.locations?.length===points.length?trip.locations:null)||points.map(p=>({lat:p.lat,lon:p.lng}));
-    const waypoints=locs.map((loc,i)=>({location:[Number(loc.lon??points[i]?.lng),Number(loc.lat??points[i]?.lat)],name:loc.street||''}));
-    return {code:'Ok',source:'valhalla',routes:[{distance,duration,legs,geometry:{type:'LineString',coordinates:allCoords}}],waypoints};
-  }
   async function requestFootRoute(points,opts={}){
-    // Only run Dijkstra synchronously when a complete real OSM graph is ALREADY
-    // in memory. Do not block each attempt on public Overpass HTTP requests.
-    const engine=window.RRWalkingDijkstra;
-    const km=opts.distanceKm||Number($('#distanceInput').value)||3;
-    if(engine?.hasWarmGraph?.(points[0],km)){
-      try{return await engine.requestRoute(points,{distanceKm:km,zones:rr.noGoZones});}
-      catch(e){console.info('Cached pedestrian graph has no suitable path, using Valhalla:',e?.message||e);}
-    }
-    return requestValhallaFootRoute(points,opts);
+    // The sole routing engine is Dijkstra on actual OSM pedestrian streets.
+    // If no usable graph exists we show an error; never fake a road or switch engines.
+    if(!window.RRWalkingDijkstra?.requestRoute)throw new Error('DijkstraUnavailable');
+    return window.RRWalkingDijkstra.requestRoute(points,{
+      distanceKm:opts.distanceKm||Number($('#distanceInput').value)||3,
+      zones:rr.noGoZones
+    });
   }
   function legCoords(leg){
     const out=[];(leg?.steps||[]).forEach(step=>(step.geometry?.coordinates||[]).forEach(c=>{const p=[c[1],c[0]],last=out[out.length-1];if(!last||Math.abs(last[0]-p[0])>1e-8||Math.abs(last[1]-p[1])>1e-8)out.push(p)}));return out;
@@ -1337,7 +1266,7 @@ try {
     const todayDailyOffers=window.DailyRouteQuests?.offersForDay?.(window.DailyRouteQuests.dayKey(Date.now()))||[];
     const dailyOffer=options.dailyOffer?todayDailyOffers.find(o=>o.id===options.dailyOffer.id&&o.day===options.dailyOffer.day):null;
     const dailyRandom=dailyOffer?window.DailyRouteQuests.rngForOffer(dailyOffer.seed):Math.random;
-    const input=Number(options.distanceKm??parseFloat($('#distanceInput').value.replace(',','.')));if(!input||input<1||input>50){toast('Введите дистанцию от 1 до 50 км');return false}
+    const input=Number(options.distanceKm??parseFloat($('#distanceInput').value.replace(',','.')));if(!input||input<1||input>12){toast('Дейкстра: дистанция от 1 до 12 км');return false}
     if(!rr.gpsFresh && !demoMode && !isDeveloperMode()){toast('Нужен актуальный GPS. Разрешите геолокацию.');requestLocation(true);return false}
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
     else if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
@@ -1361,6 +1290,9 @@ try {
         ?await Promise.race([touristPoolPromise.catch(()=>[]),new Promise(resolve=>setTimeout(()=>resolve([]),250))])
         :[];
       // The photo catalog can load later; avoid flooding the network while routing.
+      report('Загружаем настоящие пешеходные дороги OSM…');
+      if(!window.RRWalkingDijkstra?.loadGraph)throw new Error('DijkstraUnavailable');
+      await window.RRWalkingDijkstra.loadGraph(rr.start,input);
       const targetM=input*1000,maxR=Math.max(600,targetM*.5);
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
@@ -1376,6 +1308,7 @@ try {
         usePhotoOptional=true;
       }
       if(near.length<2)throw new Error('NoTouristPois');
+      const selectedTheme=$('#typeChoices .choice.active')?.dataset.type||'city';
       const nMax=input<=2?3:Math.max(3,Math.min(8,Math.round(input/1.35)));
       const tolOk=Math.max(150,targetM*.08),tolAccept=Math.max(350,targetM*.18);
       const ll=p=>({lat:p._lat,lng:p._lng});
@@ -1405,10 +1338,8 @@ try {
         }
         if(!cands.length)break;
         cands.forEach(c=>{
-          const pref=window.SmartRouteChat?.preferenceBoost;
-          const hits=typeof pref==='function'?c.pois.reduce((sum,p)=>sum+Number(pref(p)||0),0):0;
-          // Preference bonus is soft; measured walking distance and safety checks remain authoritative.
-          c.score=Math.abs(c.raw*factor-targetM)-Math.min(tolOk*.4,hits*32);
+          // Local learned ranking guides random choices without overriding road distance.
+          c.score=Math.abs(c.raw*factor-targetM)-Math.min(tolOk*.55,window.RRRouteAI?.score?.(c.pois,selectedTheme)||0);
         });
         cands.sort((x,y)=>x.score-y.score);
         const c=cands[iter===0?Math.floor(dailyRandom()*Math.min(4,cands.length)):0];
@@ -1421,9 +1352,7 @@ try {
           if(!snapOk)continue;
           if(routeHitsNoGo(route)){rejectedByZones++;continue}
           const diff=Math.abs(route.distance-targetM);
-          const preferenceBoost=window.SmartRouteChat?.preferenceBoost;
-          const prefHits=typeof preferenceBoost==='function'?c.pois.reduce((sum,p)=>sum+Number(preferenceBoost(p)||0),0):0;
-          const candidateRank=diff-Math.min(tolOk*.38,prefHits*35)+(data.source==='dijkstra-osm'?0:Math.max(100,tolOk*.6));
+          const candidateRank=diff-Math.min(tolOk*.5,window.RRRouteAI?.score?.(c.pois,selectedTheme)||0);
           // Do not trade a valid distance for an unacceptable one to satisfy a theme.
           if(!best||((diff<=tolAccept||best.diff>tolAccept)&&candidateRank<best.rank))
             best={data,route,pois:c.pois,diff,actual:route.distance/1000,rank:candidateRank};
@@ -1441,7 +1370,7 @@ try {
       rr.usePhotoOptional=usePhotoOptional;
       if(usePhotoOptional)toast('Фотографии недоступны: построен прогулочный маршрут без наград за пропущенные фототочки.');
       rr.legs=route.legs;
-      rr.routeEngine=data.source||'valhalla';
+      rr.routeEngine='dijkstra-osm';rr.routeTheme=selectedTheme;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
       rr.current=1;rr.routeDistance=route.distance;rr.requestedDistance=input;rr.currentPoi=null;rr.currentCategory='city';rr.legProgress={};
       rr.dailyOfferId=dailyOffer?.id||null;rr.dailyOfferDay=dailyOffer?.day||null;
@@ -1457,11 +1386,13 @@ try {
       console.error(e);
       if(e?.message==='NoDifferentDirection')toast('Не нашли действительно другое направление. Нажмите ещё раз — попробуем другой сектор.');
       else if(e?.message==='BadWaypointSnap')toast('Маршрутизатор привязал точки слишком далеко. Попробуйте ещё раз.');
+      else if(['OSMUnavailable','GraphIncomplete','GraphTooLarge','DijkstraUnavailable','InvalidLocation'].includes(e?.message))toast('Не удалось загрузить пешеходные дороги OSM. Проверьте интернет и повторите.');
+      else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(e?.message))toast('По данным OSM здесь нет связанного пешеходного пути. Измените старт или дистанцию.');
       else if(e?.message==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
       else if(e?.message==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
       else if(e?.message==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут, который отображается как '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км. Попробуйте другую дистанцию или ещё раз.');}
-      else toast('Не удалось быстро построить подходящий маршрут. Измените расстояние и попробуйте ещё раз.');
-      if(statusEl){statusEl.hidden=false;statusEl.textContent='Не удалось быстро найти подходящий маршрут. Попробуйте другую дистанцию или повторите попытку.';}
+      else toast('Дейкстра не нашла подходящий маршрут. Измените расстояние или попробуйте снова.');
+      if(statusEl){statusEl.hidden=false;statusEl.textContent='По графу OSM не удалось проложить прогулку. Попробуйте другую дистанцию или повторите запрос.';}
       return false;
     }finally{
       btn.disabled=false;btn.textContent=old;
@@ -2559,7 +2490,7 @@ try {
   $('#avoidRerouteBtn').onclick=()=>regenerateRoute('avoid');
   $('#applyDistanceBtn').onclick=async()=>{
     const v=parseFloat($('#activeDistanceInput').value.replace(',','.'));
-    if(!v||v<1||v>50){toast('Введите дистанцию от 1 до 50 км');return}
+    if(!v||v<1||v>12){toast('Дейкстра: дистанция от 1 до 12 км');return}
     // Не меняем сохранённую цель до тех пор, пока новый маршрут реально не построен.
     // Раньше при неудачной перестройке поле уже показывало 1,0 км, а на карте оставался старый 0,5 км.
     const oldValue=Number(rr.requestedDistance||rr.routeDistance/1000||window.state?.distance||6.5);
@@ -2630,7 +2561,8 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=1.1"></script>
+<script src="walking-dijkstra.js?v=2.0"></script>
+<script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 </body>
 </html>
