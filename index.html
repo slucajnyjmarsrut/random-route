@@ -2208,7 +2208,7 @@ try {
     const route=data?.routes?.[0];
     if(!route||!Number.isFinite(Number(route.distance))||Number(route.distance)<80||!route.legs?.length)
        throw new Error("Маршрутизатор не вернул корректный пешеходный путь");
-    return {distanceM:Math.round(route.distance),waypoints:data?.waypoints?.length||0,mode:"pedestrian"};
+    return {distanceM:Math.round(route.distance),waypoints:data?.waypoints?.length||0,mode:"pedestrian",engine:data.source};
   };
   async function curatedTouristPois(p,radius=700){
     const pool=await touristPool();
