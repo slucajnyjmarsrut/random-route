@@ -107,7 +107,7 @@ function renderHomeWeather(){
   if(severity)advice.setAttribute("data-severity",severity);
 }
 function render(){
-  renderCard("home");renderCard("route");renderHomeWeather();
+  renderCard("home");renderCard("route");if(!window.RRYakutskWeather)renderHomeWeather();
   // The ambient scene consumes the SAME forecast as safety warnings.
   // If the external service fails, the background becomes neutral.
   if(window.RRWeatherBackground){
@@ -116,6 +116,7 @@ function render(){
   }
 }
 async function refreshForecast(){
+  if(window.RRYakutskWeather)return window.RRYakutskWeather.refresh(true);
   if(busy)return;busy=true;render();
   try{
     var url="https://api.open-meteo.com/v1/forecast?latitude="+CITY.lat+"&longitude="+CITY.lon+
@@ -144,7 +145,16 @@ function boot(){
       render();
     });
   });
-  render();refreshForecast();
+  if(window.RRYakutskWeather){
+    window.RRYakutskWeather.subscribe(function(snapshot){
+      latest=snapshot.forecast;
+      lastChecked=snapshot.updatedAt?new Date(snapshot.updatedAt).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Yakutsk"}):null;
+      busy=!!snapshot.loading;
+      render();
+    });
+  }else{
+    render();refreshForecast();
+  }
   var route=get("route");if(route){new MutationObserver(function(){if(route.classList.contains("active"))render();}).observe(route,{attributes:true,attributeFilter:["class"]});}
 }
 window.SmartSafety={getPreferences:function(){return Object.assign({},prefs);},refresh:refreshForecast};
