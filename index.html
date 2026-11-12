@@ -969,13 +969,13 @@ try {
     if(id==='profile' && !isUserSignedIn()){authState.pendingProfileOpen=true;openProfileAuth('login');return}
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
-    rr.activeScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
+    rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
     const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Маршрут рассчитан алгоритмом Дейкстры по пешеходному графу OpenStreetMap.':rr.routeEngine==='valhalla'?'🚶 Резервный расчёт: Valhalla (пешеходный режим). Дейкстра не нашёл подходящий путь либо дорожный граф не загрузился.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
       if(id==='route'){if(yMap)try{yMap.container.fitToViewport()}catch(e){} if(rr.legs.length)showLeg(Math.min(rr.current-1,rr.legs.length-1),false)}
-      if(id==='home'&&yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}
+      if(id==='create'&&$('#createMapDetails')?.open&&yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
@@ -996,9 +996,28 @@ try {
   }
   updateDemoBanner();
   $('#mapFollowBtn').onclick=()=>{const p=rr.livePos||rr.start;if(yMap)yMap.setCenter([p.lat,p.lng],17,{duration:220});};
-  $('#distanceInput').addEventListener('input',()=>{if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance)}});
-  $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}}));
-  $('#partnerToggle').addEventListener('click',()=>setTimeout(()=>{if(window.state){localStorage.setItem('rr_partner',window.state.partner?'1':'0')}},0));
+  function syncRouteChoiceButtons(){
+    const km=Number($('#distanceInput').value),type=$('#typeChoices .choice.active')?.dataset.type;
+    $$('[data-distance-km]').forEach(b=>{
+      const active=Math.abs(Number(b.dataset.distanceKm)-km)<.001;
+      b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+    });
+    $$('#typeChoices .choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.type===type)));
+    const coffee=$('#partnerToggle');if(coffee)coffee.setAttribute('aria-pressed',String(coffee.classList.contains('on')));
+  }
+  $$('[data-distance-km]').forEach(b=>b.addEventListener('click',()=>{
+    $('#distanceInput').value=b.dataset.distanceKm;$('#distanceInput').dispatchEvent(new Event('input',{bubbles:true}));
+    syncRouteChoiceButtons();
+  }));
+  $('#distanceInput').addEventListener('input',()=>{
+    if(window.state){window.state.distance=parseFloat($('#distanceInput').value)||window.state.distance;localStorage.setItem('rr_distance',window.state.distance);}
+    syncRouteChoiceButtons();
+  });
+  $('#createMapDetails').addEventListener('toggle',()=>{
+    if($('#createMapDetails').open&&yHomeMap)setTimeout(()=>{try{yHomeMap.container.fitToViewport()}catch(e){}},100);
+  });
+  $$('#typeChoices .choice').forEach(b=>b.addEventListener('click',()=>{if(window.state){window.state.type=b.dataset.type;localStorage.setItem('rr_type',window.state.type)}syncRouteChoiceButtons();}));
+  $('#partnerToggle').addEventListener('click',()=>setTimeout(()=>{if(window.state){localStorage.setItem('rr_partner',window.state.partner?'1':'0')}syncRouteChoiceButtons()},0));
   $('#avoidAddHomeBtn').onclick=()=>setAvoidPickMode('home');$('#avoidAddRouteBtn').onclick=()=>setAvoidPickMode('route');
   $('#avoidClearHomeBtn').onclick=()=>{rr.noGoZones=[];saveSession();renderNoGoZones();toast('Все запретные зоны удалены')};
   $('#avoidRadiusHome').value=$('#avoidRadiusRoute').value=localStorage.getItem('rr_avoid_radius')||'300';
@@ -1339,7 +1358,7 @@ try {
     $('#distanceInput').value=String(valid.distanceKm);
     return await buildYakutsk({distanceKm:valid.distanceKm,dailyOffer:valid});
   };
-  $('#buildBtn').onclick=buildYakutsk;
+  $('#buildBtn').onclick=()=>buildYakutsk();
 
   // ---------- Бесплатный локальный фотоконтроль ----------
   // Модель MobileNet загружается в браузер только при первой проверке.
@@ -2449,7 +2468,7 @@ try {
   $('#exitRouteConfirm').onclick=()=>{$('#exitRouteModal').classList.remove('show');clearActiveRoute()};
 
   function restoreUI(){
-    if(window.state){$('#distanceInput').value=window.state.distance||6.5;$('#activeDistanceInput').value=window.state.distance||6.5;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner)}
+    if(window.state){$('#distanceInput').value=window.state.distance||6.5;$('#activeDistanceInput').value=window.state.distance||6.5;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x.dataset.type===window.state.type));$('#partnerToggle').classList.toggle('on',!!window.state.partner);syncRouteChoiceButtons()}
     renderNoGoZones();
     if(rr.livePos)updateMarkers(rr.livePos,false);else updateMarkers(rr.start,false);
     if(rr.legs.length){
