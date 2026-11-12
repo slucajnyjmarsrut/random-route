@@ -18,7 +18,7 @@ class FakeNode{
  click(){if(!this.disabled)this.events.click?.();}
 }
 function setup(){
- const nodes=Object.fromEntries(['home','route','quickInfoGrid','srs-route','toast'].map(id=>[id,new FakeNode('div')]));
+ const nodes=Object.fromEntries(['create','rrDailyCreateMount','route','srs-route','toast'].map(id=>[id,new FakeNode('div')]));
  const doc={
   getElementById(id){return nodes[id]||null},
   createElement(tag){return new FakeNode(tag)},
@@ -38,7 +38,7 @@ async function test(){
   let launched=null,count=0;
   window.__buildDailyRoute=async offer=>{launched=offer;count++;return true};
   daily.mount(doc);
-  const panel=nodes.quickInfoGrid.children[0];
+  const panel=nodes.rrDailyCreateMount.children[0];
   assert.equal(panel.tagName,'SECTION');
   const cards=panel.querySelector('[data-daily-options]').children;
   assert.equal(cards.length,3);
