@@ -10,7 +10,7 @@ assert.ok(build&&foot,'route builder should exist');
 assert.match(build,/routeBudgetMs=12000,maxAttempts=4/,'building should have a deadline and attempt limit');
 assert.match(build,/iter<maxAttempts/,'do not loop through 14 server attempts');
 assert.doesNotMatch(build,/iter<14|8500|await touristPool\(\)/,'photo data must not block initial route build');
-assert.match(build,/photoPoolPromise\.catch/,'completed photo catalog may still be used');
+assert.match(build,/touristPoolPromise\.catch/,'completed photo catalog may still be used');
 assert.match(build,/remainingMs=.*routeBudgetMs/,'HTTP timeout must use the remaining time budget');
 assert.match(build,/if\(diff<=tolAccept\)break/,'stop once a route is acceptable');
 assert.match(build,/id="routeBuildStatus"|report\('Строим пешеходный маршрут/,'screen-reader progress must be updated');
