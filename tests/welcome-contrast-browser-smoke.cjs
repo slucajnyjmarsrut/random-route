@@ -49,7 +49,9 @@ function contrast(a,b){
       };
       return {
        title:get('#authTitle'),email:get('#authEmail'),password:get('#authPassword'),
-       form:get('.rr-entry-form-wrap'),head:get('.rr-entry-welcome'),foot:get('#authNote')
+       form:get('.rr-entry-form-wrap'),head:get('.rr-entry-welcome'),foot:get('#authNote'),
+       gradient:getComputedStyle(document.querySelector('.rr-entry-welcome')).backgroundImage,
+       sheet:getComputedStyle(document.querySelector('.rr-entry-sheet')).backgroundColor
       };
     });
     assert.ok(contrast(visual.title.color,visual.form.background)>=7,
@@ -61,6 +63,12 @@ function contrast(a,b){
     assert.ok(channels(visual.email.background).every(c=>c>=235),
       theme+' email field must stay bright/white');
     assert.ok(visual.title.rect.width>100,'welcome heading must be visible');
+    assert.match(visual.gradient,/linear-gradient\(/,'header must blend gradually, not end in a solid stripe');
+    assert.match(visual.gradient,/rgb\(244, 248, 245\) 100%/,'gradient must finish in the exact same color as the form');
+    assert.equal(visual.form.background,'rgb(244, 248, 245)','form surface must be warm pale sage');
+    assert.equal(visual.sheet,'rgb(244, 248, 245)','card and form must share a seamless surface');
+    assert.ok(Math.abs(visual.head.rect.bottom-visual.form.rect.top)<2,'no gap or dark stripe between header and form');
+    assert.ok(visual.head.rect.height>=120,'gradient needs enough vertical room to fade to a soft surface');
     assert.ok(visual.foot.rect.height<46,'small disclaimer must not be a tall box');
     assert.ok(visual.head.rect.width>=340,'welcome banner must use card width');
     console.log('WELCOME_CONTRAST_OK '+device.name+' '+theme+' title '+contrast(visual.title.color,visual.form.background).toFixed(1)+':1');

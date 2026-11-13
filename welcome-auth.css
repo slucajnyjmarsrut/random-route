@@ -15,12 +15,15 @@
  max-height:calc(100dvh - 28px);margin:auto;padding:0!important;
  border:1px solid #c8d7d1;border-radius:25px!important;
  overflow-y:auto;overscroll-behavior:contain;
- background:#fff!important;color:#193d32!important;
+ background:#f4f8f5!important;color:#193d32!important;
  box-shadow:0 24px 75px rgba(0,0,0,.34)!important;
 }
 .rr-entry-welcome{
- display:flex;align-items:center;padding:25px 25px 23px;
- background:linear-gradient(140deg,#0c735c,#114f52 70%,#263c5f);
+ display:flex;align-items:center;padding:25px 25px 58px;
+ /* The last gradient stop exactly matches the form surface. No hard
+    dark-to-white stripe at the junction on phone or desktop. */
+ background:linear-gradient(180deg,
+  #0d6d5c 0%,#12645d 30%,#3b8074 60%,#9dc0b3 82%,#f4f8f5 100%);
  color:#f6fff8;
 }
 .rr-entry-emblem{
@@ -39,7 +42,7 @@
 .rr-entry-welcome-text p{
  margin:0;color:#e0f1ea;font-size:13px;line-height:1.45;
 }
-.rr-entry-form-wrap{padding:21px 25px 24px}
+.rr-entry-form-wrap{padding:13px 25px 24px;background:#f4f8f5!important;color-scheme:light}
 .rr-entry-form-wrap>h2{font-size:21px;color:#183b30;margin:0 0 15px;font-weight:900}
 .rr-entry-tabs{
  display:grid;grid-template-columns:1fr 1fr;gap:6px;
@@ -99,9 +102,9 @@
  .rr-entry-gate{padding:8px 9px}
  .rr-entry-gate .rr-entry-sheet{width:100%!important;border-radius:20px!important;
     max-height:calc(100dvh - 16px)}
- .rr-entry-welcome{padding:18px 17px 16px;gap:11px}
+ .rr-entry-welcome{padding:20px 17px 50px;gap:0}
  .rr-entry-emblem{flex-basis:52px;width:52px;height:52px;font-size:29px;border-radius:16px}
- .rr-entry-form-wrap{padding:15px 17px 19px}
+ .rr-entry-form-wrap{padding:12px 17px 19px}
  .rr-entry-form-wrap>h2{font-size:20px;margin-bottom:11px}
  .rr-entry-welcome-text h1{font-size:24px}
  .rr-entry-welcome-text p{font-size:12px}
@@ -110,7 +113,7 @@
 }
 @media(max-height:680px){
  .rr-entry-gate{align-items:flex-start!important}
- .rr-entry-welcome{padding-top:15px;padding-bottom:14px}
+ .rr-entry-welcome{padding-top:15px;padding-bottom:34px}
  .rr-entry-form-wrap{padding-top:12px;padding-bottom:14px}
  .rr-entry-form-wrap .auth-input{min-height:45px}
  .rr-entry-tabs .auth-tab{min-height:42px}
@@ -122,7 +125,7 @@
    white; without higher specificity this becomes white-on-white. */
 html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap,
 html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap{
-  background:#fff!important;
+  background:#f4f8f5!important;
   color:#183b30!important;
   color-scheme:light!important;
 }
@@ -182,7 +185,7 @@ html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-tabs .auth-tab.acti
   color:#536e61!important;
 }
 @media(max-width:560px){
- .rr-entry-welcome{padding:21px 19px 18px;gap:0}
+ .rr-entry-welcome{padding:21px 19px 53px;gap:0}
  .rr-entry-form-wrap>h2{font-size:21px}
  .rr-entry-footnote{margin-top:10px;font-size:11px}
 }
