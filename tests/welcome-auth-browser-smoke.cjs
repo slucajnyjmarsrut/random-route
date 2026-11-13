@@ -48,6 +48,7 @@ const {chromium}=require('playwright');
   await page.locator('#authEmail').fill('traveller@example.com');
   await page.locator('#authPassword').fill('WrongPassword987');
   await page.locator('#authSubmit').click();
+  await page.waitForFunction(()=>document.querySelector('#authError')?.textContent.includes('Неправильный пароль'),null,{timeout:9000});
   assert.match(await page.locator('#authError').innerText(),/Неправильный пароль/);
   assert.equal(await page.locator('#profileAuthModal.show').count(),1);
   await page.locator('#authPassword').fill('CorrectPassword987');
