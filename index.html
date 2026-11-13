@@ -2996,6 +2996,17 @@ try {
   window.__routeSave=saveSession;
   window.__routeRenderZones=renderNoGoZones;
   renderNoGoZones();
+  // Explicit start choice on a fresh site visit. Browser tests using
+  // ?demo=1 keep the existing preview flow without an account.
+  const entryPreview=new URLSearchParams(location.search).get('demo')==='1';
+  if(entryPreview){
+    guestEntered=true;
+    closeProfileAuth();
+  }else if(isUserSignedIn()){
+    closeProfileAuth();
+  }else{
+    openProfileAuth('login');
+  }
   bootGps();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}if(!demoMode)startWatching()}});
   window.addEventListener('beforeunload',saveSession);
