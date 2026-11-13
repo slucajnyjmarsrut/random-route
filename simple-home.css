@@ -5,6 +5,19 @@
  */
 .app[data-rr-screen="home"] .stats-top,.app[data-rr-screen="create"] .stats-top{display:none}
 .rr-welcome-screen{max-width:710px;margin:0 auto;padding:clamp(5px,2vh,24px) 0 10px}
+/* Home uses the available screen height instead of leaving an unexplained
+ * empty band between the primary action and persistent bottom navigation.
+ * Normal content flow still scrolls on short phones. */
+#home.rr-welcome-screen.active{
+ display:flex;flex-direction:column;
+ min-height:calc(100dvh - 188px);
+}
+#home.rr-welcome-screen .rr-welcome-start{
+ margin-top:auto;
+ margin-bottom:8px;
+ flex-shrink:0;
+}
+
 .rr-home-weather{padding:19px 22px;margin:0 0 18px;border-radius:24px;
  background:linear-gradient(140deg,#283b43,#243a38);color:#f1f7f3;
  border:1px solid #4a625f;box-shadow:0 12px 26px rgba(0,0,0,.14)}
@@ -106,6 +119,8 @@
 }
 @media(max-width:599px){
  .rr-welcome-screen{padding:4px 0 0}
+ #home.rr-welcome-screen.active{min-height:calc(100dvh - 175px)}
+ #home.rr-welcome-screen .rr-welcome-start{margin-bottom:5px}
  .rr-home-weather{padding:16px 17px;margin-bottom:13px;border-radius:20px}
  .rr-home-weather-value{font-size:27px;margin-top:12px}
  .rr-home-weather-header h2{font-size:19px}
