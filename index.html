@@ -580,6 +580,44 @@ try {
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const nativeApkMode=new URLSearchParams(location.search).get('apk')==='1';
+  // Coins and level used to share one localStorage wallet for the guest and
+  // hardcoded tester, which leaked the 250,000 RC development grant to guests.
+  // Keep verified, legitimately earned guest RC, but isolate tester credits.
+  const wallets={
+    normal:{coins:'rr_coins',level:'rr_level'},
+    tester:{coins:'rr_tester_coins_v35',level:'rr_tester_level_v35'}
+  };
+  let walletMode='normal';
+  function safeWalletNumber(value,fallback){
+    if(value===null||value===undefined||value==='')return fallback;
+    const n=Number(value);
+    return Number.isFinite(n)&&n>=0&&n<=100000000?Math.floor(n):fallback;
+  }
+  function repairLegacyTesterWallet(){
+    try{
+      if(localStorage.getItem('rr_tester_wallet_migration_v35')==='1')return;
+      const balance=Number(localStorage.getItem('rr_coins')||0);
+      let events=[];
+      try{events=JSON.parse(localStorage.getItem('rr_verified_events_v1')||'[]')}catch(e){}
+      const hasVerifiedRewards=Array.isArray(events)&&events.some(e=>
+        e&&e.data?.dailyEligible===true&&
+        ['photo_verified','route_completed','quest_correct'].includes(e.type));
+      // The exact tester giveaway (250,000 or higher), with no verified
+      // reward evidence, can be positively identified as leftover test data.
+      // Back it up separately rather than permanently deleting the value.
+      if(balance>=250000&&!hasVerifiedRewards){
+        localStorage.setItem('rr_legacy_tester_coins_backup_v35',String(balance));
+        localStorage.setItem('rr_coins','0');
+        const oldLevel=Number(localStorage.getItem('rr_level')||1);
+        if(oldLevel>=50){
+          localStorage.setItem('rr_legacy_tester_level_backup_v35',String(oldLevel));
+          localStorage.setItem('rr_level','1');
+        }
+      }
+      localStorage.setItem('rr_tester_wallet_migration_v35','1');
+    }catch(e){}
+  }
+  repairLegacyTesterWallet();
   const state = window.state = {distance:+(localStorage.getItem('rr_distance')||3),type:localStorage.getItem('rr_type')||'parks',partner:localStorage.getItem('rr_partner')==='1',points:5,current:1,coins:+(localStorage.getItem('rr_coins')||0),streak:+(localStorage.getItem('rr_streak')||0),coef:1,gps:false,photo:false,verified:false,level:+(localStorage.getItem('rr_level')||1),lastStreakDate:localStorage.getItem('rr_last_streak_date')||'',streakHistory:JSON.parse(localStorage.getItem('rr_streak_history')||'[]'),goldSlots:[false,localStorage.getItem('rr_gold_1')==='1',localStorage.getItem('rr_gold_2')==='1',localStorage.getItem('rr_gold_3')==='1'],equipped:JSON.parse(localStorage.getItem('rr_equipped')||'[null,null,null,null]'),routeplus:localStorage.getItem('rr_routeplus')==='1',themes:localStorage.getItem('rr_themes')==='1',group:localStorage.getItem('rr_group')==='1'};
   const safeJSON=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}};
   state.badgeStats=Object.assign({photoVerified:0,questsCorrect:0,routesCompleted:0},safeJSON('rr_badge_stats',{}));
@@ -666,8 +704,24 @@ try {
     const today=dateKey(new Date()),beforeLast=state.lastStreakDate,before=state.streak;recomputeStreakFromLedger();const changed=beforeLast!==today&&state.lastStreakDate===today;sync();if(!changed)return {changed:false,text:state.lastStreakDate===today?'Страйк за сегодня уже был засчитан.':'Маршрут завершён.'};return {changed:true,text:`Страйк: ${state.streak} дн. · ×${state.coef.toFixed(1)}`};
   }
   window.__completeStreakDay=completeStreakDay;window.__streakCoef=streakCoef;normalizeStreak();
-  function sync(){syncStatsFromLedger();state.coef=streakCoef(state.streak);['#coinsTop','#coinsShop','#coinsProfile'].forEach(s=>{const e=$(s);if(e)e.textContent=state.coins});$('#streakTop').textContent=$('#streakProfile').textContent=state.streak;$('#coefTop').textContent=$('#coefProfile').textContent=$('#sumCoef').textContent=state.coef.toFixed(1);const lvl=$('#levelProfile');if(lvl)lvl.textContent=state.level;localStorage.setItem('rr_coins',state.coins);localStorage.setItem('rr_level',state.level);localStorage.setItem('rr_streak',state.streak);localStorage.setItem('rr_coef',state.coef);localStorage.setItem('rr_last_streak_date',state.lastStreakDate||'');localStorage.setItem('rr_streak_history',JSON.stringify(state.streakHistory||[]));localStorage.setItem('rr_distance',state.distance);localStorage.setItem('rr_type',state.type);localStorage.setItem('rr_partner',state.partner?'1':'0');for(let i=1;i<=3;i++)localStorage.setItem('rr_gold_'+i,state.goldSlots[i]?'1':'0');localStorage.setItem('rr_equipped',JSON.stringify(state.equipped));localStorage.setItem('rr_routeplus',state.routeplus?'1':'0');localStorage.setItem('rr_themes',state.themes?'1':'0');localStorage.setItem('rr_group',state.group?'1':'0');localStorage.setItem('rr_badge_stats',JSON.stringify(state.badgeStats||{}));localStorage.setItem('rr_earned_badges',JSON.stringify([...state.earnedBadges]));localStorage.setItem('rr_profile_pins',JSON.stringify(state.profilePins||[]));renderStreak();renderVerifiedStats();syncStore();syncGoldSlots();renderBadges()}
-  function show(id){$$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));$('.content').scrollTo(0,0)}
+  function sync(){syncStatsFromLedger();state.coef=streakCoef(state.streak);['#coinsTop','#coinsShop','#coinsProfile'].forEach(s=>{const e=$(s);if(e)e.textContent=state.coins});$('#streakTop').textContent=$('#streakProfile').textContent=state.streak;$('#coefTop').textContent=$('#coefProfile').textContent=$('#sumCoef').textContent=state.coef.toFixed(1);const lvl=$('#levelProfile');if(lvl)lvl.textContent=state.level;localStorage.setItem(wallets[walletMode].coins,state.coins);localStorage.setItem(wallets[walletMode].level,state.level);localStorage.setItem('rr_streak',state.streak);localStorage.setItem('rr_coef',state.coef);localStorage.setItem('rr_last_streak_date',state.lastStreakDate||'');localStorage.setItem('rr_streak_history',JSON.stringify(state.streakHistory||[]));localStorage.setItem('rr_distance',state.distance);localStorage.setItem('rr_type',state.type);localStorage.setItem('rr_partner',state.partner?'1':'0');for(let i=1;i<=3;i++)localStorage.setItem('rr_gold_'+i,state.goldSlots[i]?'1':'0');localStorage.setItem('rr_equipped',JSON.stringify(state.equipped));localStorage.setItem('rr_routeplus',state.routeplus?'1':'0');localStorage.setItem('rr_themes',state.themes?'1':'0');localStorage.setItem('rr_group',state.group?'1':'0');localStorage.setItem('rr_badge_stats',JSON.stringify(state.badgeStats||{}));localStorage.setItem('rr_earned_badges',JSON.stringify([...state.earnedBadges]));localStorage.setItem('rr_profile_pins',JSON.stringify(state.profilePins||[]));renderStreak();renderVerifiedStats();syncStore();syncGoldSlots();renderBadges()}
+  function switchWallet(mode){
+    const target=mode==='tester'?'tester':'normal';
+    if(walletMode===target)return;
+    try{
+      localStorage.setItem(wallets[walletMode].coins,String(state.coins));
+      localStorage.setItem(wallets[walletMode].level,String(state.level));
+      walletMode=target;
+      state.coins=safeWalletNumber(localStorage.getItem(wallets[target].coins),0);
+      state.level=safeWalletNumber(localStorage.getItem(wallets[target].level),1);
+    }catch(e){
+      walletMode=target;state.coins=0;state.level=1;
+    }
+    sync();
+  }
+  window.__rrSwitchWallet=switchWallet;
+  window.__rrWalletMode=()=>walletMode;
+  function show(id){$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));$('.content').scrollTo(0,0)}
   $$('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.screen));
   let pendingPurchase=null;
   function syncStore(){
@@ -1097,6 +1151,7 @@ try {
       localStorage.removeItem('rr_user_session_v30');
       localStorage.removeItem('rr_user_session');
     }catch(e){}
+    window.__rrSwitchWallet?.(user.role==='tester'?'tester':'normal');
     renderProfileIdentity();applyDeveloperUi();closeProfileAuth();authState.pendingProfileOpen=false;
     try{showScreen(user.role==='local'?'home':'profile',{restoreScroll:false})}catch(e){}
     bootGps();
@@ -1166,8 +1221,9 @@ try {
       localStorage.removeItem(LOCAL_SESSION_KEY);
       localStorage.removeItem('rr_user_profile');
     }catch(e){}
-    runtimeUserProfile=null;runtimeSignedIn=false;applyDeveloperUi();
-    window.__setDeveloperMode?.(false);
+    runtimeUserProfile=null;runtimeSignedIn=false;
+    window.__rrSwitchWallet?.('normal');
+    applyDeveloperUi();window.__setDeveloperMode?.(false);
     showScreen('home',{restoreScroll:false});
     openProfileAuth('login');
     toast('Вы вышли из профиля');
@@ -1268,6 +1324,7 @@ try {
     // separate from authentication. Local registered credentials remain
     // available so the user can sign in again later.
     runtimeUserProfile=null;runtimeSignedIn=false;guestEntered=true;
+    window.__rrSwitchWallet?.('normal');
     try{
       localStorage.removeItem('rr_user_profile');
       localStorage.removeItem('rr_user_session');
@@ -2813,7 +2870,7 @@ try {
     const legDistanceM=Math.max(0,Number(rr.legs?.[rr.current-1]?.distance||0));
     const eligible=!demoMode&&!isDeveloperMode()&&rr.startMode==='gps';
     const added=eligible&&window.__recordVerifiedEvent?.('photo_verified',eventId,{routeId:rr.routeId,point:rr.current,poiId:(poi.type||'')+':'+(poi.id||''),poiName:poi.tags?.name||'',similarity,legDistanceM,dailyEligible:true})===true;
-    if(added&&window.state){const earned=Math.round(25*window.state.coef);window.state.coins+=earned;localStorage.setItem('rr_coins',window.state.coins);window.__syncApp?.();toast('+'+earned+' RouteCoin')}
+    if(added&&window.state){const earned=Math.round(25*window.state.coef);window.state.coins+=earned;window.__syncApp?.();toast('+'+earned+' RouteCoin')}
     else if(!eligible)toast('Демонстрация: фото подтверждено без начисления RouteCoin');
     else if(!added)toast('Эта точка уже была засчитана');
     await loadHistory();saveSession();
@@ -3004,6 +3061,7 @@ try {
     closeProfileAuth();
     bootGps();
   }else if(isUserSignedIn()){
+    window.__rrSwitchWallet?.(readUserProfile()?.role==='tester'?'tester':'normal');
     closeProfileAuth();
     bootGps();
   }else{
