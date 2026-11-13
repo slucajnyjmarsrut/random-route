@@ -28,6 +28,8 @@ const {chromium}=require('playwright');
    await page.locator('#authGuest').click();
    await page.locator('#profileAuthModal').waitFor({state:'hidden'});
    await page.locator('#home.active').waitFor({state:'visible'});
+   assert.equal(await page.locator('#homeOpenGuestProfileBtn').count(),0,
+     'home must not duplicate login/registration after the welcome screen');
    assert.deepEqual(await page.evaluate(()=>({
      profile:localStorage.getItem('rr_user_profile'),
      session:localStorage.getItem('rr_user_session_v31'),
@@ -58,9 +60,9 @@ const {chromium}=require('playwright');
    await page.locator('#profile.active').waitFor({state:'visible'});
    assert.equal(await page.locator('#profileRoutes').innerText(),'1');
    assert.equal(await page.locator('#profileName').innerText(),'Гость');
-   // The home entry reopens the same login/register/guest gateway.
-   await page.locator('#profileLogout').click();
-   await page.locator('#homeOpenGuestProfileBtn').click();
+   // Guests can still sign in later via Profile, without a second home button.
+   assert.equal(await page.locator('#guestProfileSignIn').isVisible(),true);
+   await page.locator('#guestProfileSignIn').click();
    await page.locator('#profileAuthModal.show').waitFor({state:'visible'});
    await page.locator('#authRegisterTab').click();
    assert.equal(await page.locator('#authNameField').isVisible(),true);
@@ -71,6 +73,7 @@ const {chromium}=require('playwright');
    await page.evaluate(()=>window.__rrOpenScreen('mascots',{restoreScroll:false}));
    await page.locator('.nav [data-screen="profile"]').click();
    await page.locator('#profile.active').waitFor({state:'visible'});
+   assert.equal(await page.locator('#guestProfileSignIn').isVisible(),true);
    assert.equal(await page.locator('#profileName').innerText(),'Гость');
    assert.equal(await page.locator('#profileRoutes').innerText(),'1');
    assert.deepEqual(await page.evaluate(()=>({
