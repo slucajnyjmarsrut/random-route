@@ -18,6 +18,27 @@ const {chromium}=require('playwright');
    await page.goto('http://127.0.0.1:8765/index.html?demo=1',{waitUntil:'domcontentloaded'});
    assert.equal(await page.locator('#profileAuthModal.show').count(),0);
    assert.equal(await page.locator('#homeOpenGuestProfileBtn').isVisible(),true,'entry must be visible on home');
+   // Regression from a user's screenshot: a hardcoded former tester ("Данил")
+   // remained signed in via the old localStorage session flag after a release.
+   await page.evaluate(()=>{
+     localStorage.setItem('rr_user_profile',JSON.stringify({
+       name:'Данил',email:'tester.route@yandex.ru',role:'tester'
+     }));
+     localStorage.setItem('rr_user_session','1');
+   });
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.evaluate(()=>window.__rrOpenScreen('profile',{restoreScroll:false}));
+   assert.equal(await page.locator('#profileName').innerText(),'Гость',
+     'legacy tester session must never auto-enter guest profile');
+   assert.match(await page.locator('#profileHeroTitle').innerText(),/Гостевой профиль/);
+   // Even a newer explicit test session must be left behind when the user
+   // selects guest mode. It must not erase local routes, coins or mascots.
+   await page.evaluate(()=>{
+     localStorage.setItem('rr_user_session_v30','1');
+     window.__rrOpenScreen('profile',{restoreScroll:false});
+   });
+   assert.equal(await page.locator('#profileName').innerText(),'Данил');
+   await page.evaluate(()=>window.__rrOpenScreen('home',{restoreScroll:false}));
    await page.locator('#homeOpenGuestProfileBtn').click();
    await page.locator('#profile.active').waitFor({state:'visible'});
    assert.equal(await page.locator('#profileName').innerText(),'Гость');
@@ -27,9 +48,10 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#profileAuthModal.show').count(),0);
    const empty=await page.evaluate(()=>({
      account:localStorage.getItem('rr_user_profile'),
-     session:localStorage.getItem('rr_user_session')
+     session:localStorage.getItem('rr_user_session'),
+     newSession:localStorage.getItem('rr_user_session_v30')
    }));
-   assert.deepEqual(empty,{account:null,session:null},'guest browsing must not save auth');
+   assert.deepEqual(empty,{account:null,session:null,newSession:null},'guest browsing must not save auth');
    // Show existing walking history without an account. It is still stored
    // locally by the original app and this guest-entry change must not delete it.
    await page.evaluate(()=>{
@@ -53,9 +75,10 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#profileRoutes').innerText(),'1');
    const noAccount=await page.evaluate(()=>({
      account:localStorage.getItem('rr_user_profile'),
-     session:localStorage.getItem('rr_user_session')
+     session:localStorage.getItem('rr_user_session'),
+     newSession:localStorage.getItem('rr_user_session_v30')
    }));
-   assert.deepEqual(noAccount,{account:null,session:null});
+   assert.deepEqual(noAccount,{account:null,session:null,newSession:null});
    await page.reload({waitUntil:'domcontentloaded'});
    await page.evaluate(()=>window.__rrOpenScreen('profile',{restoreScroll:false}));
    await page.locator('#profile.active').waitFor({state:'visible'});

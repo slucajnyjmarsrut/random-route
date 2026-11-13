@@ -57,12 +57,14 @@ function parseMetNorway(json){
  const wind=numberOrNull(d.wind_speed),gust=numberOrNull(d.wind_speed_of_gust);
  const summary=first?.data?.next_1_hours?.summary||first?.data?.next_6_hours?.summary||{};
  const symbol=String(summary.symbol_code||"");
- // A full-day is_day field is unavailable from MET; leave it unknown rather than guessing.
+ // MET symbol suffixes explicitly indicate day/night; never infer time
+ // from the viewer's timezone or guess it when the suffix is missing.
+ const isDay=/_night$/.test(symbol)?0:/_day$/.test(symbol)?1:null;
  return normalizedForecast({
   temperature_2m:temperature,apparent_temperature:null,
   wind_speed_10m:wind!==null?Math.round(wind*3.6*10)/10:null,
   wind_gusts_10m:gust!==null?Math.round(gust*3.6*10)/10:null,
-  snowfall:null,precipitation:null,weather_code:metCode(symbol),is_day:null
+  snowfall:null,precipitation:null,weather_code:metCode(symbol),is_day:isDay
  });
 }
 function snapshot(){return {...current};}
@@ -91,12 +93,12 @@ function cityTime(dateMillis){
  catch(e){return "";}
 }
 function tempLabel(t){const n=numberOrNull(t);return n===null?"—":(Math.round(n)>0?"+":"")+Math.round(n)+"°C";}
-function condition(code,t){
+function condition(code,t,isDay){
  if([71,73,75,77,85,86].includes(code))return "🌨️ Снег";
  if([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code))return "🌧️ Дождь или осадки";
  if([45,48].includes(code))return "🌫️ Туман";
  if([2,3].includes(code))return "☁️ Облачно";
- if([0,1].includes(code))return "☀️ Ясно";
+ if([0,1].includes(code))return isDay===0?"🌙 Ясно":isDay===1?"☀️ Ясно":"Ясно";
  return t!==null&&t<=0?"❄️ Морозная погода":"Погода в Якутске";
 }
 function adviceFor(c){
@@ -123,7 +125,7 @@ function render(doc,state=current){
    return;
  }
  const c=state.forecast.current,info=adviceFor(c),checked=cityTime(state.updatedAt);
- value.textContent=tempLabel(c.temperature_2m)+" · "+condition(c.weather_code,c.temperature_2m);
+ value.textContent=tempLabel(c.temperature_2m)+" · "+condition(c.weather_code,c.temperature_2m,c.is_day);
  detail.textContent=(c.apparent_temperature===null?"":"Ощущается "+tempLabel(c.apparent_temperature)+" · ")+
   "ветер "+(c.wind_speed_10m===null?"—":Math.round(c.wind_speed_10m)+" км/ч")+
   (checked?" · "+checked:"")+" · "+(state.source||"Прогноз");
