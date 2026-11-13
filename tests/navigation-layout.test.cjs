@@ -23,8 +23,8 @@ assert.ok(!html.includes('id="smartRouteChat"')&&!html.includes('smart-route-cha
 for(const k of ['weather','darkness','animatedBackground'])assert.ok(settings.includes('data-srs-pref="'+k+'"'),'missing setting '+k);
 assert.ok(help.includes('id="quickInfoGrid"')&&help.includes('marshik-strip'));
 assert.ok(html.includes('window.__rrOpenScreen=showScreen')&&html.includes('data-open-screen="settings"'));
-assert.ok(html.includes("$('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen"),'bottom navigation must route profile to guest and still use querySelectorAll');
-assert.ok(html.includes("$$('[data-open-screen]').forEach(b=>b.addEventListener"),'top screen buttons should use querySelectorAll');
+assert.ok(html.includes("document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen"),'bottom navigation must bind every button and route profile to guest');
+assert.ok(html.includes("document.querySelectorAll('[data-open-screen]').forEach(b=>b.addEventListener"),'screen links must bind every button using querySelectorAll');
 assert.ok(!html.includes("  $('.nav button').forEach(b=>b.onclick=()=>showScreen"),'broken single-element nav iteration');
 assert.ok(!html.includes("  $('[data-open-screen]').forEach(b=>b.addEventListener"),'broken single-element screen links');
 assert.ok(html.includes('id="laboratory"')&&html.includes('id="labGraph"')&&html.includes('id="labStart"'));
