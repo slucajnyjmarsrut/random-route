@@ -22,9 +22,6 @@
     -webkit-overflow-scrolling:touch;
     scroll-padding-bottom:105px;
   }
-  .app[data-rr-screen="home"] .content,.app[data-rr-screen="create"] .content{
-    padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
-  }
   .app .content :is(button,a,summary,label[for],select){touch-action:manipulation}
   .app .content :is(button,.rr-settings-trigger,summary){-webkit-tap-highlight-color:transparent}
   .app .content :is(input:not([type="checkbox"]),select,textarea){

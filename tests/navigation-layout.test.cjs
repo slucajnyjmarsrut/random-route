@@ -40,7 +40,12 @@ assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]"
 assert.ok(css.includes('.rr-settings-trigger')&&css.includes('@media (max-width:599px)'));
 const simpleCss=fs.readFileSync('simple-home.css','utf8');
 assert.ok(simpleCss.includes('.rr-welcome-start')&&simpleCss.includes('.rr-distance-options')&&simpleCss.includes('.rr-wish-buttons'));
-assert.ok(simpleCss.includes('.app[data-rr-screen="home"] .nav')&&simpleCss.includes('@media(max-width:599px)'));
+assert.ok(simpleCss.includes('@media(max-width:599px)'),'responsive home remains enabled');
+assert.ok(!simpleCss.includes('.app[data-rr-screen="home"] .nav')&&!simpleCss.includes('.app[data-rr-screen="create"] .nav'),
+  'bottom menu must no longer be hidden on home or route setup');
+const mobileCss=fs.readFileSync('mobile-ux.css','utf8');
+assert.ok(!mobileCss.includes(' .app[data-rr-screen="home"] .content,'),
+  'home and route setup must retain bottom padding so menu cannot cover buttons');
 assert.equal((html.match(/data-screen="/g)||[]).length,5,'keep bottom navigation usable on narrow phones');
 assert.ok(html.includes('walking-dijkstra.js?v=2.1')&&html.includes('route-ai.js?v=1.0'),'Dijkstra and local learning module must load');
 assert.ok(html.includes('id="routeEngineStatus"'),'algorithm attribution missing');
