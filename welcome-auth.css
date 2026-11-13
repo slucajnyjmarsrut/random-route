@@ -1,0 +1,117 @@
+/* Entry screen: explicit login, local-only registration or account-free guest.
+   This is a landing screen, not an account-provider dialog. */
+.rr-entry-gate{
+ position:fixed!important;inset:0!important;z-index:3100!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ overflow-y:auto!important;overscroll-behavior:contain;
+ padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
+ background:radial-gradient(circle at 78% 14%,rgba(36,163,132,.22),transparent 28%),
+   radial-gradient(circle at 12% 83%,rgba(118,125,220,.18),transparent 32%),
+   linear-gradient(135deg,#0e242c,#1a313b 58%,#101e2b)!important;
+}
+.rr-entry-gate:not(.show){display:none!important}
+.rr-entry-gate .rr-entry-sheet{
+ flex:none;width:min(470px,100%)!important;max-width:470px!important;
+ max-height:calc(100dvh - 28px);margin:auto;padding:0!important;
+ border:1px solid #c8d7d1;border-radius:25px!important;
+ overflow-y:auto;overscroll-behavior:contain;
+ background:#fff!important;color:#193d32!important;
+ box-shadow:0 24px 75px rgba(0,0,0,.34)!important;
+}
+.rr-entry-welcome{
+ display:flex;align-items:center;gap:15px;padding:24px 24px 21px;
+ background:linear-gradient(140deg,#0c735c,#114f52 70%,#263c5f);
+ color:#f6fff8;
+}
+.rr-entry-emblem{
+ flex:0 0 63px;width:63px;height:63px;display:grid;place-items:center;
+ border:1px solid #a0d6bc66;border-radius:21px;background:#ffffff26;
+ font-size:35px;box-shadow:inset 0 0 24px #e3fff51c;
+}
+.rr-entry-welcome-text{min-width:0}
+.rr-entry-welcome-text small{
+ font-size:10px;font-weight:900;letter-spacing:.095em;color:#d1eadf;
+}
+.rr-entry-welcome-text h1{
+ font-size:clamp(24px,4.8vw,31px);line-height:1.09;
+ margin:6px 0 6px;color:#fff;letter-spacing:-.5px;
+}
+.rr-entry-welcome-text p{
+ margin:0;color:#e0f1ea;font-size:13px;line-height:1.45;
+}
+.rr-entry-form-wrap{padding:21px 25px 24px}
+.rr-entry-form-wrap>h2{font-size:21px;color:#183b30;margin:0 0 15px;font-weight:900}
+.rr-entry-tabs{
+ display:grid;grid-template-columns:1fr 1fr;gap:6px;
+ padding:5px;background:#eff5f1;border-radius:14px;margin-bottom:12px;
+}
+.rr-entry-tabs .auth-tab{
+ display:block;min-height:48px;color:#4b685a;cursor:pointer;
+ border:1px solid transparent;font-size:15px;font-weight:850;
+}
+.rr-entry-tabs .auth-tab.active{color:#106448;border-color:#afd5c4;background:#fff}
+.rr-entry-tabs .auth-tab:focus-visible{outline:3px solid #258763;outline-offset:2px}
+.rr-entry-description{
+ font-size:12px;line-height:1.5;color:#5a7166;margin:0 0 13px;
+}
+.rr-entry-form-wrap .auth-field{margin-bottom:11px}
+.rr-entry-form-wrap .auth-field label{
+ display:block;font-size:12px;font-weight:850;color:#284c3d;
+ margin:0 0 6px 2px;letter-spacing:0;
+}
+.rr-entry-form-wrap .auth-input{
+ display:block;width:100%;min-height:51px;background:#fff;
+ font-size:16px;color:#1b3830;border:1px solid #a7bab0;border-radius:12px;
+ padding:12px 13px;font-weight:600;
+}
+.rr-entry-form-wrap .auth-input::placeholder{color:#8b9e92}
+.rr-entry-form-wrap .auth-input:focus{outline:2px solid #5dbb90;border-color:#299873}
+.rr-entry-form-wrap .auth-error.show{
+ display:block;padding:11px 12px;font-size:12px;line-height:1.45;margin:5px 0 10px;
+ color:#943d38;background:#fff1ee;border:1px solid #eebcb2;border-radius:11px;
+}
+.rr-entry-submit{
+ width:100%;min-height:53px;border-radius:13px;
+ background:linear-gradient(135deg,#16916c,#0e6951);
+ font-size:16px;letter-spacing:.01em;cursor:pointer;margin-top:6px;
+}
+.rr-entry-submit:disabled{opacity:.65;cursor:wait}
+.rr-entry-submit:focus-visible,.rr-entry-guest:focus-visible{outline:3px solid #b4db90;outline-offset:3px}
+.rr-entry-separator{
+ display:flex;align-items:center;gap:12px;margin:18px 0 15px;
+ font-size:12px;color:#798a80;text-align:center;
+}
+.rr-entry-separator:before,.rr-entry-separator:after{
+ content:"";height:1px;background:#d9e4de;flex:1;
+}
+.rr-entry-guest{
+ width:100%;min-height:52px;border:2px solid #27886c;border-radius:13px;
+ padding:12px 13px;background:#f1faf5;color:#12634b;
+ font-size:15px;font-weight:900;cursor:pointer;
+}
+.rr-entry-guest:hover{background:#e3f5eb}
+.rr-entry-note{
+ font-size:11px;color:#657c71;line-height:1.55;
+ background:#f4f8f5;border:1px solid #e3ede7;border-radius:11px;
+ padding:11px 12px;margin:17px 0 0;
+}
+@media(max-width:560px){
+ .rr-entry-gate{padding:8px 9px}
+ .rr-entry-gate .rr-entry-sheet{width:100%!important;border-radius:20px!important;
+    max-height:calc(100dvh - 16px)}
+ .rr-entry-welcome{padding:18px 17px 16px;gap:11px}
+ .rr-entry-emblem{flex-basis:52px;width:52px;height:52px;font-size:29px;border-radius:16px}
+ .rr-entry-form-wrap{padding:15px 17px 19px}
+ .rr-entry-form-wrap>h2{font-size:20px;margin-bottom:11px}
+ .rr-entry-welcome-text h1{font-size:24px}
+ .rr-entry-welcome-text p{font-size:12px}
+ .rr-entry-separator{margin:13px 0 12px}
+ .rr-entry-note{font-size:10px;padding:9px 10px;margin-top:13px}
+}
+@media(max-height:680px){
+ .rr-entry-gate{align-items:flex-start!important}
+ .rr-entry-welcome{padding-top:15px;padding-bottom:14px}
+ .rr-entry-form-wrap{padding-top:12px;padding-bottom:14px}
+ .rr-entry-form-wrap .auth-input{min-height:45px}
+ .rr-entry-tabs .auth-tab{min-height:42px}
+}
