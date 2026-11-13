@@ -157,6 +157,7 @@ try {
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
+<link rel="stylesheet" href="mascot-collection.css?v=1.0"/>
 </head>
 <body>
 <div class="app" data-rr-screen="home">
@@ -181,6 +182,11 @@ try {
  <img src="icons/mascot-marshik.svg" width="110" height="120" alt="Маршик — дружелюбный путешественник с картой" loading="eager"/>
  <div><strong>Привет! Я Маршик.</strong><span>Помогу выбрать прогулку. Всё просто: несколько кнопок — и можно гулять!</span></div>
 </aside>
+<div class="mascot-home-current" aria-label="Выбранный спутник прогулок">
+ <span id="mascotHomeAvatar" aria-hidden="true">🐶</span>
+ <div><strong id="mascotHomeTitle">Щенок-путник · ур. 1</strong><small id="mascotHomeSubtitle">Ваш спутник. Открывайте новых за прогулки и задания!</small></div>
+ <button type="button" data-open-screen="mascots">Спутники</button>
+</div>
 <button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
 </section>
 <section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
@@ -256,6 +262,9 @@ try {
 </div>
 <div class="map-credit" id="routeMapCredit">Карта загружается…</div>
 </div>
+<aside class="mascot-route-buddy" id="mascotRouteBuddy" aria-label="Ваш выбранный спутник">
+ <span aria-hidden="true">🐶</span><div><b>Щенок-путник</b><small>Ваш спутник · уровень 1</small></div>
+</aside>
 <div class="hint" id="routeEngineStatus" aria-live="polite" style="margin:5px 0 10px;padding:9px 12px;border:1px solid #cfe4d5;border-radius:12px;background:#f1f9f3;color:#1d5c42;font-size:12px;font-weight:800"></div>
 <div class="rr-osm-credit"><span id="rrBuildVersion">Фотоконтроль v25 · </span>Дорожные данные: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© участники OpenStreetMap</a> (ODbL)</div>
 <div class="hint" style="padding:8px 12px;color:#35614d;font-weight:800;background:#e7f2ed">🚶 Пешеходный путь: тротуары и дорожки в приоритете. Проверяйте реальные условия на месте.</div>
@@ -368,7 +377,33 @@ try {
 <div class="rank-row"><div class="rank-place">?</div><div class="rank-main"><b>Правильные квесты</b><span>Засчитанные ответы после точки</span></div><div class="price" id="ratingQuests">0</div></div>
 <div class="store-note">Глобальный рейтинг других пользователей без сервера честно посчитать нельзя, поэтому приложение его не подделывает.</div>
 </section>
+<section class="screen mascots-screen" id="mascots" aria-label="Коллекция спутников">
+ <div class="mascot-hero">
+  <small>🌟 СПУТНИКИ ВАШИХ ПРОГУЛОК</small>
+  <h1>Коллекция маскотов</h1>
+  <p>Гуляйте, выполняйте фотозадания и квесты — открывайте персонажей и прокачивайте выбранного спутника. Чем больше подтверждённых приключений, тем больше ваша коллекция.</p>
+  <div class="mascot-hero-actions"><span class="mascot-owned">Открыто <b id="mascotOwnedCount">1/20</b></span>
+   <button type="button" data-open-screen="badges">Мои значки и достижения</button>
+  </div>
+ </div>
+ <section class="mascot-equipped" id="mascotEquipped" aria-label="Ваш действующий спутник"></section>
+ <div class="mascot-help"><strong>⭐ Как начисляется опыт?</strong>
+  <p>Подтверждённая GPS-прогулка +100 XP · Успешное фотозадание +50 XP · Правильный мини-квест +50 XP. Каждые 7 дней подтверждённых прогулок подряд — дополнительный бонус +200 XP, каждые 25 прогулок — +300 XP. Опыт получает выбранный в момент выполнения спутник. Пробный режим не засчитывается.</p>
+  <p id="mascotXPStatus">Проверяем достижения…</p>
+ </div>
+ <div class="mascot-filters" role="group" aria-label="Фильтр редкости маскотов">
+  <button type="button" class="active" data-mascot-filter="all" aria-pressed="true">Все</button>
+  <button type="button" data-mascot-filter="common" aria-pressed="false">★ Обычные</button>
+  <button type="button" data-mascot-filter="uncommon" aria-pressed="false">🍃 Необычные</button>
+  <button type="button" data-mascot-filter="rare" aria-pressed="false">💎 Редкие</button>
+  <button type="button" data-mascot-filter="epic" aria-pressed="false">♛ Эпические</button>
+  <button type="button" data-mascot-filter="legendary" aria-pressed="false">👑 Легендарные</button>
+ </div>
+ <div class="mascot-grid" id="mascotCollectionGrid" aria-label="Открытые и закрытые спутники"></div>
+ <p class="hint" style="margin:14px 0 28px">Прогресс сохраняется на этом устройстве. Редкость обозначает сложность получения; покупок и случайных сундуков нет.</p>
+</section>
 <section class="screen" id="badges"><div class="hero"><small>Коллекция достижений</small><h1>Значки</h1><p>Значки зарабатываются прохождением маршрутов, фотоконтролем и квестами. Всё хранится на этом устройстве.</p></div><div class="badge-showcase">
+<button type="button" class="secondary" data-open-screen="mascots" style="margin-bottom:14px">🐾 Открыть коллекцию спутников</button>
 <h3>Значки профиля</h3>
 <p>Можно закрепить до трёх заработанных значков в профиле. Золотые слоты отдельно активируют способности специальных значков.</p>
 <div class="level-chip">Уровень <span id="levelProfile">1</span></div>
@@ -397,6 +432,7 @@ try {
   <p class="devdiag-note">GPS, фото и начисления требуют реальных испытаний на телефоне. Жёлтый статус «Не проверено» не означает неисправность.</p>
 </section>
 <div class="profile-identity" id="profileIdentity"><div class="profile-avatar" id="profileAvatar">Я</div><div class="profile-person"><b id="profileName">Пользователь</b><span id="profileEmail">—</span><div class="tester-badge hidden" id="profileRoleBadge">★ Тестировщик</div></div><button class="profile-logout" id="profileLogout" type="button">Выйти</button></div><div class="profile-badges-mini" id="profileBadgesMini"></div>
+<div class="mascot-profile-current"><span id="mascotProfileCurrent">🐶 Щенок-путник · уровень 1</span><button type="button" data-open-screen="mascots">Выбрать спутника</button></div>
 <div class="streak-card">
 <div class="streak-head">
 <div><div class="streak-kicker">СЕРИЯ ПРОГУЛОК</div><div class="streak-main">🔥 <span id="streakProfile">0</span> <small>дней подряд</small></div></div>
@@ -486,7 +522,7 @@ try {
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
 </main>
-<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="badges"><i>🏅</i>Значки</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
+<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="mascots"><i>🐾</i>Спутники</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
 <div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
 <div class="modal-backdrop" id="exitRouteModal"><div class="purchase-modal exit-route-sheet"><div class="grab"></div><div class="exit-icon">↩️</div><h2>Выйти из маршрута?</h2><p>Если выйти сейчас, текущий маршрут будет закрыт.</p><div class="exit-warning"><b>Маршрут не сохраняется.</b><br>Открытые участки, текущая контрольная точка и прогресс незавершённого маршрута будут удалены.</div><div class="purchase-actions"><button class="purchase-cancel" id="exitRouteCancel" type="button">Остаться</button><button class="purchase-confirm exit-confirm" id="exitRouteConfirm" type="button">Выйти</button></div></div></div>
 
@@ -2782,5 +2818,6 @@ try {
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
+<script src="mascot-collection.js?v=1.0"></script>
 </body>
 </html>
