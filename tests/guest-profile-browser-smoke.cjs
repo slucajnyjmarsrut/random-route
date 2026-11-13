@@ -37,8 +37,11 @@ const {chromium}=require('playwright');
        type:'route_completed',key:'route_completed:sample',at:Date.now(),
        data:{routeDistanceM:3000,dailyEligible:true}
      }]));
-     window.__renderVerifiedStats?.();
    });
+   // The verified-event ledger is read when the app starts.
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.evaluate(()=>window.__rrOpenScreen('profile',{restoreScroll:false}));
+   await page.locator('#profile.active').waitFor({state:'visible'});
    assert.equal(await page.locator('#profileRoutes').innerText(),'1');
    await page.locator('#profileLogout').click();
    await page.locator('#home.active').waitFor({state:'visible'});
