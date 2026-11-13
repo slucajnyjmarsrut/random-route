@@ -37,6 +37,10 @@ assert.equal(met('clearsky').current.is_day,null);
    await page.waitForFunction(()=>
      document.querySelector('#rrHomeWeatherValue')?.textContent.includes('🌙 Ясно')
      &&document.querySelector('.app')?.getAttribute('data-weather-night')==='true',{timeout:12000});
+   await page.waitForFunction(()=>{
+     const moon=document.querySelector('.rr-wb-moon'),sun=document.querySelector('.rr-wb-sun');
+     return moon&&sun&&getComputedStyle(moon).opacity==='1'&&getComputedStyle(sun).opacity==='0';
+   },null,{timeout:5000});
    const nighttime=await page.evaluate(()=>({
      weather:document.querySelector('#rrHomeWeatherValue').textContent,
      night:document.querySelector('.app').dataset.weatherNight,
@@ -52,6 +56,10 @@ assert.equal(met('clearsky').current.is_day,null);
    await page.waitForFunction(()=>
      document.querySelector('#rrHomeWeatherValue')?.textContent.includes('☀️ Ясно')
      &&document.querySelector('.app')?.getAttribute('data-weather-night')==='false',{timeout:12000});
+   await page.waitForFunction(()=>{
+     const moon=document.querySelector('.rr-wb-moon'),sun=document.querySelector('.rr-wb-sun');
+     return moon&&sun&&getComputedStyle(moon).opacity==='0';
+   },null,{timeout:5000});
    const daytime=await page.evaluate(()=>({
      weather:document.querySelector('#rrHomeWeatherValue').textContent,
      night:document.querySelector('.app').dataset.weatherNight,
