@@ -46,6 +46,9 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#profileAuthModal.show').count(),0,'local session persists after reload');
   await page.evaluate(()=>window.__rrOpenScreen('profile',{restoreScroll:false}));
   assert.equal(await page.locator('#profileName').innerText(),'Путешественник');
+  assert.equal(await page.locator('#guestProfileSignIn').isVisible(),false,
+    'a signed-in local account must not show guest sign-in');
+  assert.equal(await page.locator('#homeOpenGuestProfileBtn').count(),0);
   await page.locator('#profileLogout').click();
   await page.locator('#profileAuthModal.show').waitFor({state:'visible'});
   assert.equal(await page.locator('#authLoginTab').getAttribute('aria-selected'),'true');
