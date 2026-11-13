@@ -23,7 +23,7 @@ assert.ok(!html.includes('id="smartRouteChat"')&&!html.includes('smart-route-cha
 for(const k of ['weather','darkness','animatedBackground'])assert.ok(settings.includes('data-srs-pref="'+k+'"'),'missing setting '+k);
 assert.ok(help.includes('id="quickInfoGrid"')&&help.includes('marshik-strip'));
 assert.ok(html.includes('window.__rrOpenScreen=showScreen')&&html.includes('data-open-screen="settings"'));
-assert.ok(html.includes("$$('.nav button').forEach(b=>b.onclick=()=>showScreen"),'bottom navigation should use querySelectorAll');
+assert.ok(html.includes("$('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen"),'bottom navigation must route profile to guest and still use querySelectorAll');
 assert.ok(html.includes("$$('[data-open-screen]').forEach(b=>b.addEventListener"),'top screen buttons should use querySelectorAll');
 assert.ok(!html.includes("  $('.nav button').forEach(b=>b.onclick=()=>showScreen"),'broken single-element nav iteration');
 assert.ok(!html.includes("  $('[data-open-screen]').forEach(b=>b.addEventListener"),'broken single-element screen links');
@@ -34,7 +34,7 @@ assert.ok(motion.includes('.app button:not(:disabled):active')&&motion.includes(
 assert.ok(daily.includes('getElementById("rrDailyCreateMount")'),'daily routes belong in the creation screen');
 assert.ok(html.includes('data-rr-screen="home"')&&html.includes('dataset.rrScreen=id'),'screen-specific simple layout stays synchronized');
 assert.ok(html.includes("$$('[data-distance-km]').forEach")&&html.includes('syncRouteChoiceButtons'),'distance presets remain interactive');
-assert.ok(html.includes('yakutsk-weather.js?v=1.0')&&html.includes('smart-safety.js?v=1.2')&&safety.includes('RRYakutskWeather.subscribe'),'home auto-weather should be independent and synchronized with safety');
+assert.ok(html.includes('yakutsk-weather.js?v=1.1')&&html.includes('smart-safety.js?v=1.2')&&safety.includes('RRYakutskWeather.subscribe'),'home auto-weather should be independent and synchronized with safety');
 assert.ok(safety.includes('safetyScreen.appendChild(makeCard("home"))'),'safety panel belongs to its screen');
 assert.ok(safety.includes('document.querySelectorAll("#settings [data-srs-pref]")'),'settings synchronized with safety');
 assert.ok(css.includes('.rr-settings-trigger')&&css.includes('@media (max-width:599px)'));
