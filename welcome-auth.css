@@ -1,191 +1,251 @@
-/* Entry screen: explicit login, local-only registration or account-free guest.
-   This is a landing screen, not an account-provider dialog. */
+/* Login / local registration / guest entry.
+ * One subdued DARK palette regardless of the user's site theme, so opening
+ * the welcome screen at night never flashes a bright white rectangle.
+ * Keep header and body joined by a gradient ending in the exact body color.
+ */
 .rr-entry-gate{
- position:fixed!important;inset:0!important;z-index:3100!important;
- display:flex!important;align-items:center!important;justify-content:center!important;
- overflow-y:auto!important;overscroll-behavior:contain;
- padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
- background:radial-gradient(circle at 78% 14%,rgba(36,163,132,.22),transparent 28%),
-   radial-gradient(circle at 12% 83%,rgba(118,125,220,.18),transparent 32%),
-   linear-gradient(135deg,#0e242c,#1a313b 58%,#101e2b)!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:3100!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 80% 13%,rgba(33,125,108,.17),transparent 34%),
+    radial-gradient(circle at 8% 85%,rgba(60,86,117,.13),transparent 35%),
+    linear-gradient(145deg,#101f28,#142a31 58%,#101e28)!important;
 }
 .rr-entry-gate:not(.show){display:none!important}
 .rr-entry-gate .rr-entry-sheet{
- flex:none;width:min(470px,100%)!important;max-width:470px!important;
- max-height:calc(100dvh - 28px);margin:auto;padding:0!important;
- border:1px solid #c8d7d1;border-radius:25px!important;
- overflow-y:auto;overscroll-behavior:contain;
- background:#f4f8f5!important;color:#193d32!important;
- box-shadow:0 24px 75px rgba(0,0,0,.34)!important;
+  flex:none;
+  width:min(470px,100%)!important;
+  max-width:470px!important;
+  max-height:calc(100dvh - 28px);
+  margin:auto;
+  padding:0!important;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid #4e6b66!important;
+  border-radius:25px!important;
+  background:#21343a!important;
+  color:#ebf8f0!important;
+  color-scheme:dark;
+  box-shadow:0 18px 50px rgba(0,0,0,.30)!important;
 }
 .rr-entry-welcome{
- display:flex;align-items:center;padding:25px 25px 58px;
- /* The last gradient stop exactly matches the form surface. No hard
-    dark-to-white stripe at the junction on phone or desktop. */
- background:linear-gradient(180deg,
-  #0d6d5c 0%,#12645d 30%,#3b8074 60%,#9dc0b3 82%,#f4f8f5 100%);
- color:#f6fff8;
-}
-.rr-entry-emblem{
- flex:0 0 63px;width:63px;height:63px;display:grid;place-items:center;
- border:1px solid #a0d6bc66;border-radius:21px;background:#ffffff26;
- font-size:35px;box-shadow:inset 0 0 24px #e3fff51c;
+  display:flex;
+  align-items:center;
+  padding:25px 25px 38px;
+  background:linear-gradient(180deg,
+    #155d51 0%,#1c554e 32%,#214346 66%,#21343a 100%);
+  color:#f4fff7;
 }
 .rr-entry-welcome-text{min-width:0;width:100%}
-.rr-entry-welcome-text small{
- font-size:10px;font-weight:900;letter-spacing:.095em;color:#d1eadf;
-}
 .rr-entry-welcome-text h1{
- font-size:clamp(24px,4.8vw,31px);line-height:1.09;
- margin:6px 0 6px;color:#fff;letter-spacing:-.5px;
+  font-size:clamp(24px,4.8vw,31px);
+  line-height:1.13;
+  letter-spacing:-.4px;
+  margin:5px 0 6px;
+  color:#f5fff8!important;
 }
 .rr-entry-welcome-text p{
- margin:0;color:#e0f1ea;font-size:13px;line-height:1.45;
+  margin:0;
+  font-size:13px;
+  line-height:1.48;
+  color:#d7eee2!important;
 }
-.rr-entry-form-wrap{padding:13px 25px 24px;background:#f4f8f5!important;color-scheme:light}
-.rr-entry-form-wrap>h2{font-size:21px;color:#183b30;margin:0 0 15px;font-weight:900}
-.rr-entry-tabs{
- display:grid;grid-template-columns:1fr 1fr;gap:6px;
- padding:5px;background:#eff5f1;border-radius:14px;margin-bottom:12px;
+.rr-entry-form-wrap{
+  padding:12px 25px 24px;
+  background:#21343a!important;
+  color:#ebf8f0!important;
+  color-scheme:dark!important;
 }
-.rr-entry-tabs .auth-tab{
- display:block;min-height:48px;color:#4b685a;cursor:pointer;
- border:1px solid transparent;font-size:15px;font-weight:850;
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap{
+  background:#21343a!important;
+  color:#ebf8f0!important;
+  color-scheme:dark!important;
 }
-.rr-entry-tabs .auth-tab.active{color:#106448;border-color:#afd5c4;background:#fff}
-.rr-entry-tabs .auth-tab:focus-visible{outline:3px solid #258763;outline-offset:2px}
-.rr-entry-description{
- font-size:12px;line-height:1.5;color:#5a7166;margin:0 0 13px;
-}
-.rr-entry-form-wrap .auth-field{margin-bottom:11px}
-.rr-entry-form-wrap .auth-field label{
- display:block;font-size:12px;font-weight:850;color:#284c3d;
- margin:0 0 6px 2px;letter-spacing:0;
-}
-.rr-entry-form-wrap .auth-input{
- display:block;width:100%;min-height:51px;background:#fff;
- font-size:16px;color:#1b3830;border:1px solid #a7bab0;border-radius:12px;
- padding:12px 13px;font-weight:600;
-}
-.rr-entry-form-wrap .auth-input::placeholder{color:#8b9e92}
-.rr-entry-form-wrap .auth-input:focus{outline:2px solid #5dbb90;border-color:#299873}
-.rr-entry-form-wrap .auth-error.show{
- display:block;padding:11px 12px;font-size:12px;line-height:1.45;margin:5px 0 10px;
- color:#943d38;background:#fff1ee;border:1px solid #eebcb2;border-radius:11px;
-}
-.rr-entry-submit{
- width:100%;min-height:53px;border-radius:13px;
- background:linear-gradient(135deg,#16916c,#0e6951);
- font-size:16px;letter-spacing:.01em;cursor:pointer;margin-top:6px;
-}
-.rr-entry-submit:disabled{opacity:.65;cursor:wait}
-.rr-entry-submit:focus-visible,.rr-entry-guest:focus-visible{outline:3px solid #b4db90;outline-offset:3px}
-.rr-entry-separator{
- display:flex;align-items:center;gap:12px;margin:18px 0 15px;
- font-size:12px;color:#798a80;text-align:center;
-}
-.rr-entry-separator:before,.rr-entry-separator:after{
- content:"";height:1px;background:#d9e4de;flex:1;
-}
-.rr-entry-guest{
- width:100%;min-height:52px;border:2px solid #27886c;border-radius:13px;
- padding:12px 13px;background:#f1faf5;color:#12634b;
- font-size:15px;font-weight:900;cursor:pointer;
-}
-.rr-entry-guest:hover{background:#e3f5eb}
-.rr-entry-note{
- font-size:11px;color:#657c71;line-height:1.55;
- background:#f4f8f5;border:1px solid #e3ede7;border-radius:11px;
- padding:11px 12px;margin:17px 0 0;
-}
-@media(max-width:560px){
- .rr-entry-gate{padding:8px 9px}
- .rr-entry-gate .rr-entry-sheet{width:100%!important;border-radius:20px!important;
-    max-height:calc(100dvh - 16px)}
- .rr-entry-welcome{padding:20px 17px 50px;gap:0}
- .rr-entry-emblem{flex-basis:52px;width:52px;height:52px;font-size:29px;border-radius:16px}
- .rr-entry-form-wrap{padding:12px 17px 19px}
- .rr-entry-form-wrap>h2{font-size:20px;margin-bottom:11px}
- .rr-entry-welcome-text h1{font-size:24px}
- .rr-entry-welcome-text p{font-size:12px}
- .rr-entry-separator{margin:13px 0 12px}
- .rr-entry-note{font-size:10px;padding:9px 10px;margin-top:13px}
-}
-@media(max-height:680px){
- .rr-entry-gate{align-items:flex-start!important}
- .rr-entry-welcome{padding-top:15px;padding-bottom:34px}
- .rr-entry-form-wrap{padding-top:12px;padding-bottom:14px}
- .rr-entry-form-wrap .auth-input{min-height:45px}
- .rr-entry-tabs .auth-tab{min-height:42px}
-}
-
-
-/* Keep the entry card truly light even when graphite is active.
-   The global graphite stylesheet darkens .auth-input and paints .auth-sheet h2
-   white; without higher specificity this becomes white-on-white. */
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap{
-  background:#f4f8f5!important;
-  color:#183b30!important;
-  color-scheme:light!important;
-}
-html[data-rr-theme="graphite"] .app #profileAuthModal #authTitle,
-html[data-rr-theme="light"] .app #profileAuthModal #authTitle{
-  color:#173b2e!important;
+html[data-rr-theme] .app #profileAuthModal #authTitle,
+#profileAuthModal .rr-entry-form-wrap>h2{
   font-size:22px;
-  line-height:1.25;
+  line-height:1.28;
   font-weight:900;
   opacity:1;
+  margin:0 0 15px;
+  color:#f2fff7!important;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input{
-  background:#fff!important;
-  border:1px solid #a3bcb0!important;
-  color:#17382c!important;
-  -webkit-text-fill-color:#17382c;
-  color-scheme:light!important;
+.rr-entry-description{
+  margin:0 0 13px;
+  font-size:12px;
+  line-height:1.5;
+  color:#c2d9ce!important;
+}
+.rr-entry-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding:5px;
+  margin-bottom:12px;
+  border-radius:14px;
+  background:#2b4246!important;
+}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-tabs .auth-tab{
+  display:block;
+  min-height:48px;
+  border:1px solid transparent!important;
+  border-radius:11px;
+  background:transparent!important;
+  color:#d2e5db!important;
+  font-size:15px;
+  font-weight:850;
+  cursor:pointer;
+}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-tabs .auth-tab.active{
+  background:#385b59!important;
+  border-color:#70b79d!important;
+  color:#f7fff9!important;
+  box-shadow:0 3px 12px rgba(0,0,0,.15);
+}
+.rr-entry-tabs .auth-tab:focus-visible,
+.rr-entry-submit:focus-visible,
+.rr-entry-guest:focus-visible{
+  outline:3px solid #95d6b5!important;
+  outline-offset:2px;
+}
+.rr-entry-form-wrap .auth-field{margin-bottom:11px}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-field label{
+  display:block;
+  margin:0 0 6px 2px;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:0;
+  color:#dbeee4!important;
+}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-input{
+  display:block;
+  width:100%;
+  min-height:51px;
+  padding:12px 13px;
+  border:1px solid #66877e!important;
+  border-radius:12px;
+  background:#2c4146!important;
+  color:#f2fff7!important;
+  -webkit-text-fill-color:#f2fff7!important;
+  color-scheme:dark!important;
   box-shadow:none!important;
+  font-size:16px;
+  font-weight:600;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input::placeholder,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input::placeholder{
-  color:#667d73!important;
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-input::placeholder{
+  color:#bdcfc5!important;
   opacity:1!important;
-  -webkit-text-fill-color:#667d73;
+  -webkit-text-fill-color:#bdcfc5!important;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus-visible,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus-visible{
-  outline:3px solid #81c5a9!important;
-  outline-offset:1px;
-  border-color:#248461!important;
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus-visible,
+html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus{
+  outline:2px solid #94d7b9!important;
+  outline-offset:2px;
+  border-color:#94d7b9!important;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-field label,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-field label{
-  color:#234a39!important;
+#profileAuthModal .rr-entry-form-wrap .auth-input:-webkit-autofill{
+  -webkit-box-shadow:0 0 0 1000px #2c4146 inset!important;
+  -webkit-text-fill-color:#f2fff7!important;
+  caret-color:#f2fff7!important;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-tabs .auth-tab,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-tabs .auth-tab{
-  color:#3c584c!important;
-  background:transparent;
+.rr-entry-form-wrap .auth-error.show{
+  display:block;
+  padding:11px 12px;
+  margin:5px 0 10px;
+  border:1px solid #aa7376!important;
+  border-radius:11px;
+  background:#4b323a!important;
+  color:#ffe0dd!important;
+  font-size:12px;
+  line-height:1.45;
 }
-html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-tabs .auth-tab.active,
-html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-tabs .auth-tab.active{
-  color:#0f6045!important;
-  background:#fff!important;
-  box-shadow:0 3px 10px rgba(18,62,43,.09);
+html[data-rr-theme] .app #profileAuthModal .rr-entry-submit{
+  width:100%;
+  min-height:53px;
+  padding:12px 13px;
+  margin-top:6px;
+  border:1px solid #539e80!important;
+  border-radius:13px;
+  background:linear-gradient(135deg,#207b60,#17634f)!important;
+  color:#fff!important;
+  font-size:16px;
+  letter-spacing:.01em;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.16)!important;
+}
+.rr-entry-submit:disabled{opacity:.65;cursor:wait}
+.rr-entry-separator{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:18px 0 15px;
+  text-align:center;
+  font-size:12px;
+  color:#b9ccc1!important;
+}
+.rr-entry-separator:before,.rr-entry-separator:after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:#46615e!important;
+}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-guest{
+  display:block;
+  width:100%;
+  min-height:52px;
+  padding:12px 13px;
+  border:2px solid #5eab91!important;
+  border-radius:13px;
+  background:#2b4245!important;
+  color:#effff5!important;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+}
+html[data-rr-theme] .app #profileAuthModal .rr-entry-guest:hover{
+  background:#345451!important;
 }
 .rr-entry-footnote{
   max-width:370px;
   margin:12px auto 0;
   padding:0;
-  background:transparent!important;
   border:0!important;
+  background:transparent!important;
   box-shadow:none!important;
   text-align:center;
+  color:#b7ccc2!important;
   font:500 11px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  color:#536e61!important;
 }
 @media(max-width:560px){
- .rr-entry-welcome{padding:21px 19px 53px;gap:0}
- .rr-entry-form-wrap>h2{font-size:21px}
- .rr-entry-footnote{margin-top:10px;font-size:11px}
+  .rr-entry-gate{padding:8px 9px}
+  .rr-entry-gate .rr-entry-sheet{
+    width:100%!important;
+    max-height:calc(100dvh - 16px);
+    border-radius:20px!important;
+  }
+  .rr-entry-welcome{padding:21px 19px 35px}
+  .rr-entry-welcome-text h1{font-size:24px}
+  .rr-entry-welcome-text p{font-size:12px}
+  .rr-entry-form-wrap{padding:12px 17px 19px}
+  #profileAuthModal .rr-entry-form-wrap>h2{font-size:21px;margin-bottom:11px}
+  .rr-entry-separator{margin:13px 0 12px}
+  .rr-entry-footnote{margin-top:10px;font-size:11px}
+}
+@media(max-height:680px){
+  .rr-entry-gate{align-items:flex-start!important}
+  .rr-entry-welcome{padding-top:15px;padding-bottom:28px}
+  .rr-entry-form-wrap{padding-top:12px;padding-bottom:14px}
+  html[data-rr-theme] .app #profileAuthModal .rr-entry-form-wrap .auth-input{min-height:45px}
+  .rr-entry-tabs .auth-tab{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rr-entry-form-wrap *{transition:none!important}
 }
