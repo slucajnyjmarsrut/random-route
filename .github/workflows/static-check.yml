@@ -40,6 +40,7 @@ jobs:
           node --check tests/photo-browser-smoke.cjs
           node --check tests/guest-profile-browser-smoke.cjs
           node --check tests/main-nav-browser-smoke.cjs
+          node --check tests/clean-home-browser-smoke.cjs
           node --check tests/tester-wallet-browser-smoke.cjs
           node --check tests/welcome-auth-browser-smoke.cjs
           node --check tests/welcome-contrast-browser-smoke.cjs
@@ -100,7 +101,7 @@ jobs:
           const tapCode=fs.readFileSync('tap-targets.js','utf8');
           if(!tapCode.includes('controls.length!==1'))throw new Error('Unsafe card multi-action guard missing');
           if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
-          if(!html.includes('simple-home.css?v=1.4')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
+          if(!html.includes('simple-home.css?v=1.5')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
           if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
           if(!html.includes('id="rrHomeWeatherValue"') || !html.includes('id="homeOpenCreateBtn"') || !html.includes('id="rrNavPanel"'))throw new Error('Simple home or GPS navigation missing');
           if(!html.includes('RRWalkingDijkstra.requestRoute')||!html.includes('RRRouteAI?.score'))throw new Error('Dijkstra/learned route selection missing');
@@ -127,6 +128,7 @@ jobs:
           node tests/mascot-browser-smoke.cjs
           node tests/guest-profile-browser-smoke.cjs
           node tests/main-nav-browser-smoke.cjs
+          node tests/clean-home-browser-smoke.cjs
           node tests/tester-wallet-browser-smoke.cjs
           node tests/welcome-auth-browser-smoke.cjs
           node tests/welcome-contrast-browser-smoke.cjs
