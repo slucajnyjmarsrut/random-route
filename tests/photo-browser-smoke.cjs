@@ -33,6 +33,7 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
       return url.startsWith(root+'/')?route.continue():route.abort();
     });
     await page.goto(root+'/index.html',{waitUntil:'domcontentloaded',timeout:20000});
+    await page.locator('#authGuest').click();
     await page.waitForFunction(()=>!!window.__yakutskRR&&!!window.state);
     await page.evaluate(()=>{
       // The routing smoke test above checks Chromium's geolocation permission.
