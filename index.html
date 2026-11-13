@@ -189,7 +189,6 @@ try {
  <button type="button" data-open-screen="mascots">Спутники</button>
 </div>
 <button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
-<button class="secondary rr-welcome-guest" id="homeOpenGuestProfileBtn" type="button">👤 Вход / регистрация</button>
 </section>
 <section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
 <button type="button" class="rr-create-back" data-open-screen="home">← На главную</button>
@@ -434,6 +433,7 @@ try {
   <p class="devdiag-note">GPS, фото и начисления требуют реальных испытаний на телефоне. Жёлтый статус «Не проверено» не означает неисправность.</p>
 </section>
 <div class="hint rr-guest-profile-notice" id="guestProfileNotice" role="status">👤 Вы в гостевом профиле. Почта и пароль не нужны. Учётная запись не создаётся. Прогресс прогулок и спутников сохраняется только в этом браузере.</div>
+<button class="secondary rr-guest-signin" id="guestProfileSignIn" type="button">👤 Вход / регистрация</button>
 <div class="profile-identity" id="profileIdentity"><div class="profile-avatar" id="profileAvatar">Я</div><div class="profile-person"><b id="profileName">Пользователь</b><span id="profileEmail">—</span><div class="tester-badge hidden" id="profileRoleBadge">★ Тестировщик</div></div><button class="profile-logout" id="profileLogout" type="button">Выйти</button></div><div class="profile-badges-mini" id="profileBadgesMini"></div>
 <div class="mascot-profile-current"><span id="mascotProfileCurrent">🐶 Щенок-путник · уровень 1</span><button type="button" data-open-screen="mascots">Выбрать спутника</button></div>
 <div class="streak-card">
@@ -1138,6 +1138,7 @@ try {
     $('#profileAvatar').textContent=guest?'Г':(u.name||u.email||'Я').trim().charAt(0).toUpperCase();
     $('#profileLogout').textContent=guest?'На главную':'Выйти';
     $('#guestProfileNotice').classList.toggle('hidden',!guest);
+    $('#guestProfileSignIn').classList.toggle('hidden',!guest);
     const badge=$('#profileRoleBadge');
     if(badge){badge.classList.toggle('hidden',guest||u.role!=='tester');badge.textContent=guest?'':u.role==='tester'?'★ Разработчик':'★ Тестировщик'}
     if(window.__renderBadges)window.__renderBadges();
@@ -1345,7 +1346,7 @@ try {
   document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openProfileChoice():showScreen(b.dataset.screen));
   window.__rrOpenScreen=showScreen;
   document.querySelectorAll('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>b.dataset.openScreen==='profile'?openProfileChoice():showScreen(b.dataset.openScreen,{restoreScroll:false})));
-  $('#homeOpenGuestProfileBtn').onclick=()=>openProfileAuth('login');
+  $('#guestProfileSignIn').onclick=()=>openProfileAuth('login');
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
