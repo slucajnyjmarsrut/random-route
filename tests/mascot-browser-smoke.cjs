@@ -56,9 +56,13 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#mascotCollectionGrid button:enabled').count(),0);
    await page.locator('[data-mascot-filter="all"]').click();
    assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),20);
+   // Profile is correctly gated by the existing local sign-in dialog.
+   // The mascot collection itself remains freely accessible.
    await page.locator('.nav [data-screen="profile"]').click();
+   await page.locator('#profileAuthModal.show').waitFor({state:'visible'});
    assert.match(await page.locator('#mascotProfileCurrent').innerText(),/Хомяк-турист/);
-   await page.locator('.mascot-profile-current [data-open-screen="mascots"]').click();
+   await page.locator('#authCancel').click();
+   await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
    assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,errors.join(' | '));
    console.log('MASCOTS_BROWSER_OK 20 cards, 10 verified routes unlock hamster, equip, future XP, reload and rarity filter');
