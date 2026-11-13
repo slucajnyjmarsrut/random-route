@@ -589,6 +589,7 @@ try {
   };
   let walletMode='normal';
   function safeWalletNumber(value,fallback){
+    if(value===null||value===undefined||value==='')return fallback;
     const n=Number(value);
     return Number.isFinite(n)&&n>=0&&n<=100000000?Math.floor(n):fallback;
   }
