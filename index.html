@@ -1101,6 +1101,7 @@ try {
     }catch(e){}
     renderProfileIdentity();applyDeveloperUi();closeProfileAuth();authState.pendingProfileOpen=false;
     try{showScreen(user.role==='local'?'home':'profile',{restoreScroll:false})}catch(e){}
+    bootGps();
   }
   function activateTesterAccount(){
     const user={name:TESTER_ACCOUNT.name,email:TESTER_ACCOUNT.email,passwordHash:simplePassHash(TESTER_ACCOUNT.email+'|'+TESTER_ACCOUNT.password),role:'tester',createdAt:Date.now()};
@@ -1279,6 +1280,7 @@ try {
     applyDeveloperUi();
     closeProfileAuth();
     showScreen(target,{restoreScroll:false});
+    bootGps();
   }
   window.__rrOpenGuestProfile=openGuestProfile;
   function openProfileChoice(){
@@ -3002,12 +3004,14 @@ try {
   if(entryPreview){
     guestEntered=true;
     closeProfileAuth();
+    bootGps();
   }else if(isUserSignedIn()){
     closeProfileAuth();
+    bootGps();
   }else{
+    // Do not ask for GPS before the visitor chooses login or guest.
     openProfileAuth('login');
   }
-  bootGps();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}if(!demoMode)startWatching()}});
   window.addEventListener('beforeunload',saveSession);
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
