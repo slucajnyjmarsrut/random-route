@@ -158,6 +158,7 @@ try {
 <link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
 <link rel="stylesheet" href="mascot-collection.css?v=1.0"/>
+<link rel="stylesheet" href="welcome-auth.css?v=1.0"/>
 </head>
 <body>
 <div class="app" data-rr-screen="home">
@@ -188,7 +189,7 @@ try {
  <button type="button" data-open-screen="mascots">Спутники</button>
 </div>
 <button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
-<button class="secondary rr-welcome-guest" id="homeOpenGuestProfileBtn" type="button" data-open-screen="profile">👤 Открыть гостевой профиль</button>
+<button class="secondary rr-welcome-guest" id="homeOpenGuestProfileBtn" type="button">👤 Вход / регистрация</button>
 </section>
 <section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
 <button type="button" class="rr-create-back" data-open-screen="home">← На главную</button>
@@ -530,7 +531,51 @@ try {
 
 <div class="modal-backdrop" id="infoModal"><div class="info-modal"><div class="grab"></div><div class="info-icon" id="infoModalIcon">ℹ️</div><h2 id="infoModalTitle">Подробнее</h2><p id="infoModalText"></p><button class="primary" id="infoModalClose" type="button">Понятно</button></div></div>
 <div class="modal-backdrop" id="badgeDetailModal"><div class="badge-detail-sheet"><div class="grab"></div><div class="badge-detail-head"><div class="badge-detail-icon" id="badgeDetailIcon">🏅</div><div><h2 id="badgeDetailTitle">Значок</h2><span class="badge-detail-status" id="badgeDetailStatus">Не получен</span></div></div><p class="badge-detail-text" id="badgeDetailDescription"></p><div class="badge-detail-block"><b>Как получить</b><span id="badgeDetailHow"></span><div class="badge-detail-progress" id="badgeDetailProgress"><span id="badgeDetailProgressFill"></span></div></div><div class="badge-detail-block"><b>Что даёт</b><span id="badgeDetailPerk"></span></div><button class="badge-detail-close" id="badgeDetailClose" type="button">Закрыть</button></div></div>
-<div class="auth-backdrop" id="profileAuthModal"><div class="auth-sheet"><div class="grab"></div><div class="auth-brand"><div class="auth-logo">🧭</div><div><h2 id="authTitle">Вход в профиль</h2><p>Сохраните прогресс, значки, страйки и RouteCoin в своём профиле.</p></div></div><div class="auth-tabs"><button class="auth-tab active" id="authLoginTab" type="button">Войти</button><button class="auth-tab hidden" id="authRegisterTab" type="button">Создать профиль</button></div><div class="auth-error" id="authError"></div><div class="auth-field hidden" id="authNameField"><label for="authName">Имя</label><input class="auth-input" id="authName" maxlength="30" autocomplete="name" placeholder="Как вас называть"/></div><div class="auth-field"><label for="authEmail">Российская почта</label><input class="auth-input" id="authEmail" inputmode="email" autocomplete="email" placeholder="name@yandex.ru"/></div><div class="auth-field"><label for="authPassword">Пароль</label><input class="auth-input" id="authPassword" type="password" minlength="6" autocomplete="current-password" placeholder="Минимум 6 символов"/></div><div class="auth-note" id="authNote">Вход работает локально. Регистрация обычных пользователей отключена до подключения подтверждения почты.</div><button class="primary" id="authSubmit" type="button">Войти</button><button class="tester-login-btn" id="testerLogin" type="button">★ Тестировщик</button><button class="secondary" id="authCancel" type="button" style="margin-top:8px">Не сейчас</button></div></div>
+<div class="auth-backdrop rr-entry-gate show" id="profileAuthModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+ <div class="auth-sheet rr-entry-sheet">
+  <div class="rr-entry-welcome">
+   <div class="rr-entry-emblem" aria-hidden="true">🧭</div>
+   <div class="rr-entry-welcome-text">
+    <small>СЛУЧАЙНЫЙ МАРШРУТ · ЯКУТСК</small>
+    <h1>Добро пожаловать!</h1>
+    <p>Открывай новые места, выполняй задания и собирай маскотов.</p>
+   </div>
+  </div>
+  <div class="rr-entry-form-wrap">
+   <h2 id="authTitle">Начнём прогулку</h2>
+   <div class="auth-tabs rr-entry-tabs" role="tablist" aria-label="Вход или регистрация">
+    <button class="auth-tab active" id="authLoginTab" type="button" role="tab" aria-selected="true" aria-controls="rrEntryForm">Вход</button>
+    <button class="auth-tab" id="authRegisterTab" type="button" role="tab" aria-selected="false" aria-controls="rrEntryForm">Регистрация</button>
+   </div>
+   <p class="rr-entry-description" id="authDescription">Войди в профиль, созданный на этом устройстве.</p>
+   <div class="auth-error" id="authError" role="alert" aria-live="polite"></div>
+   <form id="rrEntryForm" novalidate>
+    <div class="auth-field hidden" id="authNameField">
+     <label for="authName">Как тебя зовут?</label>
+     <input class="auth-input" id="authName" maxlength="30" autocomplete="name" placeholder="Имя" />
+    </div>
+    <div class="auth-field">
+     <label for="authEmail">Электронная почта</label>
+     <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="example@mail.ru" required/>
+    </div>
+    <div class="auth-field">
+     <label for="authPassword">Пароль</label>
+     <input class="auth-input" id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="Не меньше 8 символов" required/>
+    </div>
+    <div class="auth-field hidden" id="authConfirmField">
+     <label for="authConfirm">Повтори пароль</label>
+     <input class="auth-input" id="authConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Повтори пароль"/>
+    </div>
+    <button class="primary rr-entry-submit" id="authSubmit" type="submit">Войти</button>
+   </form>
+   <div class="rr-entry-separator"><span>или</span></div>
+   <button class="rr-entry-guest" id="authGuest" type="button">🚶 Продолжить как гость</button>
+   <p class="rr-entry-note" id="authNote">Гостевой режим — без аккаунта и пароля. Регистрация работает только на этом устройстве: нет сервера, синхронизации и восстановления пароля.</p>
+   <button class="tester-login-btn hidden" id="testerLogin" type="button">★ Тестировщик</button>
+   <button class="secondary hidden" id="authCancel" type="button">Не сейчас</button>
+  </div>
+ </div>
+</div>
 <div class="toast" id="toast">Готово</div>
 </div>
 <script>
