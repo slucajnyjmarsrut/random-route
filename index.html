@@ -997,12 +997,42 @@ try {
   const authState={mode:'login',pendingProfileOpen:false};
   let runtimeUserProfile=null;
   let runtimeSignedIn=false;
+  let guestEntered=false;
+  const LOCAL_ACCOUNT_KEY='rr_local_accounts_v2';
+  const LOCAL_SESSION_KEY='rr_user_session_v31';
+  function validDeviceEmail(email){
+    return typeof email==='string'&&email.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim().toLowerCase());
+  }
+  function readDeviceAccounts(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(LOCAL_ACCOUNT_KEY)||'[]');
+      return Array.isArray(saved)?saved.filter(a=>a&&a.email&&a.salt&&a.verifier):[];
+    }catch(e){return []}
+  }
+  function storeDeviceAccounts(accounts){
+    try{localStorage.setItem(LOCAL_ACCOUNT_KEY,JSON.stringify(accounts));return true}
+    catch(e){return false}
+  }
+  function hex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
+  async function deviceVerifier(password,saltHex){
+    if(!window.crypto?.subtle)throw Error('Для регистрации нужен HTTPS и современный браузер.');
+    const salt=new Uint8Array(saltHex.match(/../g).map(x=>parseInt(x,16)));
+    const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:120000,hash:'SHA-256'},material,256);
+    return hex(new Uint8Array(bits));
+  }
+  function equalVerifier(a,b){
+    if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;
+    let mismatch=0;
+    for(let i=0;i<a.length;i++)mismatch|=a.charCodeAt(i)^b.charCodeAt(i);
+    return mismatch===0;
+  }
   function simplePassHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)}
   function emailDomain(email){return String(email||'').trim().toLowerCase().split('@').pop()||''}
   function validRussianEmail(email){const e=String(email||'').trim().toLowerCase();return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)&&RU_MAIL_DOMAINS.has(emailDomain(e))}
   function readLocalAccounts(){try{const a=JSON.parse(localStorage.getItem('rr_local_accounts_v1')||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
   function saveLocalAccounts(a){try{localStorage.setItem('rr_local_accounts_v1',JSON.stringify(a))}catch(e){}}
-  function isAllowedLocalProfile(u){return !!u&&validRussianEmail(u.email)&&(u.role==='tester'||u.role==='local')}
+  function isAllowedLocalProfile(u){return !!u&&(u.role==='tester'&&validRussianEmail(u.email)||u.role==='local'&&validDeviceEmail(u.email))}
   function readUserProfile(){
     try{const stored=JSON.parse(localStorage.getItem('rr_user_profile')||'null');if(isAllowedLocalProfile(stored))return stored}catch(e){}
     return isAllowedLocalProfile(runtimeUserProfile)?runtimeUserProfile:null;
@@ -1011,18 +1041,41 @@ try {
     const u=readUserProfile();
     // The legacy flag had left an old built-in tester account signed in.
     // Only a NEW explicit authentication may activate the optional tester UI.
-    try{return !!u&&(runtimeSignedIn||localStorage.getItem('rr_user_session_v30')==='1')}
+    try{return !!u&&(runtimeSignedIn||localStorage.getItem(LOCAL_SESSION_KEY)==='1')}
     catch(e){return !!u&&runtimeSignedIn}
   }
   function isDeveloperMode(){const u=isUserSignedIn()?readUserProfile():null;return !!u&&u.role==='tester'}
   window.__isDeveloperMode=isDeveloperMode;
   function applyDeveloperUi(){const on=isDeveloperMode();document.body.classList.toggle('dev-mode',on);document.querySelectorAll('[data-buy-type]').forEach(b=>{b.disabled=on;b.title=on?'Оплата отключена в режиме разработчика':''});if(on&&window.__setDeveloperMode)window.__setDeveloperMode(true)}
   window.__applyDeveloperUi=applyDeveloperUi;
-  function setAuthMode(){
-    authState.mode='login';$('#authLoginTab').classList.add('active');$('#authRegisterTab').classList.remove('active');$('#authNameField').classList.add('hidden');$('#authSubmit').textContent='Войти';$('#authTitle').textContent='Вход в профиль';$('#authError').classList.remove('show');$('#authPassword').setAttribute('autocomplete','current-password');$('#authNote').textContent='Регистрация обычных пользователей отключена до подключения подтверждения российской почты.';
+  function setAuthMode(mode='login'){
+    const register=mode==='register';
+    authState.mode=register?'register':'login';
+    $('#authLoginTab').classList.toggle('active',!register);
+    $('#authRegisterTab').classList.toggle('active',register);
+    $('#authLoginTab').setAttribute('aria-selected',String(!register));
+    $('#authRegisterTab').setAttribute('aria-selected',String(register));
+    $('#authNameField').classList.toggle('hidden',!register);
+    $('#authConfirmField').classList.toggle('hidden',!register);
+    $('#authSubmit').textContent=register?'Зарегистрироваться':'Войти';
+    $('#authDescription').textContent=register?'Создай локальный профиль на этом устройстве.':'Войди в свой локальный профиль или продолжи как гость.';
+    $('#authPassword').setAttribute('autocomplete',register?'new-password':'current-password');
+    $('#authError').classList.remove('show');
+    $('#authPassword').value='';
+    $('#authConfirm').value='';
   }
-  function openProfileAuth(mode='login'){setAuthMode(mode);$('#profileAuthModal').classList.add('show');setTimeout(()=>$(mode==='register'?'#authName':'#authEmail').focus(),100)}
-  function closeProfileAuth(){$('#profileAuthModal').classList.remove('show');$('#authError').classList.remove('show')}
+  function openProfileAuth(mode='login'){
+    setAuthMode(mode);
+    $('#profileAuthModal').classList.add('show');
+    $('#profileAuthModal').setAttribute('aria-hidden','false');
+    setTimeout(()=>$(mode==='register'?'#authName':'#authEmail')?.focus(),60);
+  }
+  function closeProfileAuth(){
+    $('#profileAuthModal').classList.remove('show');
+    $('#profileAuthModal').setAttribute('aria-hidden','true');
+    $('#authError').classList.remove('show');
+    $('#authPassword').value='';$('#authConfirm').value='';
+  }
   function authError(msg){const el=$('#authError');el.textContent=msg;el.classList.add('show')}
   function renderProfileIdentity(){
     const u=isUserSignedIn()?readUserProfile():null;
@@ -1039,14 +1092,15 @@ try {
     applyDeveloperUi();
   }
   function persistSession(user){
-    runtimeUserProfile=user;runtimeSignedIn=true;
+    runtimeUserProfile=user;runtimeSignedIn=true;guestEntered=false;
     try{
       localStorage.setItem('rr_user_profile',JSON.stringify(user));
-      localStorage.setItem('rr_user_session_v30','1');
+      localStorage.setItem(LOCAL_SESSION_KEY,'1');
+      localStorage.removeItem('rr_user_session_v30');
       localStorage.removeItem('rr_user_session');
     }catch(e){}
     renderProfileIdentity();applyDeveloperUi();closeProfileAuth();authState.pendingProfileOpen=false;
-    try{showScreen('profile',{restoreScroll:false})}catch(e){}
+    try{showScreen(user.role==='local'?'home':'profile',{restoreScroll:false})}catch(e){}
   }
   function activateTesterAccount(){
     const user={name:TESTER_ACCOUNT.name,email:TESTER_ACCOUNT.email,passwordHash:simplePassHash(TESTER_ACCOUNT.email+'|'+TESTER_ACCOUNT.password),role:'tester',createdAt:Date.now()};
@@ -1056,20 +1110,52 @@ try {
   }
   window.activateTesterAccount=activateTesterAccount;
   $('#authLoginTab').onclick=()=>setAuthMode('login');
-  $('#authRegisterTab').onclick=()=>authError('Регистрация отключена до подключения подтверждения почты.');
+  $('#authRegisterTab').onclick=()=>setAuthMode('register');
   const testerLoginBtn=$('#testerLogin');
-  if(testerLoginBtn){testerLoginBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setAuthMode('login');$('#authEmail').value=TESTER_ACCOUNT.email;$('#authPassword').value='';setTimeout(()=>$('#authPassword').focus(),50)})}
+  if(testerLoginBtn){testerLoginBtn.addEventListener('click',e=>{
+    e.preventDefault();e.stopPropagation();openProfileAuth('login');
+    $('#authEmail').value=TESTER_ACCOUNT.email;$('#authPassword').value='';
+  })}
   $('#authCancel').onclick=()=>{authState.pendingProfileOpen=false;closeProfileAuth()};
-  $('#profileAuthModal').onclick=e=>{if(e.target===$('#profileAuthModal'))$('#authCancel').click()};
-  $('#authSubmit').onclick=()=>{
-    const email=$('#authEmail').value.trim().toLowerCase(),pass=$('#authPassword').value,name=$('#authName').value.trim();
-    if(!validRussianEmail(email)){authError('Введите почту Яндекс, Mail.ru или Rambler.');return}
-    if(pass.length<6){authError('Пароль должен быть не короче 6 символов.');return}
-    if(authState.mode==='register'){authError('Регистрация отключена до подключения подтверждения почты.');return}
-    if(email===TESTER_ACCOUNT.email&&pass===TESTER_ACCOUNT.password){activateTesterAccount();return}
-    const user=readLocalAccounts().find(a=>a.email===email&&a.passwordHash===simplePassHash(email+'|'+pass));if(user){persistSession(user);toast('Вход выполнен');return}
-    authError('Почта или пароль неверные.');
+  $('#authGuest').onclick=()=>{
+    openGuestProfile('home');closeProfileAuth();
   };
+  $('#rrEntryForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email=$('#authEmail').value.trim().toLowerCase();
+    const pass=$('#authPassword').value;
+    const name=$('#authName').value.trim();
+    const register=authState.mode==='register';
+    if(!validDeviceEmail(email)){authError('Введите корректный адрес электронной почты.');return}
+    if(pass.length<8||pass.length>128){authError('Пароль должен содержать от 8 до 128 символов.');return}
+    const button=$('#authSubmit');
+    button.disabled=true;
+    try{
+      const accounts=readDeviceAccounts();
+      const account=accounts.find(a=>a.email===email);
+      if(register){
+        if(name.length<2){authError('Введите имя минимум из двух символов.');return}
+        if(pass!==$('#authConfirm').value){authError('Пароли не совпадают.');return}
+        if(account){authError('Эта почта уже зарегистрирована в этом браузере.');return}
+        const salt=hex(crypto.getRandomValues(new Uint8Array(16)));
+        const verifier=await deviceVerifier(pass,salt);
+        const created={email,name:name.slice(0,30),role:'local',salt,verifier,createdAt:Date.now()};
+        if(!storeDeviceAccounts([...accounts,created])){
+          authError('Не удалось сохранить локальный профиль. Проверьте настройки браузера.');return;
+        }
+        persistSession({email,name:created.name,role:'local',createdAt:created.createdAt});
+        toast('Локальный профиль создан');
+      }else{
+        if(email===TESTER_ACCOUNT.email&&pass===TESTER_ACCOUNT.password){activateTesterAccount();return}
+        if(!account){authError('Локальный профиль не найден. Создайте его во вкладке «Регистрация».');return}
+        const verifier=await deviceVerifier(pass,account.salt);
+        if(!equalVerifier(verifier,account.verifier)){authError('Неправильный пароль.');return}
+        persistSession({email,name:account.name,role:'local',createdAt:account.createdAt});
+        toast('Вход выполнен');
+      }
+    }catch(err){authError(err?.message||'Не удалось выполнить вход.')}
+    finally{button.disabled=false}
+  });
   $('#profileLogout').onclick=()=>{
     if(!isUserSignedIn()){
       showScreen('home',{restoreScroll:false});
@@ -1078,11 +1164,13 @@ try {
     try{
       localStorage.removeItem('rr_user_session');
       localStorage.removeItem('rr_user_session_v30');
+      localStorage.removeItem(LOCAL_SESSION_KEY);
       localStorage.removeItem('rr_user_profile');
     }catch(e){}
     runtimeUserProfile=null;runtimeSignedIn=false;applyDeveloperUi();
     window.__setDeveloperMode?.(false);
     showScreen('home',{restoreScroll:false});
+    openProfileAuth('login');
     toast('Вы вышли из профиля');
   };
   renderProfileIdentity();applyDeveloperUi();
@@ -1176,23 +1264,31 @@ try {
       content.scrollTo(0,restoreScroll?(rr.scrolls[id]||0):0);
     });
   }
-  function openGuestProfile(){
-    // Switch intentionally to GUEST even if an old tester profile was saved.
-    // Remove only auth markers, never routes, coins, badges or companion XP.
-    runtimeUserProfile=null;runtimeSignedIn=false;
+  function openGuestProfile(target='profile'){
+    // Guest does not create an account; retaining offline walk progress is
+    // separate from authentication. Local registered credentials remain
+    // available so the user can sign in again later.
+    runtimeUserProfile=null;runtimeSignedIn=false;guestEntered=true;
     try{
       localStorage.removeItem('rr_user_profile');
       localStorage.removeItem('rr_user_session');
       localStorage.removeItem('rr_user_session_v30');
+      localStorage.removeItem(LOCAL_SESSION_KEY);
     }catch(e){}
     window.__setDeveloperMode?.(false);
     applyDeveloperUi();
-    showScreen('profile',{restoreScroll:false});
+    closeProfileAuth();
+    showScreen(target,{restoreScroll:false});
   }
   window.__rrOpenGuestProfile=openGuestProfile;
-  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen(b.dataset.screen));
+  function openProfileChoice(){
+    if(isUserSignedIn()||guestEntered)showScreen('profile',{restoreScroll:false});
+    else openProfileAuth('login');
+  }
+  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openProfileChoice():showScreen(b.dataset.screen));
   window.__rrOpenScreen=showScreen;
-  document.querySelectorAll('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>b.dataset.openScreen==='profile'?openGuestProfile():showScreen(b.dataset.openScreen,{restoreScroll:false})));
+  document.querySelectorAll('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>b.dataset.openScreen==='profile'?openProfileChoice():showScreen(b.dataset.openScreen,{restoreScroll:false})));
+  $('#homeOpenGuestProfileBtn').onclick=()=>openProfileAuth('login');
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
