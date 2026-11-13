@@ -56,12 +56,17 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#mascotCollectionGrid button:enabled').count(),0);
    await page.locator('[data-mascot-filter="all"]').click();
    assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),20);
-   // Profile is correctly gated by the existing local sign-in dialog.
-   // The mascot collection itself remains freely accessible.
+   // Guest profile requires no account, retains visible mascot progress.
    await page.locator('.nav [data-screen="profile"]').click();
-   await page.locator('#profileAuthModal.show').waitFor({state:'visible'});
+   await page.locator('#profile.active').waitFor({state:'visible'});
+   assert.match(await page.locator('#profileName').innerText(),/Гость/);
    assert.match(await page.locator('#mascotProfileCurrent').innerText(),/Хомяк-турист/);
-   await page.locator('#authCancel').click();
+   assert.equal(await page.locator('#profileAuthModal.show').count(),0);
+   const keys=await page.evaluate(()=>({
+     account:localStorage.getItem('rr_user_profile'),
+     session:localStorage.getItem('rr_user_session')
+   }));
+   assert.deepEqual(keys,{account:null,session:null},'guest profile must not create an account');
    await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
    assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,errors.join(' | '));
