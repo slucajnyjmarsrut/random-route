@@ -158,7 +158,7 @@ try {
 <link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
 <link rel="stylesheet" href="mascot-collection.css?v=1.0"/>
-<link rel="stylesheet" href="welcome-auth.css?v=1.0"/>
+<link rel="stylesheet" href="welcome-auth.css?v=1.1"/>
 </head>
 <body>
 <div class="app" data-rr-screen="home">
@@ -534,9 +534,7 @@ try {
 <div class="auth-backdrop rr-entry-gate show" id="profileAuthModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
  <div class="auth-sheet rr-entry-sheet">
   <div class="rr-entry-welcome">
-   <div class="rr-entry-emblem" aria-hidden="true">🧭</div>
    <div class="rr-entry-welcome-text">
-    <small>СЛУЧАЙНЫЙ МАРШРУТ · ЯКУТСК</small>
     <h1>Добро пожаловать!</h1>
     <p>Открывай новые места, выполняй задания и собирай маскотов.</p>
    </div>
@@ -556,21 +554,21 @@ try {
     </div>
     <div class="auth-field">
      <label for="authEmail">Электронная почта</label>
-     <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="example@mail.ru" required/>
+     <input class="auth-input" id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@yandex.ru" required/>
     </div>
     <div class="auth-field">
      <label for="authPassword">Пароль</label>
-     <input class="auth-input" id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="Не меньше 8 символов" required/>
+     <input class="auth-input" id="authPassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" placeholder="Не меньше 6 символов" required/>
     </div>
     <div class="auth-field hidden" id="authConfirmField">
      <label for="authConfirm">Повтори пароль</label>
-     <input class="auth-input" id="authConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Повтори пароль"/>
+     <input class="auth-input" id="authConfirm" type="password" minlength="6" maxlength="128" autocomplete="new-password" placeholder="Повтори пароль"/>
     </div>
     <button class="primary rr-entry-submit" id="authSubmit" type="submit">Войти</button>
    </form>
    <div class="rr-entry-separator"><span>или</span></div>
    <button class="rr-entry-guest" id="authGuest" type="button">🚶 Продолжить как гость</button>
-   <p class="rr-entry-note" id="authNote">Гостевой режим — без аккаунта и пароля. Регистрация работает только на этом устройстве: нет сервера, синхронизации и восстановления пароля.</p>
+   <p class="rr-entry-footnote" id="authNote">Регистрация локальная — только в этом браузере, без синхронизации.</p>
    <button class="tester-login-btn hidden" id="testerLogin" type="button">★ Тестировщик</button>
    <button class="secondary hidden" id="authCancel" type="button">Не сейчас</button>
   </div>
@@ -1128,7 +1126,7 @@ try {
     const name=$('#authName').value.trim();
     const register=authState.mode==='register';
     if(!validDeviceEmail(email)){authError('Введите корректный адрес электронной почты.');return}
-    if(pass.length<8||pass.length>128){authError('Пароль должен содержать от 8 до 128 символов.');return}
+    if(pass.length<6||pass.length>128){authError('Пароль должен содержать от 6 до 128 символов.');return}
     const button=$('#authSubmit');
     button.disabled=true;
     try{

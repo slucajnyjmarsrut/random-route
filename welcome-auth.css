@@ -19,7 +19,7 @@
  box-shadow:0 24px 75px rgba(0,0,0,.34)!important;
 }
 .rr-entry-welcome{
- display:flex;align-items:center;gap:15px;padding:24px 24px 21px;
+ display:flex;align-items:center;padding:25px 25px 23px;
  background:linear-gradient(140deg,#0c735c,#114f52 70%,#263c5f);
  color:#f6fff8;
 }
@@ -28,7 +28,7 @@
  border:1px solid #a0d6bc66;border-radius:21px;background:#ffffff26;
  font-size:35px;box-shadow:inset 0 0 24px #e3fff51c;
 }
-.rr-entry-welcome-text{min-width:0}
+.rr-entry-welcome-text{min-width:0;width:100%}
 .rr-entry-welcome-text small{
  font-size:10px;font-weight:900;letter-spacing:.095em;color:#d1eadf;
 }
@@ -114,4 +114,75 @@
  .rr-entry-form-wrap{padding-top:12px;padding-bottom:14px}
  .rr-entry-form-wrap .auth-input{min-height:45px}
  .rr-entry-tabs .auth-tab{min-height:42px}
+}
+
+
+/* Keep the entry card truly light even when graphite is active.
+   The global graphite stylesheet darkens .auth-input and paints .auth-sheet h2
+   white; without higher specificity this becomes white-on-white. */
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap{
+  background:#fff!important;
+  color:#183b30!important;
+  color-scheme:light!important;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal #authTitle,
+html[data-rr-theme="light"] .app #profileAuthModal #authTitle{
+  color:#173b2e!important;
+  font-size:22px;
+  line-height:1.25;
+  font-weight:900;
+  opacity:1;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input{
+  background:#fff!important;
+  border:1px solid #a3bcb0!important;
+  color:#17382c!important;
+  -webkit-text-fill-color:#17382c;
+  color-scheme:light!important;
+  box-shadow:none!important;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input::placeholder,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input::placeholder{
+  color:#667d73!important;
+  opacity:1!important;
+  -webkit-text-fill-color:#667d73;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus-visible,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-input:focus-visible{
+  outline:3px solid #81c5a9!important;
+  outline-offset:1px;
+  border-color:#248461!important;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-form-wrap .auth-field label,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-form-wrap .auth-field label{
+  color:#234a39!important;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-tabs .auth-tab,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-tabs .auth-tab{
+  color:#3c584c!important;
+  background:transparent;
+}
+html[data-rr-theme="graphite"] .app #profileAuthModal .rr-entry-tabs .auth-tab.active,
+html[data-rr-theme="light"] .app #profileAuthModal .rr-entry-tabs .auth-tab.active{
+  color:#0f6045!important;
+  background:#fff!important;
+  box-shadow:0 3px 10px rgba(18,62,43,.09);
+}
+.rr-entry-footnote{
+  max-width:370px;
+  margin:12px auto 0;
+  padding:0;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  text-align:center;
+  font:500 11px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  color:#536e61!important;
+}
+@media(max-width:560px){
+ .rr-entry-welcome{padding:21px 19px 18px;gap:0}
+ .rr-entry-form-wrap>h2{font-size:21px}
+ .rr-entry-footnote{margin-top:10px;font-size:11px}
 }

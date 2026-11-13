@@ -40,6 +40,7 @@ jobs:
           node --check tests/photo-browser-smoke.cjs
           node --check tests/guest-profile-browser-smoke.cjs
           node --check tests/welcome-auth-browser-smoke.cjs
+          node --check tests/welcome-contrast-browser-smoke.cjs
           node --check tests/night-weather-browser-smoke.cjs
           node --check mascot-collection.js
           node tests/mascot-collection.test.cjs
@@ -124,4 +125,5 @@ jobs:
           node tests/mascot-browser-smoke.cjs
           node tests/guest-profile-browser-smoke.cjs
           node tests/welcome-auth-browser-smoke.cjs
+          node tests/welcome-contrast-browser-smoke.cjs
           node tests/night-weather-browser-smoke.cjs
