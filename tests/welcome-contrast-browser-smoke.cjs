@@ -50,8 +50,11 @@ function contrast(a,b){
       return {
        title:get('#authTitle'),email:get('#authEmail'),password:get('#authPassword'),
        form:get('.rr-entry-form-wrap'),head:get('.rr-entry-welcome'),foot:get('#authNote'),
+       tabs:get('.rr-entry-tabs'),activeTab:get('.rr-entry-tabs .auth-tab.active'),
+       guest:get('#authGuest'),description:get('#authDescription'),
        gradient:getComputedStyle(document.querySelector('.rr-entry-welcome')).backgroundImage,
-       sheet:getComputedStyle(document.querySelector('.rr-entry-sheet')).backgroundColor
+       sheet:getComputedStyle(document.querySelector('.rr-entry-sheet')).backgroundColor,
+       scheme:getComputedStyle(document.querySelector('.rr-entry-form-wrap')).colorScheme
       };
     });
     assert.ok(contrast(visual.title.color,visual.form.background)>=7,
@@ -60,15 +63,29 @@ function contrast(a,b){
       theme+' email input contrast '+JSON.stringify(visual));
     assert.ok(contrast(visual.password.color,visual.password.background)>=7,
       theme+' password input contrast '+JSON.stringify(visual));
-    assert.ok(channels(visual.email.background).every(c=>c>=235),
-      theme+' email field must stay bright/white');
+    const DARK='rgb(33, 52, 58)';
+    const BRIGHTNESS_LIMIT=105;
+    for(const [name,part] of [
+       ['card',{background:visual.sheet}],['form',visual.form],['email input',visual.email],
+       ['password input',visual.password],['tabs',visual.tabs],['guest button',visual.guest]
+    ]){
+      assert.ok(channels(part.background).every(x=>x<BRIGHTNESS_LIMIT),
+        theme+' '+name+' must stay dark and comfortable at night: '+JSON.stringify(part));
+    }
+    assert.equal(visual.scheme,'dark',theme+' form must use native dark controls');
+    assert.ok(contrast(visual.activeTab.color,visual.activeTab.background)>=4.5,
+      theme+' active tab must remain readable');
+    assert.ok(contrast(visual.guest.color,visual.guest.background)>=7,
+      theme+' guest button must remain readable');
+    assert.ok(contrast(visual.description.color,visual.form.background)>=4.5,
+      theme+' description must remain readable');
     assert.ok(visual.title.rect.width>100,'welcome heading must be visible');
-    assert.match(visual.gradient,/linear-gradient\(/,'header must blend gradually, not end in a solid stripe');
-    assert.match(visual.gradient,/rgb\(244, 248, 245\) 100%/,'gradient must finish in the exact same color as the form');
-    assert.equal(visual.form.background,'rgb(244, 248, 245)','form surface must be warm pale sage');
-    assert.equal(visual.sheet,'rgb(244, 248, 245)','card and form must share a seamless surface');
-    assert.ok(Math.abs(visual.head.rect.bottom-visual.form.rect.top)<2,'no gap or dark stripe between header and form');
-    assert.ok(visual.head.rect.height>=120,'gradient needs enough vertical room to fade to a soft surface');
+    assert.match(visual.gradient,/linear-gradient\(/,'header must blend gradually, not end in a bright stripe');
+    assert.match(visual.gradient,/rgb\(33, 52, 58\) 100%/,'gradient must finish in same dark color as form');
+    assert.equal(visual.form.background,DARK,'form must be dark muted teal');
+    assert.equal(visual.sheet,DARK,'card and form must share seamless dark surface');
+    assert.ok(Math.abs(visual.head.rect.bottom-visual.form.rect.top)<2,'no gap between header and form');
+    assert.ok(visual.head.rect.height>=105,'gradient needs enough room to fade');
     assert.ok(visual.foot.rect.height<46,'small disclaimer must not be a tall box');
     assert.ok(visual.head.rect.width>=340,'welcome banner must use card width');
     console.log('WELCOME_CONTRAST_OK '+device.name+' '+theme+' title '+contrast(visual.title.color,visual.form.background).toFixed(1)+':1');
