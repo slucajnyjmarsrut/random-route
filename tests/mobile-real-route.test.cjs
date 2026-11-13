@@ -10,7 +10,7 @@ assert.match(data.source,/OpenStreetMap API 0.6/);
 assert.ok(data.ways.length>2000,'actual roads must be bundled for Yakutsk');
 assert.ok(sw.includes('./data/yakutsk-center-walking.json'),'offline/PWA shell must cache real roads');
 assert.ok(sw.includes('./mobile-ux.css'),'mobile stylesheet must be cached');
-assert.ok(html.includes('mobile-ux.css?v=1.0'),'mobile CSS should be activated on live site');
+assert.ok(html.includes('mobile-ux.css?v=1.1'),'mobile CSS should be activated on live site');
 assert.ok(html.includes('walking-dijkstra.js?v=2.1'),'browser must use new OSM loader');
 assert.ok(css.includes('position:sticky')&&css.includes('.rr-create-go'),'build button remains reachable on phones');
 assert.match(css,/@media\(max-width:599px\)/);
