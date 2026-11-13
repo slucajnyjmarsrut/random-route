@@ -39,6 +39,7 @@ jobs:
           node tests/mobile-real-route.test.cjs
           node --check tests/photo-browser-smoke.cjs
           node --check tests/guest-profile-browser-smoke.cjs
+          node --check tests/tester-wallet-browser-smoke.cjs
           node --check tests/welcome-auth-browser-smoke.cjs
           node --check tests/welcome-contrast-browser-smoke.cjs
           node --check tests/night-weather-browser-smoke.cjs
@@ -124,6 +125,7 @@ jobs:
           node tests/map-viewport-browser-smoke.cjs
           node tests/mascot-browser-smoke.cjs
           node tests/guest-profile-browser-smoke.cjs
+          node tests/tester-wallet-browser-smoke.cjs
           node tests/welcome-auth-browser-smoke.cjs
           node tests/welcome-contrast-browser-smoke.cjs
           node tests/night-weather-browser-smoke.cjs
