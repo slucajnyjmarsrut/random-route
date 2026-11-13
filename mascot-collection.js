@@ -148,7 +148,7 @@
      if(statsNote)statsNote.textContent="Подтверждено: "+stats.routes+" прогулок · "+stats.photos+" фото · "+stats.quests+" заданий";
      const hero=$("#mascotEquipped");
      if(hero){
-       hero.innerHTML='<div class="mascot-equipped-avatar rarity-'+selected.rarity+'"><span aria-hidden="true">'+selected.emoji+'</span><b>'+selected.gear+'</b></div>'
+       hero.innerHTML='<div class="mascot-equipped-avatar rarity-'+selected.rarity+' level-'+(lv>=7?'star':lv>=4?'explorer':'beginner')+'"><span aria-hidden="true">'+selected.emoji+'</span><b>'+(lv>=7?'🌟':lv>=4?'✨':selected.gear)+'</b></div>'
          +'<div class="mascot-equipped-copy"><small>ВАШ СПУТНИК</small><h2>'+selected.name+'</h2>'
          +'<p>'+rarities[selected.rarity].name+' · Уровень '+lv+' · '+levelStage(lv)+'</p>'
          +'<div class="mascot-xp-meter" aria-label="Прогресс уровня"><span style="width:'+Math.round(bar(current.xp[selected.id])*100)+'%"></span></div>'
@@ -164,9 +164,9 @@
          card.className="mascot-card rarity-"+m.rarity+(isOwned?"":" locked")+(isSelected?" selected":"");
          card.dataset.mascotId=m.id;
          const tier=doc.createElement("div");tier.className="mascot-card-tier";tier.textContent=rarities[m.rarity].icon+" "+rarities[m.rarity].name;
-         const avatar=doc.createElement("div");avatar.className="mascot-card-avatar";
+         const avatar=doc.createElement("div");const mLevel=levelFor(current.xp[m.id]);avatar.className="mascot-card-avatar level-"+(mLevel>=7?"star":mLevel>=4?"explorer":"beginner");
          const face=doc.createElement("span");face.setAttribute("aria-hidden","true");face.textContent=m.emoji;
-         const gear=doc.createElement("b");gear.textContent=m.gear;avatar.append(face,gear);
+         const gear=doc.createElement("b");gear.textContent=mLevel>=7?"🌟":mLevel>=4?"✨":m.gear;avatar.append(face,gear);
          const title=doc.createElement("h3");title.textContent=m.name;
          const hint=doc.createElement("p");hint.className="mascot-card-condition";
          hint.textContent=isOwned?"Уровень "+levelFor(current.xp[m.id])+" · "+levelStage(levelFor(current.xp[m.id])):requirement(m,stats);
