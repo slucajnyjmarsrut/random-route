@@ -113,3 +113,18 @@
  .mascot-home-current button{margin-left:auto}
 }
 @media(prefers-reduced-motion:reduce){.mascot-mini-meter>span,.mascot-xp-meter>span{transition:none}}
+
+/* Cosmetic evolution milestones: the companion's portrait visibly changes
+ * when it reaches the Explorer and Star stages, without gameplay buffs. */
+.mascot-card-avatar.level-explorer,.mascot-equipped-avatar.level-explorer{
+  border-color:#87f6e0;box-shadow:inset 0 0 26px #7df8d33b,0 0 15px #73e8bf66;
+}
+.mascot-card-avatar.level-star,.mascot-equipped-avatar.level-star{
+  border-color:#ffe991;box-shadow:inset 0 0 28px #ffdf7757,0 0 22px #ffcd65a3;
+  background:radial-gradient(circle at 40% 30%,#ffffff72,transparent 52%),
+  linear-gradient(140deg,#9971cc,#6a4468,#66440f);
+}
+.mascot-card-avatar.level-star:before,.mascot-equipped-avatar.level-star:before{
+  content:"✦ ✨ ✦";position:absolute;top:0;left:0;right:0;text-align:center;
+  color:#fff9d2;font-size:14px;letter-spacing:5px;z-index:1;pointer-events:none;
+}
