@@ -66,6 +66,7 @@ async function main(){
       return url.startsWith('http://127.0.0.1:8765/')?route.continue():route.abort();
     });
     await gpsPage.goto('http://127.0.0.1:8765/index.html',{waitUntil:'domcontentloaded',timeout:20000});
+    await gpsPage.locator('#authGuest').click();
     await gpsPage.locator('#homeOpenCreateBtn').click();
     await gpsPage.locator('[data-distance-km="3"]').click();
     await gpsPage.locator('#buildBtn').click();
