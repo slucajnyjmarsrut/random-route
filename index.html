@@ -1145,9 +1145,9 @@ try {
     showScreen('profile',{restoreScroll:false});
   }
   window.__rrOpenGuestProfile=openGuestProfile;
-  $('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen(b.dataset.screen));
+  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>b.dataset.screen==='profile'?openGuestProfile():showScreen(b.dataset.screen));
   window.__rrOpenScreen=showScreen;
-  $('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>b.dataset.openScreen==='profile'?openGuestProfile():showScreen(b.dataset.openScreen,{restoreScroll:false})));
+  document.querySelectorAll('[data-open-screen]').forEach(b=>b.addEventListener('click',()=>b.dataset.openScreen==='profile'?openGuestProfile():showScreen(b.dataset.openScreen,{restoreScroll:false})));
 
   $('#locateYakutskBtn').onclick=()=>{demoMode=false;localStorage.removeItem('rr_preview_city_mode');$('#demoGpsBtn').classList.add('hidden');updateDemoBanner();requestLocation(true)};
   let demoMode=new URLSearchParams(location.search).get('demo')==='1'||localStorage.getItem('rr_preview_city_mode')==='1';
