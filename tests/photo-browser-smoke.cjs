@@ -67,6 +67,14 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
       await page.locator('#cameraInput').setInputFiles({
         name,mimeType:'image/svg+xml',buffer:Buffer.from(svg(color))
       });
+      // This smoke test injects a photo checkpoint directly. Finish opening
+      // that mocked route screen even if the guest's asynchronous GPS boot
+      // restored the home view a moment after our fixture was installed.
+      await page.evaluate(()=>{
+        document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id==='route'));
+        document.querySelector('.app').dataset.rrScreen='route';
+        document.querySelector('#photoBlock').classList.remove('hidden');
+      });
       await page.locator('#verifyBtn').click();
       await page.waitForFunction(()=>/^(message (error|success))$/.test(
         document.querySelector('#verificationMessage')?.className||''
