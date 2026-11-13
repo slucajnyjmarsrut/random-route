@@ -5,7 +5,7 @@ const home=html.split('<section class="screen active rr-welcome-screen" id="home
 const make=html.split('<section class="screen rr-create-screen" id="create"')[1]?.split('<section class="screen" id="route"')[0];
 const route=html.split('<section class="screen" id="route"')[1]?.split('<section class="screen" id="shop"')[0];
 assert.ok(home&&make&&route);
-for(const x of ['id="rrHomeWeatherValue"','Исследуем Якутск','rr-welcome-mascot','id="homeOpenCreateBtn"'])assert.ok(home.includes(x),x);
+for(const x of ['id="rrHomeWeatherValue"','Исследуем Якутск','rr-welcome-mascot','id="homeOpenCreateBtn"','rr-marshik-pointer','rr-marshik-pointing-hand'])assert.ok(home.includes(x),x);
 for(const x of ['smartChat','id="homeMap"','rdq-card','quickInfoGrid','id="distanceInput"','id="buildBtn"'])assert.ok(!home.includes(x),'unexpected on home '+x);
 for(const x of ['id="distanceInput"','id="typeChoices"','id="partnerToggle"','id="createMapDetails"','id="homeMap"','id="buildBtn"','id="rrDailyCreateMount"'])assert.ok(make.includes(x),x);
 assert.equal((make.match(/data-distance-km="/g)||[]).length,4);
@@ -20,5 +20,9 @@ assert.ok(html.includes('updateLiveRouteProgress(p,sane)'),'GPS navigation must 
 assert.ok(html.includes('mapFollowBtn')&&html.includes('autoFollow(p,false)'),'follow GPS map');
 assert.ok(html.includes('yPassedLine'),'draw past trail');
 assert.ok(css.includes('.rr-welcome-start')&&css.includes('.rr-wish-buttons')&&css.includes('.rr-distance-options'));
+assert.ok(css.includes('rrMarshikCtaPulse')&&css.includes('prefers-reduced-motion:reduce'),
+ 'Marshik arrow and CTA must honor reduced-motion users');
+assert.ok(html.includes('rr_marshik_route_cta_used_v1')&&html.includes('rr-marshik-cta-active'),
+ 'persist dismissal without breaking the route action');
 assert.ok(navcss.includes('.rr-nav-panel')&&navcss.includes('prefers-reduced-motion:reduce'));
 console.log('Welcome screen, accessible button wizard and animated GPS navigation integration OK');
