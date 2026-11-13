@@ -47,6 +47,7 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
       });
       const rr=window.__yakutskRR;
       rr.routeId='photo-e2e-gps-2026';rr.routeEngine='dijkstra-osm';
+      rr.activeScreen='route';
       rr.startMode='gps';rr.usePhotoOptional=false;
       rr.current=1;rr.stage='photo';rr.currentPhotoFile=null;
       rr.livePos={lat:62.0274,lng:129.732,accuracy:12};
@@ -133,6 +134,9 @@ const modelMock='window.mobilenet={load:async()=>({infer(img){const c=document.c
     assert.deepEqual(repeat,{coins:25,photos:1});
     // A genuinely matched photo and its event-ledger proof survive reload.
     await page.reload({waitUntil:'domcontentloaded',timeout:20000});
+    // A guest must select guest entry again on a fresh visit before GPS
+    // and route restoration start. No account is silently persisted.
+    await page.locator('#authGuest').click();
     try{
       await page.waitForFunction(()=>window.__yakutskRR?.stage==='verified'
         &&!document.querySelector('#historyBlock').classList.contains('hidden'),null,{timeout:11000});
