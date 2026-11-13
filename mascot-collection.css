@@ -1,0 +1,130 @@
+/* Collectible cosmetic companions: five rarity themes, touch-first cards. */
+.mascots-screen{color:#eef6f3}
+.mascot-hero{
+  padding:23px;border-radius:24px;margin-bottom:14px;
+  background:radial-gradient(circle at 84% 15%,rgba(152,98,231,.48),transparent 38%),
+    radial-gradient(circle at 5% 84%,rgba(22,175,200,.35),transparent 44%),
+    linear-gradient(132deg,#202945,#342a65 48%,#193a4c);
+  border:1px solid #667db3;box-shadow:0 12px 30px rgba(13,15,48,.2);
+}
+.mascot-hero small{font-size:12px;font-weight:900;letter-spacing:.08em;color:#b3e3ff}
+.mascot-hero h1{font-size:clamp(26px,4vw,38px);line-height:1.1;margin:8px 0}
+.mascot-hero p{max-width:760px;font-size:14px;line-height:1.5;color:#e3e9ff;margin:0}
+.mascot-hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:15px}
+.mascot-hero-actions button{border:1px solid #9aafe3;border-radius:12px;padding:10px 13px;min-height:44px;font-weight:800;color:#fff;background:#354c78;cursor:pointer}
+.mascot-owned{display:inline-flex;align-items:center;min-height:44px;padding:9px 14px;border-radius:11px;
+ font-size:15px;font-weight:900;background:#ffffff1d;color:#fff;border:1px solid #ffffff4f}
+.mascot-equipped{display:flex;align-items:center;gap:16px;padding:18px 20px;
+ border-radius:22px;border:1px solid #856dbe;background:linear-gradient(135deg,#353561,#273b57);
+ margin:0 0 14px;color:#f7fcff}
+.mascot-equipped-avatar{flex:0 0 122px;width:122px;height:122px;border-radius:26px;display:grid;place-items:center;
+ position:relative;background:radial-gradient(circle at 37% 25%,#ffffff4f,transparent 40%),linear-gradient(145deg,#7b67d9,#414b86);
+ border:2px solid #c1adff;box-shadow:0 8px 23px #17173c7d}
+.mascot-equipped-avatar span{font-size:73px;line-height:1;filter:drop-shadow(0 7px 7px #1517388c)}
+.mascot-equipped-avatar b{position:absolute;font-size:27px;right:0;bottom:-3px;background:#283d67dd;
+ padding:5px;border-radius:12px}
+.mascot-equipped-copy{flex:1;min-width:0}
+.mascot-equipped-copy>small{font-size:11px;font-weight:800;color:#b6e7f9}
+.mascot-equipped-copy h2{font-size:clamp(21px,3vw,28px);margin:3px 0;line-height:1.25}
+.mascot-equipped-copy p{font-size:13px;color:#e1dafe;margin:4px 0 10px}
+.mascot-equipped-copy .mascot-xp-meter{height:12px;background:#161d3b;border-radius:99px;overflow:hidden;border:1px solid #7488bd;margin:10px 0 6px}
+.mascot-xp-meter>span,.mascot-mini-meter>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#73f0c3,#ffe46c);transition:width .2s}
+.mascot-equipped-copy>small:last-child{font-size:12px;color:#d9e9f5}
+.mascot-help{border:1px solid #4f6976;background:#223b47;color:#e6f7ef;padding:15px 17px;
+ border-radius:17px;margin:0 0 16px}
+.mascot-help strong{font-size:14px}
+.mascot-help p{font-size:12px;color:#c2ddd1;line-height:1.5;margin:7px 0 0}
+.mascot-filters{display:flex;gap:8px;overflow-x:auto;padding:0 0 11px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.mascot-filters button{scroll-snap-align:start;white-space:nowrap;flex:0 0 auto;min-height:45px;padding:9px 12px;
+ border:1px solid #53687a;border-radius:12px;background:#2b3647;color:#e3eaf0;font-size:12px;font-weight:900;cursor:pointer}
+.mascot-filters button.active{background:#305d8c;color:#fff;border-color:#7cbeff}
+.mascot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.mascot-card{
+ --rarity:#a5bdf5;--rarity-dark:#3c4d7a;
+ min-width:0;padding:12px;position:relative;overflow:hidden;display:flex;flex-direction:column;
+ border:2px solid var(--rarity);border-radius:21px;
+ background:radial-gradient(circle at 25% 18%,color-mix(in srgb,var(--rarity) 29%,transparent),transparent 42%),
+ linear-gradient(150deg,var(--rarity-dark),#202d45 73%);color:#f5fbff;
+ box-shadow:0 11px 18px #121b3240;
+}
+.mascot-card.rarity-uncommon,.rarity-uncommon{--rarity:#79e2a1;--rarity-dark:#275f49}
+.mascot-card.rarity-rare,.rarity-rare{--rarity:#79dafa;--rarity-dark:#235b84}
+.mascot-card.rarity-epic,.rarity-epic{--rarity:#e6a0ff;--rarity-dark:#62357d}
+.mascot-card.rarity-legendary,.rarity-legendary{--rarity:#ffcf72;--rarity-dark:#815018}
+.mascot-card.selected{box-shadow:0 0 0 2px #fff8,0 12px 22px #1418297d}
+.mascot-card.locked{filter:saturate(.55)}
+.mascot-card-tier{font-size:11px;font-weight:900;color:#f7fdff;min-height:19px;white-space:normal}
+.mascot-card-avatar{
+ position:relative;display:grid;place-items:center;aspect-ratio:1.2;margin:8px 0 5px;
+ border-radius:17px;background:radial-gradient(circle at 50% 27%,#ffffff59,transparent 43%),
+ linear-gradient(140deg,color-mix(in srgb,var(--rarity) 45%,#142d52),#293753);
+ border:1px solid color-mix(in srgb,var(--rarity) 55%,#fff3);
+}
+.mascot-card-avatar:after{content:"✦";position:absolute;top:8px;right:10px;color:var(--rarity);font-size:24px}
+.mascot-card-avatar span{font-size:clamp(47px,6.8vw,88px);line-height:1;filter:drop-shadow(0 8px 5px #0619297d)}
+.mascot-card-avatar b{position:absolute;bottom:5px;right:7px;font-size:26px;filter:drop-shadow(0 2px 2px #0c182b)}
+.mascot-card.locked .mascot-card-avatar span{filter:grayscale(.8) opacity(.67)}
+.mascot-card h3{font-size:15px;line-height:1.28;margin:4px 0 5px;color:#fff;min-height:39px}
+.mascot-card-condition{font-size:11px;line-height:1.4;color:#e0eaf4;min-height:31px;margin:0 0 9px}
+.mascot-mini-meter{height:8px;border-radius:50px;background:#101d33ad;overflow:hidden;margin:auto 0 10px}
+.mascot-action{min-height:45px;width:100%;border-radius:12px;border:1px solid var(--rarity);
+ background:#f7fbff;color:#1c3451;font-size:12px;line-height:1.3;font-weight:900;
+ padding:9px 8px;cursor:pointer}
+.mascot-action:disabled{opacity:.78;cursor:default}
+.mascot-card.selected .mascot-action{background:#358f6a;color:white}
+.mascot-card.locked .mascot-action{background:#1b2638;color:#ccd8e4;border-color:#506479}
+.mascot-action:focus-visible,.mascot-filters button:focus-visible,.mascot-hero-actions button:focus-visible{outline:3px solid #fff2aa;outline-offset:3px}
+.mascot-route-buddy{
+ display:flex;align-items:center;gap:10px;margin:4px 0 13px;padding:9px 13px;
+ border-radius:16px;background:linear-gradient(130deg,#2b485b,#27473f);
+ border:1px solid #53777c;color:#f2fff7}
+.mascot-route-buddy>span{font-size:36px}
+.mascot-route-buddy div{display:flex;flex-direction:column;gap:4px}
+.mascot-route-buddy b{font-size:14px}
+.mascot-route-buddy small{font-size:11px;color:#c3e7d5}
+.mascot-home-current{display:flex;align-items:center;gap:12px;padding:12px 16px;margin:0 0 12px;
+ border-radius:18px;background:linear-gradient(130deg,#31524e,#333f66);border:1px solid #52797a;color:#fff}
+.mascot-home-current>span{font-size:40px}
+.mascot-home-current div{display:grid;gap:4px;flex:1;min-width:0}
+.mascot-home-current strong{font-size:15px}
+.mascot-home-current small{font-size:12px;line-height:1.4;color:#def4e7}
+.mascot-home-current button{min-height:44px;border:1px solid #8ac8b8;border-radius:12px;
+ background:#255b58;color:#fff;padding:8px 12px;font-weight:850;cursor:pointer}
+.mascot-profile-current{padding:13px 15px;border:1px solid #648588;background:#2d4b52;
+ border-radius:16px;margin-bottom:11px;color:#eef7f3;display:flex;align-items:center;gap:10px}
+.mascot-profile-current>span{flex:1;font-size:13px;font-weight:900}
+.mascot-profile-current button{border:1px solid #86bda9;border-radius:12px;min-height:44px;
+ color:#fff;background:#376552;padding:8px 11px;font-weight:850}
+@media(min-width:1100px){.mascot-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(min-width:650px) and (max-width:1099px){.mascot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:649px){.mascot-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .mascot-card{padding:9px;border-radius:16px}
+ .mascot-card-tier{font-size:10px}
+ .mascot-card-avatar span{font-size:clamp(53px,13vw,73px)}
+ .mascot-card h3{font-size:13px;min-height:34px}
+ .mascot-card-condition{font-size:10px;min-height:43px}
+ .mascot-hero{padding:18px 15px}
+ .mascot-equipped{gap:12px;padding:12px}
+ .mascot-equipped-avatar{flex-basis:88px;width:88px;height:93px;border-radius:19px}
+ .mascot-equipped-avatar span{font-size:58px}
+ .mascot-equipped-avatar b{font-size:19px}
+ .mascot-home-current{flex-wrap:wrap;padding:11px}
+ .mascot-home-current>span{font-size:34px}
+ .mascot-home-current button{margin-left:auto}
+}
+@media(prefers-reduced-motion:reduce){.mascot-mini-meter>span,.mascot-xp-meter>span{transition:none}}
+
+/* Cosmetic evolution milestones: the companion's portrait visibly changes
+ * when it reaches the Explorer and Star stages, without gameplay buffs. */
+.mascot-card-avatar.level-explorer,.mascot-equipped-avatar.level-explorer{
+  border-color:#87f6e0;box-shadow:inset 0 0 26px #7df8d33b,0 0 15px #73e8bf66;
+}
+.mascot-card-avatar.level-star,.mascot-equipped-avatar.level-star{
+  border-color:#ffe991;box-shadow:inset 0 0 28px #ffdf7757,0 0 22px #ffcd65a3;
+  background:radial-gradient(circle at 40% 30%,#ffffff72,transparent 52%),
+  linear-gradient(140deg,#9971cc,#6a4468,#66440f);
+}
+.mascot-card-avatar.level-star:before,.mascot-equipped-avatar.level-star:before{
+  content:"✦ ✨ ✦";position:absolute;top:0;left:0;right:0;text-align:center;
+  color:#fff9d2;font-size:14px;letter-spacing:5px;z-index:1;pointer-events:none;
+}
