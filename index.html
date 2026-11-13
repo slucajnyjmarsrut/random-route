@@ -963,7 +963,7 @@ try {
     return isAllowedLocalProfile(runtimeUserProfile)?runtimeUserProfile:null;
   }
   function isUserSignedIn(){const u=readUserProfile();try{return !!u&&(runtimeSignedIn||localStorage.getItem('rr_user_session')==='1')}catch(e){return !!u&&runtimeSignedIn}}
-  function isDeveloperMode(){const u=readUserProfile();return !!u&&u.role==='tester'}
+  function isDeveloperMode(){const u=isUserSignedIn()?readUserProfile():null;return !!u&&u.role==='tester'}
   window.__isDeveloperMode=isDeveloperMode;
   function applyDeveloperUi(){const on=isDeveloperMode();document.body.classList.toggle('dev-mode',on);document.querySelectorAll('[data-buy-type]').forEach(b=>{b.disabled=on;b.title=on?'Оплата отключена в режиме разработчика':''});if(on&&window.__setDeveloperMode)window.__setDeveloperMode(true)}
   window.__applyDeveloperUi=applyDeveloperUi;
