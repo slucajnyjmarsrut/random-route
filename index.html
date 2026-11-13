@@ -153,7 +153,7 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
-<link rel="stylesheet" href="simple-home.css?v=1.0"/>
+<link rel="stylesheet" href="simple-home.css?v=1.1"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.0"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
@@ -188,6 +188,7 @@ try {
  <button type="button" data-open-screen="mascots">Спутники</button>
 </div>
 <button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create">Построить маршрут <span aria-hidden="true">→</span></button>
+<button class="secondary rr-welcome-guest" id="homeOpenGuestProfileBtn" type="button" data-open-screen="profile">👤 Войти в профиль без регистрации</button>
 </section>
 <section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
 <button type="button" class="rr-create-back" data-open-screen="home">← На главную</button>
@@ -431,6 +432,7 @@ try {
   <div id="developerCheckResults" class="devdiag-results" aria-live="polite">Запусти проверку, чтобы увидеть подробный отчёт.</div>
   <p class="devdiag-note">GPS, фото и начисления требуют реальных испытаний на телефоне. Жёлтый статус «Не проверено» не означает неисправность.</p>
 </section>
+<div class="hint rr-guest-profile-notice" id="guestProfileNotice" role="status">👤 Вы в гостевом профиле. Почта и пароль не нужны. Учётная запись не создаётся. Прогресс прогулок и спутников сохраняется только в этом браузере.</div>
 <div class="profile-identity" id="profileIdentity"><div class="profile-avatar" id="profileAvatar">Я</div><div class="profile-person"><b id="profileName">Пользователь</b><span id="profileEmail">—</span><div class="tester-badge hidden" id="profileRoleBadge">★ Тестировщик</div></div><button class="profile-logout" id="profileLogout" type="button">Выйти</button></div><div class="profile-badges-mini" id="profileBadgesMini"></div>
 <div class="mascot-profile-current"><span id="mascotProfileCurrent">🐶 Щенок-путник · уровень 1</span><button type="button" data-open-screen="mascots">Выбрать спутника</button></div>
 <div class="streak-card">
@@ -522,7 +524,7 @@ try {
   <div class="rr-page-links"><button type="button" data-open-screen="home">🗺️ К маршрутам</button><button type="button" data-open-screen="help">ℹ️ О приложении</button></div>
 </section>
 </main>
-<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="mascots"><i>🐾</i>Спутники</button><button data-screen="profile"><i>👤</i>Профиль</button></nav>
+<nav class="nav"><button class="active" data-screen="home"><i>🗺️</i>Главная</button><button data-screen="rating"><i>🏆</i>Рейтинг</button><button data-screen="shop"><i>🛍️</i>Магазин</button><button data-screen="mascots"><i>🐾</i>Спутники</button><button data-screen="profile"><i>👤</i>Войти</button></nav>
 <div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
 <div class="modal-backdrop" id="exitRouteModal"><div class="purchase-modal exit-route-sheet"><div class="grab"></div><div class="exit-icon">↩️</div><h2>Выйти из маршрута?</h2><p>Если выйти сейчас, текущий маршрут будет закрыт.</p><div class="exit-warning"><b>Маршрут не сохраняется.</b><br>Открытые участки, текущая контрольная точка и прогресс незавершённого маршрута будут удалены.</div><div class="purchase-actions"><button class="purchase-cancel" id="exitRouteCancel" type="button">Остаться</button><button class="purchase-confirm exit-confirm" id="exitRouteConfirm" type="button">Выйти</button></div></div></div>
 
@@ -961,7 +963,7 @@ try {
     return isAllowedLocalProfile(runtimeUserProfile)?runtimeUserProfile:null;
   }
   function isUserSignedIn(){const u=readUserProfile();try{return !!u&&(runtimeSignedIn||localStorage.getItem('rr_user_session')==='1')}catch(e){return !!u&&runtimeSignedIn}}
-  function isDeveloperMode(){const u=readUserProfile();return !!u&&u.role==='tester'}
+  function isDeveloperMode(){const u=isUserSignedIn()?readUserProfile():null;return !!u&&u.role==='tester'}
   window.__isDeveloperMode=isDeveloperMode;
   function applyDeveloperUi(){const on=isDeveloperMode();document.body.classList.toggle('dev-mode',on);document.querySelectorAll('[data-buy-type]').forEach(b=>{b.disabled=on;b.title=on?'Оплата отключена в режиме разработчика':''});if(on&&window.__setDeveloperMode)window.__setDeveloperMode(true)}
   window.__applyDeveloperUi=applyDeveloperUi;
@@ -971,7 +973,20 @@ try {
   function openProfileAuth(mode='login'){setAuthMode(mode);$('#profileAuthModal').classList.add('show');setTimeout(()=>$(mode==='register'?'#authName':'#authEmail').focus(),100)}
   function closeProfileAuth(){$('#profileAuthModal').classList.remove('show');$('#authError').classList.remove('show')}
   function authError(msg){const el=$('#authError');el.textContent=msg;el.classList.add('show')}
-  function renderProfileIdentity(){const u=readUserProfile();if(!u){applyDeveloperUi();return;}$('#profileName').textContent=u.name||'Пользователь';$('#profileEmail').textContent=u.email||'';$('#profileHeroTitle').textContent=u.name?`Привет, ${u.name}`:'Прогресс';$('#profileAvatar').textContent=(u.name||u.email||'Я').trim().charAt(0).toUpperCase();const badge=$('#profileRoleBadge');if(badge){badge.classList.toggle('hidden',u.role!=='tester');badge.textContent=u.role==='tester'?'★ Разработчик':'★ Тестировщик'}if(window.__renderBadges)window.__renderBadges();applyDeveloperUi()}
+  function renderProfileIdentity(){
+    const u=isUserSignedIn()?readUserProfile():null;
+    const guest=!u;
+    $('#profileName').textContent=guest?'Гость':u.name||'Пользователь';
+    $('#profileEmail').textContent=guest?'Без учётной записи · только этот браузер':u.email||'';
+    $('#profileHeroTitle').textContent=guest?'Гостевой профиль':u.name?`Привет, ${u.name}`:'Прогресс';
+    $('#profileAvatar').textContent=guest?'Г':(u.name||u.email||'Я').trim().charAt(0).toUpperCase();
+    $('#profileLogout').textContent=guest?'На главную':'Выйти';
+    $('#guestProfileNotice').classList.toggle('hidden',!guest);
+    const badge=$('#profileRoleBadge');
+    if(badge){badge.classList.toggle('hidden',guest||u.role!=='tester');badge.textContent=guest?'':u.role==='tester'?'★ Разработчик':'★ Тестировщик'}
+    if(window.__renderBadges)window.__renderBadges();
+    applyDeveloperUi();
+  }
   function persistSession(user){runtimeUserProfile=user;runtimeSignedIn=true;try{localStorage.setItem('rr_user_profile',JSON.stringify(user));localStorage.setItem('rr_user_session','1')}catch(e){}renderProfileIdentity();applyDeveloperUi();closeProfileAuth();authState.pendingProfileOpen=false;try{showScreen('profile',{restoreScroll:false})}catch(e){} }
   function activateTesterAccount(){
     const user={name:TESTER_ACCOUNT.name,email:TESTER_ACCOUNT.email,passwordHash:simplePassHash(TESTER_ACCOUNT.email+'|'+TESTER_ACCOUNT.password),role:'tester',createdAt:Date.now()};
@@ -995,7 +1010,17 @@ try {
     const user=readLocalAccounts().find(a=>a.email===email&&a.passwordHash===simplePassHash(email+'|'+pass));if(user){persistSession(user);toast('Вход выполнен');return}
     authError('Почта или пароль неверные.');
   };
-  $('#profileLogout').onclick=()=>{try{localStorage.removeItem('rr_user_session');localStorage.removeItem('rr_user_profile')}catch(e){}runtimeUserProfile=null;runtimeSignedIn=false;applyDeveloperUi();window.__setDeveloperMode?.(false);showScreen('home',{restoreScroll:false});toast('Вы вышли из профиля')};
+  $('#profileLogout').onclick=()=>{
+    if(!isUserSignedIn()){
+      showScreen('home',{restoreScroll:false});
+      return;
+    }
+    try{localStorage.removeItem('rr_user_session');localStorage.removeItem('rr_user_profile')}catch(e){}
+    runtimeUserProfile=null;runtimeSignedIn=false;applyDeveloperUi();
+    window.__setDeveloperMode?.(false);
+    showScreen('home',{restoreScroll:false});
+    toast('Вы вышли из профиля');
+  };
   renderProfileIdentity();applyDeveloperUi();
 
   // Карточки на главной: кратко на экране, подробно по нажатию.
@@ -1067,7 +1092,8 @@ try {
 
   function showScreen(id,{restoreScroll=true}={}){
     const content=$('.content'); if(rr.activeScreen)rr.scrolls[rr.activeScreen]=content.scrollTop;
-    if(id==='profile' && !isUserSignedIn()){authState.pendingProfileOpen=true;openProfileAuth('login');return}
+    // The guest profile is a regular screen: no password or account is required.
+    // Only explicit tester authentication continues to use the legacy dialog.
     if(id==='home' && rr.legs.length && rr.stage!=='idle' && rr.stage!=='completed') id='route';
     if(id==='profile')renderProfileIdentity();
     if(id==='create'&&(rr.gpsFresh||rr.startMode==='demo'||rr.startMode==='developer')){
