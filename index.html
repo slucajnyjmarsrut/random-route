@@ -153,7 +153,7 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
-<link rel="stylesheet" href="simple-home.css?v=1.5"/>
+<link rel="stylesheet" href="simple-home.css?v=1.6"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.1"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
@@ -181,8 +181,10 @@ try {
 <div class="hero rr-welcome-hero"><small>Откройте город пешком</small><h1>Исследуем Якутск</h1><p>Выберите прогулку. Мы покажем пешеходный путь и интересные места.</p></div>
 <aside class="marshik-strip rr-welcome-mascot" aria-label="Маршик объясняет, как начать прогулку">
  <img src="icons/mascot-marshik.svg" width="110" height="120" alt="Маршик — помощник с картой" loading="eager"/>
- <div><strong>Привет! Я Маршик.</strong><span id="homeActionHelp">Нажми «Построить маршрут», затем выбери расстояние и интересные места. Магазин, спутники и профиль — в меню снизу.</span></div>
+ <div><strong>Привет! Я Маршик.</strong><span id="homeActionHelp">Нажми «Построить маршрут» — я показываю на большую зелёную кнопку ниже! Затем выбери расстояние и интересные места. Магазин, спутники и профиль — в меню снизу.</span></div>
+ <span class="rr-marshik-pointing-hand" aria-hidden="true">👇</span>
 </aside>
+<div class="rr-marshik-pointer" aria-hidden="true"><span class="rr-marshik-pointer-arrow">↓</span></div>
 <button class="primary rr-welcome-start" id="homeOpenCreateBtn" type="button" data-open-screen="create" aria-describedby="homeActionHelp">Построить маршрут <span aria-hidden="true">→</span></button>
 </section>
 <section class="screen rr-create-screen" id="create" aria-label="Создание прогулочного маршрута">
@@ -3043,6 +3045,25 @@ try {
     }
     showScreen(rr.activeScreen,{restoreScroll:true});
   }
+
+  // Маршик показывает, где начать прогулку, пока пользователь не нажал CTA.
+  // Не изменяем переходы между разделами или существующие обработчики кнопки.
+  (() => {
+    const home=$('#home'),cta=$('#homeOpenCreateBtn');
+    const key='rr_marshik_route_cta_used_v1';
+    let used=false;
+    try{used=localStorage.getItem(key)==='1'}catch(e){}
+    const refreshGuide=()=>{
+      home.classList.toggle('rr-marshik-guide-dismissed',used);
+      cta.classList.toggle('rr-marshik-cta-active',!used);
+    };
+    refreshGuide();
+    cta.addEventListener('click',()=>{
+      used=true;
+      refreshGuide();
+      try{localStorage.setItem(key,'1')}catch(e){}
+    });
+  })();
 
   // v9.3: вход без кода, GPS запускается сразу после загрузки интерфейса.
   let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');}})}
