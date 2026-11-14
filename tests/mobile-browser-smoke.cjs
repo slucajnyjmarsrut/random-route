@@ -17,6 +17,7 @@ async function main(){
   const width=await page.evaluate(()=>[document.documentElement.scrollWidth,innerWidth]);
   assert.ok(width[0]<=width[1]+2,'mobile page must not scroll horizontally: '+width);
   await page.locator('#homeOpenCreateBtn').click();
+  await page.locator('#rrStartSettings > summary').click();
   await page.locator('#demoYakutskBtn').waitFor({state:'visible',timeout:9000});
   await page.locator('#demoYakutskBtn').click();
   await page.locator('[data-distance-km="3"]').click();
