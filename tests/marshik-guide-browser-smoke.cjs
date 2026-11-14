@@ -33,7 +33,8 @@ const {chromium}=require('playwright');
    await page.locator('[data-type="city"]').click();
    await expectStep('create:build');
    await page.reload({waitUntil:'domcontentloaded'});
-   await page.locator('#home.active').waitFor({state:'visible'});
+   // The app restores the last active screen (often 'create') on reload.
+   await page.waitForFunction(()=>document.querySelector('.app')?.dataset.rrScreen==='create');
    await page.evaluate(()=>window.__rrOpenScreen('create',{restoreScroll:false}));
    await expectStep('create:build');
    await page.evaluate(()=>window.__rrOpenScreen('route',{restoreScroll:false}));
