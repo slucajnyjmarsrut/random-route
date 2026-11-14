@@ -53,7 +53,7 @@ const {chromium}=require('playwright');
      await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error',null,{timeout:20000});
      await expectStep('create:error');
      assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
-     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Не удалось загрузить/);
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Дороги временно недоступны/);
      assert.equal(await page.locator('#routeBuildStatus').isVisible(),true);
      assert.equal(await page.locator('#buildBtn').isEnabled(),true);
      // The Retry button must trigger another real attempt, not a dead label.
