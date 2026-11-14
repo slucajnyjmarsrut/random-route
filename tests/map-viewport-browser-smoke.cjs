@@ -22,6 +22,7 @@ const ROOT='http://127.0.0.1:8765';
      await page.goto(ROOT+'/index.html?demo=1',{waitUntil:'domcontentloaded',timeout:20000});
      await page.locator('#homeOpenCreateBtn').waitFor({state:'visible'});
      await page.locator('#homeOpenCreateBtn').click();
+     await page.locator('#rrStartSettings > summary').click();
      await page.locator('#createMapDetails summary').click();
      const home=page.locator('#homeMap');
      await page.locator('#rrHomeMapExpand').click();
