@@ -24,6 +24,24 @@
     if (!app || $('#profileAuthModal')?.classList.contains('show')) return null;
     const screen = app.dataset.rrScreen;
     if (screen === 'create') {
+      const buildStatus = $('#routeBuildStatus');
+      const buildText = buildStatus?.textContent || '';
+      const buildError = buildStatus && !buildStatus.hidden && (
+        buildStatus.dataset.state === 'error' ||
+        /маршрут (?:не найден|не построен|пока не построен)|не загружаются дорожные данные|нет соединённого пешеходного/i.test(buildText)
+      );
+      if (buildError) return {
+        key:'create:error', target:'#buildBtn', anchor:'#buildBtn',
+        heading:'Маршрут пока не построен',
+        message:buildStatus.dataset.errorCode==='osm' || /дорожн|openstreetmap|osm/i.test(buildText)
+          ?'Дороги временно недоступны. Нажми «Повторить построение». Если не получится — проверь интернет или попробуй позже.'
+          :'Не удалось подобрать пешеходный путь. Измени расстояние или нажми «Повторить построение».'
+      };
+      if ($('#buildBtn')?.disabled) return {
+        key:'create:building', target:'#buildBtn', anchor:'#buildBtn', spotlight:false,
+        heading:'Строю маршрут…',
+        message:'Проверяю реальные пешеходные дороги. Подсказка изменится после результата.'
+      };
       if (creatorStage === 0) return {
         key:'create:distance', target:'.rr-distance-options', anchor:'.rr-distance-options',
         heading:'Шаг 1 · Длина прогулки',
@@ -49,22 +67,10 @@
           message:'Обнови GPS или нажми «Пробный маршрут без GPS». После этого можно строить прогулку.'
         };
       }
-      if ($('#routeBuildStatus')?.dataset.state==='error') return {
-        key:'create:error', target:'#buildBtn', anchor:'#buildBtn',
-        heading:'Маршрут пока не готов',
-        message:$('#routeBuildStatus')?.dataset.errorCode==='osm'
-          ?'Не удалось загрузить пешеходные дороги. Нажми «Повторить построение». Если ошибка останется — проверь интернет и попробуй позже.'
-          :'Маршрут не построен. Выбери другую дистанцию или нажми «Повторить построение».'
-      };
-      if ($('#buildBtn')?.disabled) return {
-        key:'create:building', target:'#buildBtn', anchor:'#buildBtn', spotlight:false,
-        heading:'Маршик строит прогулку',
-        message:'Подбираем пешеходный путь. Подсказка сменится, когда маршрут будет готов.'
-      };
       return {
         key:'create:build', target:'#buildBtn', anchor:'#buildBtn',
-        heading:'Шаг 3 · Всё готово!',
-        message:'Нажми «Построить прогулку» — дальше я покажу путь на карте.'
+        heading:'Шаг 3 · Построим маршрут?',
+        message:'Нажми «Построить прогулку». Я покажу путь на карте, только если найду подходящий пешеходный маршрут.'
       };
     }
     if (screen !== 'route') return null;
@@ -127,7 +133,11 @@
     if (!step) { if (activeKey) clearStep(); return; }
     const target = $(step.target), anchor = $(step.anchor);
     if (!target || !anchor || !shown(target)) { if (activeKey) clearStep(); return; }
-    if (step.key === activeKey && target === activeTarget && guide?.isConnected) return;
+    if (step.key === activeKey && target === activeTarget && guide?.isConnected) {
+      const textNode=guide.querySelector('#rrMarshikGuideText');
+      if(textNode&&textNode.textContent!==step.message)textNode.textContent=step.message;
+      return;
+    }
     clearStep();
     guide = document.createElement('aside');
     guide.id = guideId;
@@ -206,7 +216,10 @@
   };
   watch('.app', {attributes:true, attributeFilter:['data-rr-screen']});
   watch('#rrStartSettings', {attributes:true, attributeFilter:['open']});
-  watch('#routeBuildStatus', {attributes:true, attributeFilter:['hidden','data-state','data-error-code']});
+  watch('#routeBuildStatus', {
+    attributes:true, attributeFilter:['hidden','data-state','data-error-code'],
+    childList:true, characterData:true, subtree:true
+  });
   ['#home','#create','#route','#profileAuthModal','#photoBlock','#verifyBtn',
    '#nextBtn','#demoGpsBtn','#buildBtn','#gpsCheck','#photoCheck'].forEach(selector =>
     watch(selector, {attributes:true, attributeFilter:['class','disabled']})

@@ -271,6 +271,8 @@ html[data-rr-theme="light"] .rr-create-details .unit{color:#3b5f4e}
 .rr-build-status[data-state="error"]{
   border-color:#e1b76a;background:#333c38;color:#ffedc4;
 }
+#routeBuildStatus[data-state="error"]{margin-top:10px}
+#buildBtn[aria-describedby="routeBuildStatus"]{outline:3px solid #efc16c;outline-offset:3px}
 html[data-rr-theme="light"] .rr-build-status[data-state="error"]{
   background:#fff2d7;color:#6a421e;border-color:#e1b76a;
 }
