@@ -1574,6 +1574,14 @@ try {
     rr.stage='walking';rr.autoGpsBusy=false;saveSession();
   }
 
+  const defaultBuildButtonMarkup=$('#buildBtn').innerHTML;
+  function clearRouteBuildFailure(){
+    const el=$('#routeBuildStatus'),btn=$('#buildBtn');
+    if(el?.dataset.state!=='error')return;
+    el.hidden=true;el.removeAttribute('data-state');el.removeAttribute('data-error-code');
+    btn.innerHTML=defaultBuildButtonMarkup;btn.removeAttribute('aria-describedby');
+    document.dispatchEvent(new Event('rr:marshik-refresh'));
+  }
   async function buildYakutsk(options={}){
     const todayDailyOffers=window.DailyRouteQuests?.offersForDay?.(window.DailyRouteQuests.dayKey(Date.now()))||[];
     const dailyOffer=options.dailyOffer?todayDailyOffers.find(o=>o.id===options.dailyOffer.id&&o.day===options.dailyOffer.day):null;
@@ -1591,11 +1599,11 @@ try {
       status(msg);toast('Маршруты доступны в Якутске; попробуйте демонстрационный режим.');
       return false;
     }
-    const btn=$('#buildBtn'),old=btn.textContent,statusEl=$('#routeBuildStatus');
+    const btn=$('#buildBtn'),statusEl=$('#routeBuildStatus'),retryAfterError=statusEl?.dataset.state==='error';
     const startedAt=performance.now(),routeBudgetMs=12000,maxAttempts=4;
     const report=message=>{
       btn.textContent=message;
-      if(statusEl){statusEl.hidden=false;statusEl.textContent=message+' Можно продолжать пользоваться телефоном.';}
+      if(statusEl){statusEl.hidden=false;statusEl.dataset.state='loading';statusEl.removeAttribute('data-error-code');statusEl.textContent=message+' Можно продолжать пользоваться телефоном.';}
     };
     btn.disabled=true;report('Подбираем интересные места…');
     try{
@@ -1613,7 +1621,7 @@ try {
       // The photo catalog can load later; avoid flooding the network while routing.
       report('Загружаем настоящие пешеходные дороги OSM…');
       if(!window.RRWalkingDijkstra?.loadGraph)throw new Error('DijkstraUnavailable');
-      const streetGraph=await window.RRWalkingDijkstra.loadGraph(rr.start,input);
+      const streetGraph=await window.RRWalkingDijkstra.loadGraph(rr.start,input,{retry:retryAfterError});
       const targetM=input*1000,maxR=Math.min(2450,Math.max(800,targetM*.55));
       const within=p=>distMeters(rr.start,{lat:p._lat,lng:p._lng})<=maxR;
       let near=photoPool.filter(p=>isPhotoSafePoi(p)&&!poiInsideNoGo(p)&&within(p));
@@ -1783,28 +1791,38 @@ try {
       return true;
     }catch(e){
       console.error(e);
-      if(e?.message==='NoDifferentDirection')toast('Не нашли действительно другое направление. Нажмите ещё раз — попробуем другой сектор.');
+      const reason=String(e?.message||'');
+      const osmError=['OSMUnavailable','GraphIncomplete','GraphTooLarge','DijkstraUnavailable','InvalidLocation'].includes(reason)
+        || e?.name==='AbortError' || /failed to fetch|networkerror|overpass|timeout/i.test(reason);
+      if(e?.message==='NoDifferentDirection')toast('Не нашли действительно другое направление. Попробуем другой сектор.');
       else if(e?.message==='BadWaypointSnap')toast('Маршрутизатор привязал точки слишком далеко. Попробуйте ещё раз.');
-      else if(['OSMUnavailable','GraphIncomplete','GraphTooLarge','DijkstraUnavailable','InvalidLocation'].includes(e?.message))toast('Не удалось загрузить пешеходные дороги OSM. Проверьте интернет и повторите.');
-      else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(e?.message))toast('По данным OSM здесь нет связанного пешеходного пути. Измените старт или дистанцию.');
-      else if(e?.message==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
-      else if(e?.message==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
-      else if(e?.message==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут, который отображается как '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км. Попробуйте другую дистанцию или ещё раз.');}
+      else if(osmError){/* One inline error, not a duplicate dark toast. */}
+      else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason))toast('По данным OSM здесь нет связанного пешеходного пути. Измените старт или дистанцию.');
+      else if(reason==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
+      else if(reason==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
+      else if(reason==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут длиной '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',')+' км.');}
       else toast('Дейкстра не нашла подходящий маршрут. Измените расстояние или попробуйте снова.');
       if(statusEl){
-        statusEl.hidden=false;
-        statusEl.textContent=(
-          ['OSMUnavailable','GraphIncomplete','GraphTooLarge','DijkstraUnavailable'].includes(e?.message)
-            ?'Не загружаются дорожные данные OpenStreetMap. Проверьте интернет и нажмите «Повторить».'
-            :e?.message==='NoNearbyFootpath'||e?.message==='DisconnectedWalkingGraph'
-              ?'Нет соединённого пешеходного пути возле старта. Попробуйте переместиться ближе к улице или выбрать другое расстояние.'
-              :'Маршрут не найден. Попробуйте выбрать другую длину прогулки.'
-        );
+        statusEl.hidden=false;statusEl.dataset.state='error';statusEl.dataset.errorCode=osmError?'osm':reason;
+        statusEl.textContent=osmError
+          ?'Дорожные данные OSM сейчас недоступны. Маршрут не построен. Нажмите «Повторить построение». Если ошибка повторится, проверьте интернет или попробуйте позже.'
+          :['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason)
+            ?'Возле точки старта нет соединённого пешеходного пути. Попробуйте другое место старта или расстояние, затем повторите построение.'
+            :'Маршрут пока не построен. Измените расстояние или нажмите «Повторить построение».';
       }
       return false;
     }finally{
-      btn.disabled=false;btn.textContent=old;
-      if(statusEl&&rr.legs.length&&rr.stage!=='idle')statusEl.hidden=true;
+      btn.disabled=false;
+      if(statusEl?.dataset.state==='error'){
+        btn.textContent='↻ Повторить построение';
+        btn.setAttribute('aria-describedby','routeBuildStatus');
+      }else{
+        btn.innerHTML=defaultBuildButtonMarkup;
+        btn.removeAttribute('aria-describedby');
+      }
+      if(statusEl&&rr.legs.length&&rr.stage!=='idle'){
+        statusEl.hidden=true;statusEl.removeAttribute('data-state');statusEl.removeAttribute('data-error-code');
+      }
     }
   }
   window.__buildDailyRoute=async function(offer){
@@ -1815,6 +1833,11 @@ try {
     return await buildYakutsk({distanceKm:valid.distanceKm,dailyOffer:valid});
   };
   $('#buildBtn').onclick=()=>buildYakutsk();
+  // A changed preference invalidates the old error: never keep a stale
+  // message or retry label after the user has revised their route request.
+  $$('[data-distance-km], #typeChoices .choice').forEach(b=>b.addEventListener('click',clearRouteBuildFailure));
+  $('#distanceInput').addEventListener('change',clearRouteBuildFailure);
+  $('#homeOpenCreateBtn').addEventListener('click',clearRouteBuildFailure);
 
   // ---------- Бесплатный локальный фотоконтроль ----------
   // Модель MobileNet загружается в браузер только при первой проверке.

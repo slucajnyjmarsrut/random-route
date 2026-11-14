@@ -19,11 +19,15 @@
   const STATIC_PATH='./data/yakutsk-center-walking.json?v=1';
   const STATIC_BOUNDS={south:62.016,west:129.708,north:62.046,east:129.760};
   let staticGraph=null,staticPromise=null,staticUnavailableUntil=0;
-  function canUseStatic(start,requestedKm){
-    const p=start||{},km=Number(requestedKm);
-    return Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&km>=1&&km<=6
+  function staticCoversStart(start){
+    const p=start||{};
+    return Number.isFinite(p.lat)&&Number.isFinite(p.lng)
       &&p.lat>=STATIC_BOUNDS.south+.002&&p.lat<=STATIC_BOUNDS.north-.002
       &&p.lng>=STATIC_BOUNDS.west+.004&&p.lng<=STATIC_BOUNDS.east-.004;
+  }
+  function canUseStatic(start,requestedKm){
+    const km=Number(requestedKm);
+    return km>=1&&km<=6&&staticCoversStart(start);
   }
   async function loadStaticGraph(){
     if(staticGraph)return staticGraph;
@@ -232,16 +236,35 @@
     try{const item=graphCache.get(graphKey(start,requestedKm));return !!item&&item.expires>Date.now();}
     catch(e){return false;}
   }
-  async function loadGraph(start,requestedKm){
+  async function bundledFallback(key,start){
+    if(!staticCoversStart(start))return null;
+    try{
+      const graph=await loadStaticGraph();
+      graphCache.delete(key);
+      graphCache.set(key,{graph,fallback:true,expires:Date.now()+90*1000});
+      while(graphCache.size>2)graphCache.delete(graphCache.keys().next().value);
+      return graph;
+    }catch(e){
+      console.warn('Bundled OSM snapshot also unavailable:',e?.message||e);
+      return null;
+    }
+  }
+  async function loadGraph(start,requestedKm,options={}){
     if(canUseStatic(start,requestedKm)){
       try{return await loadStaticGraph();}
       catch(e){console.warn('Local OSM street snapshot is unavailable:',e?.message||e);}
     }
     const radius=graphRadius(requestedKm),area=bbox(start,radius),key=graphKey(start,requestedKm);
     const item=graphCache.get(key);
-    if(item&&item.expires>Date.now())return item.graph;
+    if(item&&item.expires>Date.now()&&!(options.retry&&item.fallback))return item.graph;
     if(pending.has(key))return pending.get(key);
-    if(unavailableUntil>Date.now())throw Error('OSMUnavailable');
+    // An explicit tap on Retry may recheck an Overpass outage, but regular
+    // background preloads still honour the cooldown.
+    if(unavailableUntil>Date.now()&&!options.retry){
+      const local=await bundledFallback(key,start);
+      if(local)return local;
+      throw Error('OSMUnavailable');
+    }
     const work=(async()=>{
       const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
       let lastError;
@@ -258,8 +281,14 @@
         }catch(e){lastError=e;}
         finally{clearTimeout(timer);}
       }
+      // For downtown Yakutsk, the bundled graph contains genuine OSM ways.
+      // For long walks it is ONLY a candidate: buildYakutsk still verifies
+      // actual Dijkstra distance and rejects an unsuitable route.
+      const local=await bundledFallback(key,start);
+      if(local)return local;
+      console.warn('Overpass walking data is unavailable:',lastError?.message||lastError);
       unavailableUntil=Date.now()+20*1000;
-      throw lastError||Error('OSMUnavailable');
+      throw Error('OSMUnavailable');
     })();
     pending.set(key,work);
     try{return await work;}finally{pending.delete(key);}
