@@ -77,7 +77,7 @@ jobs:
           if(!html.includes('yakutsk-weather.js?v=1.1')||!html.includes('smart-safety.js?v=1.2'))throw new Error('Independent auto-weather module missing');
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
           if(!html.includes('weather-background.js?v=1.0')||!html.includes('weather-background.css?v=1.0'))throw new Error('Animated weather background not loaded');
-          if(!html.includes('mobile-ux.css?v=1.1')||!html.includes('walking-dijkstra.js?v=2.1'))throw new Error('Mobile layout or real OSM dataset integration missing');
+          if(!html.includes('mobile-ux.css?v=1.1')||!html.includes('walking-dijkstra.js?v=2.3'))throw new Error('Mobile layout or real OSM dataset integration missing');
           if(!html.includes('responsive-layout.js?v=1.0')||!html.includes('responsive-layout.css?v=1.0'))throw new Error('Responsive desktop and phone assets missing');
           if(html.includes('user-scalable=no'))throw new Error('Viewport must allow zoom for accessibility');
           if(!html.includes('window.__rrResizeMaps'))throw new Error('Yandex map resize hook missing');
@@ -104,7 +104,7 @@ jobs:
           const tapCode=fs.readFileSync('tap-targets.js','utf8');
           if(!tapCode.includes('controls.length!==1'))throw new Error('Unsafe card multi-action guard missing');
           if(!html.includes('developerDiagnostics')||!html.includes('window.__rrDeveloperCatalog')||!html.includes('window.__rrDeveloperRouteProbe'))throw new Error('Developer diagnostics hooks missing');
-          if(!html.includes('simple-home.css?v=1.9')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
+          if(!html.includes('simple-home.css?v=2.0')||!html.includes('route-navigation.css?v=1.0'))throw new Error('Simple interface and navigation styles missing');
           if(!html.includes('icons/favicon.svg?v=4'))throw new Error('Optimized favicon link missing');
           if(!html.includes('id="rrHomeWeatherValue"') || !html.includes('id="homeOpenCreateBtn"') || !html.includes('id="rrNavPanel"'))throw new Error('Simple home or GPS navigation missing');
           if(!html.includes('RRWalkingDijkstra.requestRoute')||!html.includes('RRRouteAI?.score'))throw new Error('Dijkstra/learned route selection missing');
@@ -133,6 +133,7 @@ jobs:
           node tests/main-nav-browser-smoke.cjs
           node tests/clean-home-browser-smoke.cjs
           node tests/marshik-guide-browser-smoke.cjs
+          node tests/route-recovery-browser-smoke.cjs
           node tests/tester-wallet-browser-smoke.cjs
           node tests/welcome-auth-browser-smoke.cjs
           node tests/welcome-contrast-browser-smoke.cjs

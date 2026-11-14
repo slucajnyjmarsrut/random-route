@@ -55,6 +55,8 @@ const {chromium}=require('playwright');
      assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
      assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Дороги временно недоступны/);
      assert.equal(await page.locator('#routeBuildStatus').isVisible(),true);
+     assert.equal(await page.locator('#tryDemoRouteBtn').isVisible(),true,
+       'show a clearly labelled demo alternative after an OSM outage');
      assert.equal(await page.locator('#buildBtn').isEnabled(),true);
      // The Retry button must trigger another real attempt, not a dead label.
      await page.locator('#buildBtn').click();
@@ -64,6 +66,7 @@ const {chromium}=require('playwright');
      await expectStep('create:build');
      assert.equal(await page.locator('#routeBuildStatus').isVisible(),false,
        'old errors must disappear after the user changes their route');
+     assert.equal(await page.locator('#tryDemoRouteBtn').isVisible(),false);
      assert.match(await page.locator('#buildBtn').innerText(),/Построить прогулку/);
      await page.evaluate(()=>{window.RRWalkingDijkstra.loadGraph=window.__originalOsmLoad;});
    }

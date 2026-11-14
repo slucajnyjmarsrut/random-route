@@ -273,6 +273,13 @@ html[data-rr-theme="light"] .rr-create-details .unit{color:#3b5f4e}
 }
 #routeBuildStatus[data-state="error"]{margin-top:10px}
 #buildBtn[aria-describedby="routeBuildStatus"]{outline:3px solid #efc16c;outline-offset:3px}
+#tryDemoRouteBtn.rr-demo-recovery{
+  min-height:48px;margin:8px 0 12px;border-color:#9fd5be;
+  background:#23443b;color:#e4fff0;font-size:14px;
+}
+html[data-rr-theme="light"] #tryDemoRouteBtn.rr-demo-recovery{
+  background:#ebf8f0;border-color:#a8d4bb;color:#154d31;
+}
 html[data-rr-theme="light"] .rr-build-status[data-state="error"]{
   background:#fff2d7;color:#6a421e;border-color:#e1b76a;
 }
