@@ -14,6 +14,11 @@ assert.match(build,/await prefetchTouristPhotos\(rr\.start,input\)/,'route build
 assert.match(html,/withPhotoDeadline\(resolveTouristGuideItem\(item\),2100\)/,'never wait for the entire photo catalogue');
 assert.match(build,/remainingMs=.*routeBudgetMs/,'HTTP timeout must use the remaining time budget');
 assert.match(build,/if\(diff<=tolAccept\)break/,'stop once a route is acceptable');
+assert.match(build,/if\(!best\|\|best\.diff>tolAccept\)/,
+ 'even a street-only route should try the robust real-OSM fallback');
+assert.match(build,/ranked\.sort\(\(a,b\)=>a\.score-b\.score\)/,
+ 'rank real walking-node pairs by distance instead of 6 random pairs');
+assert.match(build,/Math\.min\(16,ranked\.length\)/,'bound extra Dijkstra attempts');
 assert.match(build,/RRRouteAI\?\.score\?\./,'learning model ranks random tourist points');
 assert.match(build,/id="routeBuildStatus"|report\('Строим пешеходный маршрут/,'screen-reader progress must be updated');
 assert.match(foot,/RRWalkingDijkstra\.requestRoute\(points/);
