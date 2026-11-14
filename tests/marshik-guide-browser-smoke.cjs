@@ -32,6 +32,30 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('.rr-distance-options').evaluate(x=>x.classList.contains('rr-marshik-current-target')),false);
    await page.locator('[data-type="city"]').click();
    await expectStep('create:build');
+   if(device.name==='phone'){
+     // Force an OSM outage without changing geolocation or the rest of the app.
+     await page.evaluate(()=>{
+       window.__originalOsmLoad=window.RRWalkingDijkstra.loadGraph;
+       window.RRWalkingDijkstra.loadGraph=async()=>{throw new Error('OSMUnavailable');};
+     });
+     await page.locator('#buildBtn').click();
+     await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error',null,{timeout:20000});
+     await expectStep('create:error');
+     assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Не удалось загрузить/);
+     assert.equal(await page.locator('#routeBuildStatus').isVisible(),true);
+     assert.equal(await page.locator('#buildBtn').isEnabled(),true);
+     // The Retry button must trigger another real attempt, not a dead label.
+     await page.locator('#buildBtn').click();
+     await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error',null,{timeout:20000});
+     assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
+     await page.locator('[data-distance-km="5"]').click();
+     await expectStep('create:build');
+     assert.equal(await page.locator('#routeBuildStatus').isVisible(),false,
+       'old errors must disappear after the user changes their route');
+     assert.match(await page.locator('#buildBtn').innerText(),/Построить прогулку/);
+     await page.evaluate(()=>{window.RRWalkingDijkstra.loadGraph=window.__originalOsmLoad;});
+   }
    const gpsPanel=page.locator('#rrStartSettings');
    assert.equal(await gpsPanel.evaluate(el=>el.open),false,'GPS settings must start collapsed');
    assert.ok((await gpsPanel.boundingBox()).height<80,'GPS summary must be compact, not a full card');

@@ -38,6 +38,7 @@ jobs:
           node --check route-ai.js
           node tests/route-ai.test.cjs
           node tests/fast-route-building.test.cjs
+          node tests/osm-recovery.test.cjs
           node tests/mobile-real-route.test.cjs
           node --check tests/photo-browser-smoke.cjs
           node --check tests/guest-profile-browser-smoke.cjs

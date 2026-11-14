@@ -49,6 +49,13 @@
           message:'Обнови GPS или нажми «Пробный маршрут без GPS». После этого можно строить прогулку.'
         };
       }
+      if ($('#routeBuildStatus')?.dataset.state==='error') return {
+        key:'create:error', target:'#buildBtn', anchor:'#buildBtn',
+        heading:'Маршрут пока не готов',
+        message:$('#routeBuildStatus')?.dataset.errorCode==='osm'
+          ?'Не удалось загрузить пешеходные дороги. Нажми «Повторить построение». Если ошибка останется — проверь интернет и попробуй позже.'
+          :'Маршрут не построен. Выбери другую дистанцию или нажми «Повторить построение».'
+      };
       if ($('#buildBtn')?.disabled) return {
         key:'create:building', target:'#buildBtn', anchor:'#buildBtn', spotlight:false,
         heading:'Маршик строит прогулку',
@@ -199,6 +206,7 @@
   };
   watch('.app', {attributes:true, attributeFilter:['data-rr-screen']});
   watch('#rrStartSettings', {attributes:true, attributeFilter:['open']});
+  watch('#routeBuildStatus', {attributes:true, attributeFilter:['hidden','data-state','data-error-code']});
   ['#home','#create','#route','#profileAuthModal','#photoBlock','#verifyBtn',
    '#nextBtn','#demoGpsBtn','#buildBtn','#gpsCheck','#photoCheck'].forEach(selector =>
     watch(selector, {attributes:true, attributeFilter:['class','disabled']})

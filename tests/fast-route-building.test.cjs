@@ -17,7 +17,7 @@ assert.match(build,/if\(diff<=tolAccept\)break/,'stop once a route is acceptable
 assert.match(build,/RRRouteAI\?\.score\?\./,'learning model ranks random tourist points');
 assert.match(build,/id="routeBuildStatus"|report\('Строим пешеходный маршрут/,'screen-reader progress must be updated');
 assert.match(foot,/RRWalkingDijkstra\.requestRoute\(points/);
-assert.match(build,/await window\.RRWalkingDijkstra\.loadGraph\(rr\.start,input\)/,'load the real OSM graph once before ranking');
+assert.match(build,/await window\.RRWalkingDijkstra\.loadGraph\(rr\.start,input/,'load the real OSM graph once before ranking');
 assert.doesNotMatch(html,/valhalla/i,'only Dijkstra should be in the live route planner');
 assert.match(dijkstra,/function hasWarmGraph\(/);
 assert.match(dijkstra,/function preload\(/);
