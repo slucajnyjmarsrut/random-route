@@ -50,7 +50,7 @@ const mobileCss=fs.readFileSync('mobile-ux.css','utf8');
 assert.ok(!mobileCss.includes(' .app[data-rr-screen="home"] .content,'),
   'home and route setup must retain bottom padding so menu cannot cover buttons');
 assert.equal((html.match(/data-screen="/g)||[]).length,5,'keep bottom navigation usable on narrow phones');
-assert.ok(html.includes('walking-dijkstra.js?v=2.1')&&html.includes('route-ai.js?v=1.0'),'Dijkstra and local learning module must load');
+assert.ok(html.includes('walking-dijkstra.js?v=2.3')&&html.includes('route-ai.js?v=1.0'),'Dijkstra and local learning module must load');
 assert.ok(html.includes('id="routeEngineStatus"'),'algorithm attribution missing');
 assert.ok(html.includes('return window.RRWalkingDijkstra.requestRoute(points,'),'only OSM Dijkstra routes allowed');
 assert.ok(html.includes("rr.routeEngine='dijkstra-osm'"),'routes should be attributed to Dijkstra');

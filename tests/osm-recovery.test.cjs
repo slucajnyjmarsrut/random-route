@@ -21,7 +21,7 @@ const originalFetch=global.fetch;
       '7 km should still try live OSM for its wider coverage');
     const graph=await route.loadGraph(center,7);
     assert.ok(graph.nodes.size>100,'fallback must be a real bundled OSM graph');
-    assert.ok(remoteAttempts>=1,'live OSM should be attempted first');
+    assert.ok(remoteAttempts>=2,'two independent OSM Overpass servers are tried before a local fallback');
     assert.equal(localLoads,1,'load bundled snapshot once');
     assert.equal(route.hasWarmGraph(center,7),true,'fallback graph is reused');
     const calls=remoteAttempts;

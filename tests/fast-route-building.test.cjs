@@ -28,6 +28,10 @@ assert.match(dijkstra,/function hasWarmGraph\(/);
 assert.match(dijkstra,/function preload\(/);
 assert.match(css,/\.rr-build-status/);
 assert.match(build,/let routeSucceeded=false/,'route success should be explicit');
+assert.match(build,/setStart\(YAKUTSK,'demo',false\)/,
+ 'demo mode must not use an old GPS position');
+assert.match(html,/id="tryDemoRouteBtn"/,
+ 'error state must offer a deliberate preview alternative');
 assert.match(build,/if\(statusEl&&routeSucceeded\)/,'old route legs must not mask a fresh failure');
 assert.match(html,/id="routeBuildStatus".*?aria-live="polite"/);
 console.log('Route speed: strict attempt/time budgets, ready-graph fast path, background photo loading and accessible progress OK');

@@ -153,7 +153,7 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
-<link rel="stylesheet" href="simple-home.css?v=1.9"/>
+<link rel="stylesheet" href="simple-home.css?v=2.0"/>
 <link rel="stylesheet" href="marshik-guide.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.1"/>
@@ -245,6 +245,7 @@ try {
 </details>
 <button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
 <p id="routeBuildStatus" class="rr-build-status" role="status" aria-live="polite" hidden></p>
+<button id="tryDemoRouteBtn" class="secondary rr-demo-recovery hidden" type="button">🧪 Пробный маршрут из центра Якутска · 3 км</button>
 <p class="rr-create-final-note">Нужен интернет. Для настоящей прогулки разрешите GPS. Всегда проверяйте дорожные условия.</p>
 <details class="rr-create-details rr-daily-details"><summary>Готовые прогулки дня</summary><div id="rrDailyCreateMount"></div></details>
 </section>
@@ -1578,6 +1579,7 @@ try {
     const el=$('#routeBuildStatus'),btn=$('#buildBtn');
     if(el?.dataset.state!=='error')return;
     el.hidden=true;el.removeAttribute('data-state');el.removeAttribute('data-error-code');
+    $('#tryDemoRouteBtn')?.classList.add('hidden');
     btn.innerHTML=defaultBuildButtonMarkup;btn.removeAttribute('aria-describedby');
     document.dispatchEvent(new Event('rr:marshik-refresh'));
   }
@@ -1590,6 +1592,10 @@ try {
       toast('Сейчас определим ваше местоположение и автоматически построим маршрут.');
       requestLocation(true,()=>buildYakutsk(options));
       return false;
+    }
+    // Demo always starts in central Yakutsk, never at a stale GPS position.
+    if(demoMode && (!rr.legs.length||rr.stage==='idle'||rr.stage==='completed')){
+      setStart(YAKUTSK,'demo',false);
     }
     if(isDeveloperMode()){rr.gpsFresh=true;rr.startMode='developer';if(!rr.livePos)rr.livePos={lat:rr.start.lat,lng:rr.start.lng,accuracy:0}}
     else if(rr.livePos && !demoMode){rr.start={lat:rr.livePos.lat,lng:rr.livePos.lng};rr.startMode='gps'}
@@ -1605,6 +1611,7 @@ try {
       btn.textContent=message;
       if(statusEl){statusEl.hidden=false;statusEl.dataset.state='loading';statusEl.removeAttribute('data-error-code');statusEl.textContent=message+' Можно продолжать пользоваться телефоном.';}
     };
+    $('#tryDemoRouteBtn')?.classList.add('hidden');
     btn.disabled=true;report('Подбираем интересные места…');
     try{
       // v10.7: контрольные точки — это сами туристические места из белого списка.
@@ -1820,6 +1827,7 @@ try {
       else toast('Дейкстра не нашла подходящий маршрут. Измените расстояние или попробуйте снова.');
       if(statusEl){
         statusEl.hidden=false;statusEl.dataset.state='error';statusEl.dataset.errorCode=osmError?'osm':reason;
+        $('#tryDemoRouteBtn')?.classList.remove('hidden');
         statusEl.textContent=osmError
           ?'Дорожные данные OSM сейчас недоступны. Маршрут не построен. Нажмите «Повторить построение». Если ошибка повторится, проверьте интернет или попробуйте позже.'
           :['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason)
@@ -1850,6 +1858,15 @@ try {
     return await buildYakutsk({distanceKm:valid.distanceKm,dailyOffer:valid});
   };
   $('#buildBtn').onclick=()=>buildYakutsk();
+  $('#tryDemoRouteBtn').onclick=()=>{
+    // Explicitly-labelled preview: never silently substitute for real GPS.
+    clearRouteBuildFailure();
+    $('#demoYakutskBtn').click();
+    const distance3=$('[data-distance-km="3"]');
+    if(distance3)distance3.click();
+    else $('#distanceInput').value='3';
+    $('#buildBtn').click();
+  };
   // A changed preference invalidates the old error: never keep a stale
   // message or retry label after the user has revised their route request.
   $$('[data-distance-km], #typeChoices .choice').forEach(b=>b.addEventListener('click',clearRouteBuildFailure));
@@ -3095,7 +3112,10 @@ try {
   }
 
   // v9.3: вход без кода, GPS запускается сразу после загрузки интерфейса.
-  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');}})}
+  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{
+    if(!rr.legs.length||rr.stage==='idle'||rr.stage==='completed')setStart(YAKUTSK,'demo',false);
+    else status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');
+  }})}
   window.__routeSave=saveSession;
   window.__routeRenderZones=renderNoGoZones;
   renderNoGoZones();
@@ -3119,13 +3139,13 @@ try {
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
-        if(sessionStorage.getItem('rr_worker_updated_v44')==='1')return;
-        sessionStorage.setItem('rr_worker_updated_v44','1');
+        if(sessionStorage.getItem('rr_worker_updated_v45')==='1')return;
+        sessionStorage.setItem('rr_worker_updated_v45','1');
         if(rr.activeScreen!=='route'&&!$('#buildBtn').disabled)location.reload();
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=44',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=45',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3141,7 +3161,7 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=2.1"></script>
+<script src="walking-dijkstra.js?v=2.3"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>

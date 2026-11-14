@@ -11,7 +11,11 @@
   'use strict';
   // Public Overpass can be overloaded or refuse requests. The bundled OSM
   // snapshot below is authoritative for its downtown bounding box.
-  const ENDPOINTS=['https://overpass.private.coffee/api/interpreter'];
+  // Two independent public OSM Overpass servers instead of one fragile host.
+  const ENDPOINTS=[
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter'
+  ];
   const ROAD_TYPES='footway|path|pedestrian|steps|living_street|residential|service|unclassified|tertiary|secondary|primary|track|cycleway';
   const LIMIT_NODES=55000,LIMIT_EDGES=145000;
   // Two bounded cached graphs allow route length changes without reloading OSM.
@@ -266,12 +270,17 @@
       throw Error('OSMUnavailable');
     }
     const work=(async()=>{
-      const query=osmQuery(area),urlQuery='?data='+encodeURIComponent(query);
+      const query=osmQuery(area);
       let lastError;
       for(const endpoint of ENDPOINTS){
-        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10500);
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8500);
         try{
-          const response=await fetch(endpoint+urlQuery,{signal:controller.signal,cache:'no-store',headers:{Accept:'application/json'}});
+          // Standard form POST avoids edge URL limits and is CORS-simple.
+          const response=await fetch(endpoint,{
+            method:'POST',body:'data='+encodeURIComponent(query),
+            signal:controller.signal,cache:'no-store',
+            headers:{'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'}
+          });
           if(!response.ok)throw Error('Overpass '+response.status);
           const result=await response.json();
           const graph=makeGraph(result?.elements?.filter(e=>e.type==='way')||[]);
