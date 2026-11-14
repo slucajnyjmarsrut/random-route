@@ -9,6 +9,13 @@ for(const x of ['id="rrHomeWeatherValue"','Исследуем Якутск','rr-
 for(const x of ['smartChat','id="homeMap"','rdq-card','quickInfoGrid','id="distanceInput"','id="buildBtn"'])assert.ok(!home.includes(x),'unexpected on home '+x);
 for(const x of ['id="distanceInput"','id="typeChoices"','id="partnerToggle"','id="createMapDetails"','id="homeMap"','id="buildBtn"','id="rrDailyCreateMount"'])assert.ok(make.includes(x),x);
 assert.equal((make.match(/data-distance-km="/g)||[]).length,4);
+assert.ok(make.includes('id="rrStartSettings"')&&make.includes('rr-create-start-compact'),
+ 'GPS settings should be collapsed into one compact row');
+assert.ok(!make.includes('<h2 id="rrStartTitle"'),
+ 'remove the large third step panel');
+assert.ok(make.includes('id="yakutskLocationStatus"')&&make.includes('id="locateYakutskBtn"')&&make.includes('id="demoYakutskBtn"'),
+ 'retain real and demo GPS choices');
+assert.ok(css.includes('#rrStartSettings.rr-create-start-compact'), 'compact GPS styles missing');
 assert.equal((make.match(/class="choice(?: active)?" data-type="/g)||[]).length,3);
 assert.ok(!make.includes('<textarea')&&!html.includes('id="smartRouteChat"'));
 assert.ok(html.includes("$$('[data-distance-km]').forEach"));

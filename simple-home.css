@@ -130,6 +130,37 @@
 .rr-wish-buttons button b{font-size:15px;line-height:1.4;font-weight:850}
 .rr-wish-buttons button.active,.rr-wish-buttons button[aria-pressed="true"]{background:#245445!important;border-color:#79d4a3!important;color:#d7ffe4!important;box-shadow:inset 0 0 0 1px #79d4a3!important}
 .rr-create-intro{font-size:16px;line-height:1.55;color:#d6e7db;margin:0 0 12px}
+/* GPS is advanced configuration, not a mandatory full-screen third card.
+ * All location controls and map exclusions remain available inside details. */
+#rrStartSettings.rr-create-start-compact{
+ margin:0 0 12px;border:1px solid #475b58;border-radius:17px;
+ background:#29363d;color:#eaf5ee;box-shadow:none;overflow:visible
+}
+#rrStartSettings.rr-create-start-compact>summary{
+ display:flex;align-items:center;gap:8px;min-height:54px;
+ padding:12px 15px;font-size:15px;line-height:1.25;list-style:none
+}
+#rrStartSettings.rr-create-start-compact>summary .rr-start-summary-heading{flex:1}
+#rrStartSettings.rr-create-start-compact>summary .rr-start-summary-note{
+ flex:0 1 auto;min-width:0;font-size:12px;font-weight:600;color:#b9cfc2
+}
+#rrStartSettings.rr-create-start-compact>summary::after{position:static;flex:0 0 auto;margin-left:4px}
+#rrStartSettings .rr-start-settings-body{padding:0 14px 14px}
+#rrStartSettings .rr-create-intro{font-size:14px;line-height:1.45}
+#rrStartSettings .location-status{border-radius:12px;padding:11px 12px;font-size:13px}
+#rrStartSettings .gps-quality{font-size:12px;margin:8px 0}
+#rrStartSettings .rr-create-gps-actions{margin:10px 0 0}
+#rrStartSettings .rr-create-gps-actions button{min-height:48px}
+#rrStartSettings .rr-map-details{margin:12px 0 0}
+@media(max-width:599px){
+ #rrStartSettings.rr-create-start-compact>summary{min-height:52px;padding:12px}
+ #rrStartSettings .rr-start-settings-body{padding:0 12px 12px}
+ #rrStartSettings.rr-create-start-compact>summary .rr-start-summary-note{font-size:11px}
+}
+html[data-rr-theme="light"] #rrStartSettings.rr-create-start-compact{
+ background:#fff;color:#163e2d;border-color:#d6e5dc
+}
+html[data-rr-theme="light"] #rrStartSettings .rr-start-summary-note{color:#54705e}
 .rr-create-note{font-size:14px;line-height:1.55;color:#bacdc1;margin:12px 0 0}
 .rr-create-field-label{display:block;font-size:15px;font-weight:700;color:#d3e8da;margin:12px 0 8px}
 .rr-create-details{margin:13px 0 0;border-radius:16px;border:1px solid #52645d;

@@ -32,6 +32,23 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('.rr-distance-options').evaluate(x=>x.classList.contains('rr-marshik-current-target')),false);
    await page.locator('[data-type="city"]').click();
    await expectStep('create:build');
+   const gpsPanel=page.locator('#rrStartSettings');
+   assert.equal(await gpsPanel.evaluate(el=>el.open),false,'GPS settings must start collapsed');
+   assert.ok((await gpsPanel.boundingBox()).height<80,'GPS summary must be compact, not a full card');
+   assert.equal(await page.locator('#locateYakutskBtn').isVisible(),false,'GPS actions hidden until requested');
+   assert.equal(await page.locator('#createMapDetails').count(),1,'map settings remain available');
+   // A user without GPS can expand the same compact row; the guide changes to the GPS action.
+   await page.locator('#demoGpsBtn').evaluate(el=>el.classList.add('hidden'));
+   await page.locator('#yakutskLocationStatus').evaluate(el=>{el.className='location-status warn';el.textContent='GPS ожидается';});
+   await expectStep('create:gps');
+   assert.equal(await page.locator('#rrStartSettings > summary').evaluate(el=>el.classList.contains('rr-marshik-current-target')),true);
+   await page.locator('#rrStartSettings > summary').click();
+   await expectStep('create:gps-action');
+   assert.equal(await page.locator('#locateYakutskBtn').isVisible(),true);
+   await page.locator('#yakutskLocationStatus').evaluate(el=>{el.className='location-status ok';el.textContent='GPS определён';});
+   await expectStep('create:build');
+   await page.locator('#rrStartSettings > summary').click();
+   await page.locator('#demoGpsBtn').evaluate(el=>el.classList.remove('hidden'));
    await page.reload({waitUntil:'domcontentloaded'});
    // The app restores the last active screen (often 'create') on reload.
    await page.waitForFunction(()=>document.querySelector('.app')?.dataset.rrScreen==='create');

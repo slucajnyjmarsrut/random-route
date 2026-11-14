@@ -153,7 +153,7 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
-<link rel="stylesheet" href="simple-home.css?v=1.7"/>
+<link rel="stylesheet" href="simple-home.css?v=1.8"/>
 <link rel="stylesheet" href="marshik-guide.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.1"/>
@@ -219,12 +219,13 @@ try {
  </div>
  <p class="rr-create-note">Это пожелание: реальные места и пешеходные пути определяются по карте.</p>
 </section>
-<section class="rr-create-panel" aria-labelledby="rrStartTitle">
- <h2 id="rrStartTitle"><span class="rr-create-step-number">3</span> Откуда начнём?</h2>
- <p class="rr-create-intro">Начало и конец прогулки — ваше текущее местоположение.</p>
+<details class="rr-create-details rr-create-start-compact" id="rrStartSettings">
+ <summary id="rrStartTitle"><span class="rr-start-summary-heading">📍 Местоположение и GPS</span><span class="rr-start-summary-note">При необходимости</span></summary>
+ <div class="rr-start-settings-body">
+ <p class="rr-create-intro">Маршрут начинается и заканчивается в точке старта. Здесь можно обновить GPS или выбрать пробный маршрут.</p>
  <div class="location-status warn" id="yakutskLocationStatus" role="status">Определяем ваше местоположение…</div>
  <div class="gps-quality" id="gpsQualityHome"><span>●</span><span>Точность GPS: <b>ожидается</b></span></div>
- <div class="rr-create-gps-actions"><button class="secondary" id="locateYakutskBtn" type="button">📍 Определить, где я</button><button class="secondary hidden" id="demoYakutskBtn" type="button">🧪 Пробный маршрут</button></div>
+ <div class="rr-create-gps-actions"><button class="secondary" id="locateYakutskBtn" type="button">📍 Обновить GPS</button><button class="secondary hidden" id="demoYakutskBtn" type="button">🧪 Пробный маршрут</button></div>
  <details id="createMapDetails" class="rr-create-details rr-map-details"><summary>Карта старта и нежелательные улицы</summary>
   <div class="rr-map-inner"><div class="city-chip">Якутск</div><div id="homeMap" aria-label="Яндекс Карта стартовой точки"></div><div class="map-credit" id="homeMapCredit">Карта загружается…</div></div>
   <div class="card avoid-card" id="avoidHomeCard">
@@ -235,7 +236,8 @@ try {
 <button class="danger-lite hidden" id="avoidClearHomeBtn" type="button" style="margin-top:9px">Очистить все зоны</button>
 </div>
  </details>
-</section>
+ </div>
+</details>
 <details class="rr-create-details rr-more-wishes"><summary>Дополнительные пожелания</summary>
  <div class="rr-extra-wishes"><p>По возможности добавим остановку в кафе по пути.</p>
   <div class="row"><span>☕ Кафе по пути</span><button type="button" aria-label="Добавить кафе по пути" aria-pressed="true" class="toggle on" id="partnerToggle"></button></div>
