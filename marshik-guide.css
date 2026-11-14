@@ -1,0 +1,58 @@
+/* Only one contextual Marshik hint and one active destination at a time. */
+.rr-marshik-step{
+  position:relative;display:flex;align-items:center;gap:12px;
+  max-width:680px;min-width:0;margin:5px 0 18px;padding:12px 14px 19px;
+  border:1px solid #79d7a6;border-radius:18px;
+  background:linear-gradient(130deg,#234f44,#283b42);
+  box-shadow:0 9px 24px rgba(0,0,0,.24);
+  color:#f0fff6;isolation:isolate;
+  animation:rrMarshikStepEnter .38s ease-out both;
+}
+.rr-marshik-step img{
+  width:58px;height:62px;flex:0 0 58px;object-fit:contain;
+  animation:rrMarshikStepBob 2s ease-in-out 3;
+}
+.rr-marshik-step-bubble{min-width:0;flex:1;overflow-wrap:anywhere}
+.rr-marshik-step-bubble strong{
+  display:block;margin-bottom:4px;font-size:clamp(15px,2.5vw,18px);
+  line-height:1.3;color:#9ef4c4;
+}
+.rr-marshik-step-bubble p{font-size:clamp(13px,2vw,15px);line-height:1.45;margin:0;color:#fff}
+.rr-marshik-step-arrow{
+  position:absolute;left:50%;bottom:-21px;transform:translateX(-50%);
+  font-size:30px;font-weight:900;line-height:1;color:#ffe28f;
+  text-shadow:0 2px 7px rgba(0,0,0,.7);
+  pointer-events:none;animation:rrMarshikArrowBob 1.4s ease-in-out 3;
+}
+.rr-marshik-step-done{border-color:#c4e7b7}
+.rr-marshik-current-target{
+  outline:3px solid #ffe08a!important;outline-offset:4px!important;
+  filter:drop-shadow(0 0 8px rgba(255,211,98,.56));
+  animation:rrMarshikTargetGlow 1.5s ease-in-out 3;
+}
+#typeChoices.rr-marshik-current-target,.rr-distance-options.rr-marshik-current-target{
+  border-radius:15px;
+}
+@keyframes rrMarshikStepEnter{
+  from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}
+}
+@keyframes rrMarshikStepBob{
+  0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) translateY(-2px)}
+}
+@keyframes rrMarshikArrowBob{
+  0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,5px)}
+}
+@keyframes rrMarshikTargetGlow{
+  0%,100%{filter:drop-shadow(0 0 7px rgba(255,211,98,.55))}
+  50%{filter:drop-shadow(0 0 15px rgba(255,222,141,.85))}
+}
+@media(max-width:599px){
+  .rr-marshik-step{gap:8px;padding:9px 10px 16px;margin-bottom:16px;border-radius:16px}
+  .rr-marshik-step img{width:46px;height:50px;flex-basis:46px}
+  .rr-marshik-step-bubble strong{font-size:14px}
+  .rr-marshik-step-bubble p{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rr-marshik-step,.rr-marshik-step img,.rr-marshik-step-arrow,
+  .rr-marshik-current-target{animation:none!important;scroll-behavior:auto!important}
+}

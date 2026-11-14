@@ -23,7 +23,7 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#home .rr-welcome-mascot').count(),1,
     'retain one Marshik instruction block');
    assert.match(await page.locator('#homeActionHelp').innerText(),
-    /Нажми «Построить маршрут».*Магазин, спутники и профиль — в меню снизу/);
+    /Нажми «Построить маршрут».*каждый следующий шаг/);
    assert.equal(await page.locator('#homeOpenCreateBtn').getAttribute('aria-describedby'),'homeActionHelp');
    assert.equal(await page.locator('#home .rr-marshik-pointer').count(),1,'Marshik must point to the CTA');
    assert.equal(await page.locator('#home .rr-marshik-pointer-svg').isVisible(),true,
