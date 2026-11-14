@@ -22,7 +22,9 @@ assert.ok(html.includes('yPassedLine'),'draw past trail');
 assert.ok(css.includes('.rr-welcome-start')&&css.includes('.rr-wish-buttons')&&css.includes('.rr-distance-options'));
 assert.ok(css.includes('rrMarshikCtaPulse')&&css.includes('prefers-reduced-motion:reduce'),
  'Marshik arrow and CTA must honor reduced-motion users');
-assert.ok(html.includes('rr_marshik_route_cta_used_v1')&&html.includes('rr-marshik-cta-active'),
- 'persist dismissal without breaking the route action');
+assert.ok(html.includes('rr-marshik-cta-active')&&html.includes('rr-marshik-pointer-svg'),
+ 'the CTA and directional arrow should be present even for returning users');
+assert.ok(!html.includes("const key='rr_marshik_route_cta_used_v1'"),
+ 'old one-time dismissal logic must not hide Marshik');
 assert.ok(navcss.includes('.rr-nav-panel')&&navcss.includes('prefers-reduced-motion:reduce'));
 console.log('Welcome screen, accessible button wizard and animated GPS navigation integration OK');
