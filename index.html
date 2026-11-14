@@ -1800,7 +1800,7 @@ try {
       else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason))toast('По данным OSM здесь нет связанного пешеходного пути. Измените старт или дистанцию.');
       else if(reason==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
       else if(reason==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
-      else if(reason==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут длиной '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',')+' км.');}
+      else if(reason==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут длиной '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км.');}
       else toast('Дейкстра не нашла подходящий маршрут. Измените расстояние или попробуйте снова.');
       if(statusEl){
         statusEl.hidden=false;statusEl.dataset.state='error';statusEl.dataset.errorCode=osmError?'osm':reason;
