@@ -12,6 +12,8 @@ const {chromium}=require('playwright');
    const context=await browser.newContext({viewport:{width:device.width,height:device.height},
     isMobile:device.mobile,hasTouch:device.mobile,serviceWorkers:'block'});
    const page=await context.newPage(),errors=[];
+   // Simulate users who already dismissed the old v39 hint.
+   await page.addInitScript(()=>localStorage.setItem('rr_marshik_route_cta_used_v1','1'));
    page.on('pageerror',e=>errors.push(e.message));
    await page.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:8765/')?r.continue():r.abort());
    await page.goto('http://127.0.0.1:8765/index.html?demo=1',{waitUntil:'domcontentloaded'});
@@ -24,9 +26,13 @@ const {chromium}=require('playwright');
     /Нажми «Построить маршрут».*Магазин, спутники и профиль — в меню снизу/);
    assert.equal(await page.locator('#homeOpenCreateBtn').getAttribute('aria-describedby'),'homeActionHelp');
    assert.equal(await page.locator('#home .rr-marshik-pointer').count(),1,'Marshik must point to the CTA');
+   assert.equal(await page.locator('#home .rr-marshik-pointer-svg').isVisible(),true,
+    'direction arrow must remain visible for returning users');
+   assert.equal(await page.locator('#home .rr-marshik-pointer-tip').count(),1,
+    'direction arrow must have a clear arrowhead');
    assert.equal(await page.locator('#home .rr-marshik-pointing-hand').count(),1,'Marshik should visibly gesture');
    assert.equal(await page.locator('#homeOpenCreateBtn').evaluate(x=>x.classList.contains('rr-marshik-cta-active')),true,
-    'new users must see highlighted start button');
+    'new and returning users must see highlighted start button');
    const sizes=await page.evaluate(()=>{
      const rect=id=>document.querySelector(id).getBoundingClientRect().toJSON();
      return {home:rect('#home'),button:rect('#homeOpenCreateBtn'),
@@ -59,16 +65,17 @@ const {chromium}=require('playwright');
    await page.locator('#home.active').waitFor({state:'visible'});
    await page.locator('#homeOpenCreateBtn').click();
    await page.locator('#create.active').waitFor({state:'visible'});
-   assert.equal(await page.evaluate(()=>localStorage.getItem('rr_marshik_route_cta_used_v1')),'1',
-    'first click should permanently dismiss attention animation');
    await page.locator('#create .rr-create-back').click();
    await page.locator('#home.active').waitFor({state:'visible'});
-   assert.equal(await page.locator('#homeOpenCreateBtn').evaluate(x=>x.classList.contains('rr-marshik-cta-active')),false);
-   assert.equal(await page.locator('#home .rr-marshik-pointer').evaluate(x=>getComputedStyle(x).visibility),'hidden');
+   assert.equal(await page.locator('#homeOpenCreateBtn').evaluate(x=>x.classList.contains('rr-marshik-cta-active')),true,
+    'button should remain highlighted after a route is started');
+   assert.equal(await page.locator('#home .rr-marshik-pointer-svg').isVisible(),true,
+    'Marshik should point again on return to home');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('#home.active').waitFor({state:'visible'});
-   assert.equal(await page.locator('#homeOpenCreateBtn').evaluate(x=>x.classList.contains('rr-marshik-cta-active')),false,
-    'highlight should stay dismissed after reload');
+   assert.equal(await page.locator('#homeOpenCreateBtn').evaluate(x=>x.classList.contains('rr-marshik-cta-active')),true,
+    'highlight should stay visible on reload even with the old dismissed flag');
+   assert.equal(await page.locator('#home .rr-marshik-pointer-svg').isVisible(),true);
    assert.equal(await page.locator('.nav [data-screen="profile"]').isVisible(),true);
    assert.equal(await page.locator('.nav [data-screen="shop"]').isVisible(),true);
    assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,errors.join(' | '));

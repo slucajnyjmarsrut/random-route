@@ -48,54 +48,54 @@
  background:linear-gradient(130deg,#27805f,#1e725d)!important;color:#fff!important;letter-spacing:-.01em}
 .rr-welcome-start span{font-size:29px;line-height:1}
 
-/* A single visual path from Marshik to the real primary action.
- * The path grows into spare height on a desktop and stays short on phones.
- * It never catches touches or covers the persistent bottom navigation. */
+/* A permanently visible visual path, including for returning visitors.
+ * No saved dismissal state can hide the guide. It takes the existing free
+ * space between Marshik and CTA without covering taps or bottom navigation. */
 #home .rr-welcome-mascot{position:relative}
 #home .rr-welcome-mascot .rr-marshik-pointing-hand{
-  position:absolute;left:50%;bottom:-14px;z-index:2;
-  transform:translateX(-50%);font-size:28px!important;line-height:1!important;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.38));pointer-events:none;
+  position:absolute;left:clamp(42px,9%,65px);bottom:-13px;z-index:2;
+  transform:rotate(-16deg);font-size:29px!important;line-height:1!important;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));pointer-events:none;
 }
 #home .rr-marshik-pointer{
-  position:relative;display:flex;align-items:flex-end;justify-content:center;
-  flex:1 0 32px;min-height:32px;margin:0 0 8px;pointer-events:none;
+  position:relative;display:block;flex:1 0 32px;min-height:32px;
+  margin:0 0 8px;pointer-events:none;
 }
-#home .rr-marshik-pointer::before{
-  content:"";position:absolute;top:0;bottom:13px;left:calc(50% - 2px);width:4px;
-  background:repeating-linear-gradient(to bottom,#f9d982 0 8px,transparent 8px 16px);
-  border-radius:6px;opacity:.9;
+#home .rr-marshik-pointer-svg{
+  display:block;position:absolute;inset:0;width:100%;height:100%;
+  overflow:visible;filter:drop-shadow(0 0 4px rgba(255,202,90,.8));
+  animation:rrMarshikPoint 1.5s ease-in-out 3;
 }
-#home .rr-marshik-pointer-arrow{
-  position:relative;font-size:30px;font-weight:900;line-height:1;color:#ffdf8b;
-  text-shadow:0 2px 7px rgba(0,0,0,.65);
-  animation:rrMarshikPoint 1.4s ease-in-out 4;
+#home .rr-marshik-pointer-line,
+#home .rr-marshik-pointer-tip{
+  fill:none;stroke:#ffe38a;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
+#home .rr-marshik-pointer-tip{stroke-width:7}
 #home #homeOpenCreateBtn.rr-marshik-cta-active{
   position:relative;z-index:1;
-  box-shadow:0 0 0 4px rgba(255,216,126,.5),0 0 30px rgba(255,213,111,.55),0 12px 28px rgba(0,0,0,.25)!important;
-  animation:rrMarshikCtaPulse 1.8s ease-in-out 4;
+  outline:3px solid #ffe08a;outline-offset:2px;
+  box-shadow:0 0 0 5px rgba(255,216,126,.35),0 0 30px rgba(255,213,111,.55),0 12px 28px rgba(0,0,0,.25)!important;
+  animation:rrMarshikCtaPulse 1.8s ease-in-out 3;
 }
 #home #homeOpenCreateBtn.rr-marshik-cta-active::after{
-  content:"";position:absolute;inset:-6px;border:3px solid #ffe29a;
-  border-radius:25px;pointer-events:none;animation:rrMarshikRing 1.8s ease-out 4;
+  content:"";position:absolute;inset:-6px;border:2px solid #ffe29a;
+  border-radius:25px;pointer-events:none;animation:rrMarshikRing 1.8s ease-out 3;
 }
-#home.rr-marshik-guide-dismissed .rr-marshik-pointer,
-#home.rr-marshik-guide-dismissed .rr-marshik-pointing-hand{visibility:hidden}
 @keyframes rrMarshikPoint{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(5px)}
+  0%,100%{opacity:1}
+  50%{opacity:.65}
 }
 @keyframes rrMarshikCtaPulse{
   0%,100%{transform:scale(1)}
-  50%{transform:scale(1.025)}
+  50%{transform:scale(1.02)}
 }
 @keyframes rrMarshikRing{
   0%{opacity:.85;transform:scale(1)}
   100%{opacity:0;transform:scale(1.045)}
 }
 @media(prefers-reduced-motion:reduce){
-  #home .rr-marshik-pointer-arrow,
+  #home .rr-marshik-pointer-svg,
   #home #homeOpenCreateBtn.rr-marshik-cta-active,
   #home #homeOpenCreateBtn.rr-marshik-cta-active::after{animation:none!important}
 }
