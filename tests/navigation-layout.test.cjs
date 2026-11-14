@@ -15,7 +15,7 @@ const settings=html.split('<section class="screen" id="settings"')[1].split('<se
 const help=html.split('<section class="screen" id="help"')[1].split('</main>')[0];
 assert.ok(home.includes('id="rrHomeWeatherValue"')&&home.includes('Исследуем Якутск')&&home.includes('rr-welcome-mascot')&&home.includes('id="homeOpenCreateBtn"'));
 assert.ok(!home.includes('mascot-home-current')&&!home.includes('mascotHomeAvatar'),'mascot collection should not appear as redundant home banner');
-assert.ok(home.includes('id="homeActionHelp"')&&home.includes('Магазин, спутники и профиль — в меню снизу.'),'Marshik must give clear navigation guidance');
+assert.ok(home.includes('id="homeActionHelp"')&&home.includes('Дальше я подскажу каждый следующий шаг.'),'Marshik must give clear navigation guidance');
 assert.ok(home.includes('aria-describedby="homeActionHelp"'),'main button should link to Marshik guidance');
 assert.ok(!home.includes('id="homeMap"')&&!home.includes('id="smartChat"')&&!home.includes('id="buildBtn"'),'home must contain only the weather, title, mascot and one call to action');
 assert.ok(create.includes('id="distanceInput"')&&create.includes('id="typeChoices"')&&create.includes('id="partnerToggle"')&&create.includes('id="buildBtn"')&&create.includes('id="homeMap"'));
