@@ -126,6 +126,7 @@ jobs:
           npx playwright install --with-deps chromium
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/rr-mobile-test-server.log 2>&1 &
           node tests/mobile-browser-smoke.cjs
+          node tests/route-recovery-browser-smoke.cjs
           node tests/photo-browser-smoke.cjs
           node tests/map-viewport-browser-smoke.cjs
           node tests/mascot-browser-smoke.cjs
@@ -133,7 +134,6 @@ jobs:
           node tests/main-nav-browser-smoke.cjs
           node tests/clean-home-browser-smoke.cjs
           node tests/marshik-guide-browser-smoke.cjs
-          node tests/route-recovery-browser-smoke.cjs
           node tests/tester-wallet-browser-smoke.cjs
           node tests/welcome-auth-browser-smoke.cjs
           node tests/welcome-contrast-browser-smoke.cjs
