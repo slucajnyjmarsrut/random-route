@@ -27,6 +27,17 @@ const {chromium}=require('playwright');
    await page.locator('#create.active').waitFor({state:'visible'});
    await expectStep('create:distance');
    assert.equal(await page.locator('.rr-distance-options').evaluate(x=>x.classList.contains('rr-marshik-current-target')),true);
+   // Regression: a restored earlier wizard stage must NOT override an error,
+   // including an error message from an older cached build handler.
+   if(device.name==='phone'){
+     await page.locator('#routeBuildStatus').evaluate(el=>{
+       el.hidden=false;el.textContent='Маршрут не найден. Попробуйте выбрать другую длину прогулки.';
+     });
+     await expectStep('create:error');
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Не удалось подобрать/);
+     await page.locator('#routeBuildStatus').evaluate(el=>{el.hidden=true;el.textContent='';});
+     await expectStep('create:distance');
+   }
    await page.locator('[data-distance-km="3"]').click();
    await expectStep('create:interest');
    assert.equal(await page.locator('.rr-distance-options').evaluate(x=>x.classList.contains('rr-marshik-current-target')),false);
@@ -42,7 +53,7 @@ const {chromium}=require('playwright');
      await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error',null,{timeout:20000});
      await expectStep('create:error');
      assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
-     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Не удалось загрузить/);
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Дороги временно недоступны/);
      assert.equal(await page.locator('#routeBuildStatus').isVisible(),true);
      assert.equal(await page.locator('#buildBtn').isEnabled(),true);
      // The Retry button must trigger another real attempt, not a dead label.

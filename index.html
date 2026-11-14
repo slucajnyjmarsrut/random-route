@@ -153,7 +153,7 @@ try {
 <link rel="stylesheet" href="responsive-layout.css?v=1.0"/>
 <link rel="stylesheet" href="interface-interactions.css?v=1.0"/>
 <link rel="stylesheet" href="graphite-theme.css?v=1.1"/>
-<link rel="stylesheet" href="simple-home.css?v=1.8"/>
+<link rel="stylesheet" href="simple-home.css?v=1.9"/>
 <link rel="stylesheet" href="marshik-guide.css?v=1.0"/>
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.1"/>
@@ -804,7 +804,6 @@ try {
   // Старый демонстрационный генератор и фальшивая проверка удалены. Ниже работает только реальная GPS/маршрутная система.
 
   sync();renderVerifiedStats();
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 })();
 </script>
 <script>
@@ -1600,6 +1599,7 @@ try {
       return false;
     }
     const btn=$('#buildBtn'),statusEl=$('#routeBuildStatus'),retryAfterError=statusEl?.dataset.state==='error';
+    let routeSucceeded=false;
     const startedAt=performance.now(),routeBudgetMs=12000,maxAttempts=4;
     const report=message=>{
       btn.textContent=message;
@@ -1719,7 +1719,10 @@ try {
       // If a sightseeing route cannot match the user's requested distance,
       // attempt a simple walking loop using only REAL OSM road nodes. It will
       // never claim to visit monuments or unlock a photograph reward.
-      if((!best||best.diff>tolAccept)&&!syntheticWalk){
+      // A street-only route must also get a deterministic rescue search.
+      // Previously syntheticWalk=true skipped this entire fallback after only
+      // four random attempts, causing frequent false "NoRoute" errors.
+      if(!best||best.diff>tolAccept){
         const allStreetNodes=window.RRWalkingDijkstra.walkingWaypoints(streetGraph,rr.start,input,{zones:rr.noGoZones});
         const streetNodes=allStreetNodes.filter((_,i)=>i%Math.max(1,Math.ceil(allStreetNodes.length/120))===0);
         const toPoi=(n,i)=>({
@@ -1729,13 +1732,25 @@ try {
         });
         if(streetNodes.length){
           report('Пробуем прогулку по настоящим улицам без обязательных достопримечательностей…');
-          for(let tryIndex=0;tryIndex<6;tryIndex++){
-            const first=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
-            let second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
-            for(let n=0;n<6&&second&&first&&second.id===first.id;n++)
-              second=streetNodes[Math.floor(dailyRandom()*streetNodes.length)];
-            if(!first||!second||first.id===second.id)continue;
-            const pois=[toPoi(first,1),toPoi(second,2)],pts=[rr.start,...pois.map(ll),rr.start];
+          // Rank real OSM node pairs instead of trying just 6 random ones.
+          // Still verify every proposal with Dijkstra and its actual length.
+          const step=Math.max(1,Math.ceil(streetNodes.length/36));
+          const samples=streetNodes.filter((_,i)=>i%step===0);
+          const ranked=[];
+          for(let i=0;i<samples.length;i++)for(let j=i+1;j<samples.length;j++){
+            const a=samples[i],b=samples[j];
+            const bearingGap=bearingDiff(bearingDeg(rr.start,a),bearingDeg(rr.start,b));
+            if(bearingGap<25)continue;
+            const straight=distMeters(rr.start,a)+distMeters(a,b)+distMeters(b,rr.start);
+            const score=Math.abs(straight*1.25-targetM)+(bearingGap<60?targetM*.16:0);
+            ranked.push({a,b,score});
+          }
+          ranked.sort((a,b)=>a.score-b.score);
+          for(let tryIndex=0;tryIndex<Math.min(16,ranked.length);tryIndex++){
+            if(performance.now()-startedAt>routeBudgetMs+4500)break;
+            const pair=ranked[tryIndex];
+            const pois=[toPoi(pair.a,1),toPoi(pair.b,2)];
+            const pts=[rr.start,...pois.map(ll),rr.start];
             try{
               const data=await requestFootRoute(pts,{distanceKm:input}),route=data.routes[0];
               if(routeHitsNoGo(route))continue;
@@ -1745,7 +1760,7 @@ try {
               }
               if(diff<=tolAccept)break;
             }catch(e){console.info('OSM street-loop candidate',e?.message||e);}
-            // Give the browser a chance to paint feedback between attempts.
+            // Stay responsive while examining alternatives; do not fake legs.
             await new Promise(resolve=>setTimeout(resolve,0));
           }
         }
@@ -1788,6 +1803,7 @@ try {
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
       resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
       window.dispatchEvent(new Event('rr:daily-route-built'));
+      routeSucceeded=true;
       return true;
     }catch(e){
       console.error(e);
@@ -1820,7 +1836,8 @@ try {
         btn.innerHTML=defaultBuildButtonMarkup;
         btn.removeAttribute('aria-describedby');
       }
-      if(statusEl&&rr.legs.length&&rr.stage!=='idle'){
+      // Old routes may have legs even if this new request failed.
+      if(statusEl&&routeSucceeded){
         statusEl.hidden=true;statusEl.removeAttribute('data-state');statusEl.removeAttribute('data-error-code');
       }
     }
@@ -3099,7 +3116,17 @@ try {
   }
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}if(!demoMode)startWatching()}});
   window.addEventListener('beforeunload',saveSession);
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      try{
+        if(sessionStorage.getItem('rr_worker_updated_v44')==='1')return;
+        sessionStorage.setItem('rr_worker_updated_v44','1');
+        if(rr.activeScreen!=='route'&&!$('#buildBtn').disabled)location.reload();
+        else toast('Доступно обновление. Обновите страницу после прогулки.');
+      }catch(e){}
+    });
+    navigator.serviceWorker.register('sw.js?v=44',{updateViaCache:'none'}).catch(()=>{});
+  }
 })();
 </script>
 <script src="weather-background.js?v=1.0"></script>
@@ -3119,6 +3146,6 @@ try {
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
 <script src="mascot-collection.js?v=1.0"></script>
-<script src="marshik-guide.js?v=1.0"></script>
+<script src="marshik-guide.js?v=1.1"></script>
 </body>
 </html>
