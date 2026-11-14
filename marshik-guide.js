@@ -37,11 +37,18 @@
       const demo = shown($('#demoGpsBtn'));
       const gpsReady = $('#yakutskLocationStatus')?.classList.contains('ok') &&
         !/за пределами/i.test($('#yakutskLocationStatus')?.textContent || '');
-      if (!demo && !gpsReady) return {
-        key:'create:gps', target:'#locateYakutskBtn', anchor:'.rr-create-gps-actions',
-        heading:'Шаг 3 · Точка старта',
-        message:'Нажми «Определить, где я» и разреши GPS. Если ты не в Якутске, выбери «Пробный маршрут».'
-      };
+      if (!demo && !gpsReady) {
+        if (!$('#rrStartSettings')?.open) return {
+          key:'create:gps', target:'#rrStartSettings > summary', anchor:'#rrStartSettings',
+          heading:'Нужно уточнить место старта',
+          message:'Раскрой «Местоположение и GPS», чтобы обновить координаты или выбрать пробный маршрут.'
+        };
+        return {
+          key:'create:gps-action', target:'#locateYakutskBtn', anchor:'.rr-create-gps-actions',
+          heading:'Выбираем точку старта',
+          message:'Обнови GPS или нажми «Пробный маршрут без GPS». После этого можно строить прогулку.'
+        };
+      }
       if ($('#buildBtn')?.disabled) return {
         key:'create:building', target:'#buildBtn', anchor:'#buildBtn', spotlight:false,
         heading:'Маршик строит прогулку',
@@ -191,6 +198,7 @@
     if (node) new MutationObserver(schedule).observe(node, config);
   };
   watch('.app', {attributes:true, attributeFilter:['data-rr-screen']});
+  watch('#rrStartSettings', {attributes:true, attributeFilter:['open']});
   ['#home','#create','#route','#profileAuthModal','#photoBlock','#verifyBtn',
    '#nextBtn','#demoGpsBtn','#buildBtn','#gpsCheck','#photoCheck'].forEach(selector =>
     watch(selector, {attributes:true, attributeFilter:['class','disabled']})
