@@ -30,13 +30,20 @@
         buildStatus.dataset.state === 'error' ||
         /маршрут (?:не найден|не построен|пока не построен)|не загружаются дорожные данные|нет соединённого пешеходного/i.test(buildText)
       );
-      if (buildError) return {
-        key:'create:error', target:'#buildBtn', anchor:'#buildBtn',
-        heading:'Маршрут пока не построен',
-        message:buildStatus.dataset.errorCode==='osm' || /дорожн|openstreetmap|osm/i.test(buildText)
-          ?'Дороги временно недоступны. Нажми «Повторить построение». Если не получится — проверь интернет или попробуй позже.'
-          :'Не удалось подобрать пешеходный путь. Измени расстояние или нажми «Повторить построение».'
-      };
+      if (buildError) {
+        const osmFailure=buildStatus.dataset.errorCode==='osm' ||
+          /дорожн|openstreetmap|osm/i.test(buildText);
+        const preview=shown($('#tryDemoRouteBtn'))&&osmFailure;
+        return {
+          key:preview?'create:preview-recovery':'create:error',
+          target:preview?'#tryDemoRouteBtn':'#buildBtn',
+          anchor:preview?'#tryDemoRouteBtn':'#buildBtn',
+          heading:preview?'Можно попробовать другой старт':'Маршрут пока не построен',
+          message:preview
+            ?'Дороги для этого старта не загрузились. Попробуй «Пробный маршрут из центра Якутска» или повтори позже. Пробный режим — без настоящего GPS.'
+            :'Маршрут не построен. Проверь интернет или расстояние и нажми «Повторить построение».'
+        };
+      }
       if ($('#buildBtn')?.disabled) return {
         key:'create:building', target:'#buildBtn', anchor:'#buildBtn', spotlight:false,
         heading:'Строю маршрут…',
