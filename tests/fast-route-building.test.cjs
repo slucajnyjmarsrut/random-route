@@ -28,6 +28,8 @@ assert.match(dijkstra,/function hasWarmGraph\(/);
 assert.match(dijkstra,/function preload\(/);
 assert.match(css,/\.rr-build-status/);
 assert.match(build,/let routeSucceeded=false/,'route success should be explicit');
+assert.match(build,/maxSnap:55/,'tourist stops must snap to nearby walking paths');
+assert.match(dijkstra,/isPedestrianStop/,'checkpoints must not be placed on vehicle-road centreline');
 assert.match(build,/setStart\(YAKUTSK,'demo',false\)/,
  'demo mode must not use an old GPS position');
 assert.match(html,/id="tryDemoRouteBtn"/,

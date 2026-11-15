@@ -4,18 +4,23 @@ const route=require('../walking-dijkstra.js');
 const p={lat:62.03,lng:129.70};
 assert.match(route.osmQuery(route.bbox(p,1000)),/highway/);
 assert.equal(route.allowed({highway:'footway'}),true);
-assert.equal(route.allowed({highway:'residential'}),true);
+assert.equal(route.allowed({highway:'residential'}),false,'unmarked vehicle roads must not count as walking paths');
 assert.equal(route.allowed({highway:'motorway'}),false);
+assert.equal(route.allowed({highway:'pedestrian'}),true);
+assert.equal(route.allowed({highway:'steps'}),true);
+assert.equal(route.allowed({highway:'living_street'}),false);
+assert.equal(route.allowed({highway:'cycleway'}),false);
 assert.equal(route.allowed({highway:'service',access:'private'}),false);
 assert.equal(route.allowed({highway:'service'}),false);
-assert.equal(route.allowed({highway:'service',foot:'yes'}),true);
+assert.equal(route.allowed({highway:'service',foot:'yes'}),false,'a service-road centreline is not a sidewalk');
 assert.equal(route.allowed({highway:'primary',sidewalk:'no'}),false);
-assert.equal(route.allowed({highway:'primary',sidewalk:'yes'}),true);
+assert.equal(route.allowed({highway:'primary',sidewalk:'yes'}),false,'even a tagged sidewalk does not move the road centreline');
 const vertices=Array.from({length:24},(_,i)=>({lat:p.lat+i*.00007,lon:p.lng}));
 const ways=[{type:'way',nodes:vertices.map((_,i)=>i+101),geometry:vertices,tags:{highway:'footway'}}];
 const graph=route.makeGraph(ways);
 assert.equal(graph.nodes.size,24);
 assert.equal(graph.edgeCount,23);
+assert.equal(route.isPedestrianStop(graph,String(101)),true);
 const first=vertices[0],last=vertices.at(-1);
 const start={lat:first.lat,lng:first.lon},finish={lat:last.lat,lng:last.lon};
 assert.equal(route.nearestNode(graph,start),String(101));
@@ -41,7 +46,24 @@ adj:new Map([['A',[{to:'B',cost:200,metres:100},{to:'C',cost:80,metres:120}]],['
 const chosen=route.shortest(manual,'A','B');assert.deepEqual(chosen.ids,['A','C','B']);assert.equal(chosen.length,240);
 const costly=new Map([['A:C',1],['B:C',1]]);
 assert.deepEqual(route.shortest(manual,'A','B',[],costly).ids,['A','B'],'repeat penalty should avoid used physical edges');
-console.log('OSM walking Dijkstra: graph creation, pedestrian tags, shortest path, no-go zones, route geometry OK');
+
+// Regression: a pedestrian checkpoint may not be on the centreline of a car road,
+// even if a footway/crossing segment is drawn directly through it.
+const nearRoad=vertices.map((p,i)=>({lat:p.lat,lon:p.lon+.00012}));
+const vehicles={type:'way',tags:{highway:'primary'},nodes:nearRoad.map((_,i)=>'r'+i),
+ geometry:nearRoad};
+const nearFootway={type:'way',tags:{highway:'footway'},nodes:vertices.map((_,i)=>'p'+i),
+ geometry:vertices};
+const protectedGraph=route.makeGraph([nearFootway,vehicles]);
+assert.equal(protectedGraph.nodes.has('r1'),false,'car-road nodes must not enter the walking graph');
+assert.equal(protectedGraph.nodes.has('p1'),true,'genuine footway geometry stays available');
+assert.equal(route.isPedestrianStop(protectedGraph,'p1'),false,'checkpoint beside major road carriageway is rejected');
+assert.equal(route.nearestNode(protectedGraph,{lat:vertices[1].lat,lng:vertices[1].lon},8,{safeStop:true}),null,
+ 'never snap a checkpoint onto the centre of the car road');
+assert.throws(()=>route.walkingWaypoints(protectedGraph,start,3),/NoNearbyFootpath/,
+ 'if every footpath sits on the vehicle-road centreline, refuse to build a route');
+
+console.log('OSM Dijkstra: pedestrian-only paths, carriageway checkpoint guard, real geometry OK');
 
 // First tap can use a cached graph without any repeat HTTP requests.
 (async()=>{
