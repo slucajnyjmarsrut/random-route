@@ -1,17 +1,10 @@
-
-/* Evidence-based, route-specific street tags from OSM; no safety score. */
-.sra-panel{border-top:1px solid #d9e8dc;margin-top:14px;padding-top:14px;display:grid;gap:8px}
-.sra-panel strong{font-size:15px;color:#0d5842}
-.sra-panel p{font-size:11px;line-height:1.5;margin:0;color:#577369}
-.sra-btn{width:100%;border:0;background:#0c6b4c;color:white;border-radius:12px;padding:12px;font-size:13px;font-weight:850}
-.sra-btn:disabled{opacity:.55}
-.sra-panel .sra-note{font-size:10px;color:#708179}
-.sra-result{display:grid;gap:7px;background:#f4f8f5;border:1px solid #d2e4d8;border-radius:13px;padding:10px}
-.sra-panel .sra-line{font-size:12px;color:#244638;line-height:1.52}
-.sra-panel .sra-line.warn{color:#75501a;background:#fff4de;border-radius:8px;padding:7px}
-.sra-panel .sra-line.small{font-size:10px;color:#62796d}
-.sra-source{font-size:10px;font-weight:700;color:#1a654e;text-decoration:underline}
-.sra-result[data-source="bundled"]{border-color:#dfc58a}
-.sra-btn{min-height:44px;cursor:pointer}
-.sra-btn:focus-visible{outline:3px solid #f8d77a;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){.sra-btn{scroll-behavior:auto}}
+/* Only short, actionable street cautions, no technical manual-check UI. */
+.sra-panel[hidden]{display:none!important}
+.sra-panel{margin:9px 0 0}
+.sra-result{display:grid;gap:6px}
+.sra-panel .sra-alert{margin:0;padding:9px 12px;border:1px solid #d2aa63;
+ border-radius:12px;background:#fff3d9;color:#674718;
+ font-size:13px;font-weight:650;line-height:1.45}
+[data-rr-theme="graphite"] .sra-panel .sra-alert{
+ background:#463b2b;border-color:#806341;color:#ffe0ad}
+@media(max-width:599px){.sra-panel .sra-alert{font-size:12px;padding:8px 10px}}

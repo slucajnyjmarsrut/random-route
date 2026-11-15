@@ -1,5 +1,5 @@
 /* Offline app shell only. Maps, GPS, routes and weather require services. */
-const CACHE="random-route-shell-qwen-clean-v49";
+const CACHE="random-route-shell-auto-street-audit-v50";
 const SHELL=["./","./index.html","./smart-safety.js","./yakutsk-weather.js","./smart-safety.css","./weather-background.js","./weather-background.css","./responsive-layout.js","./responsive-layout.css","./dijkstra-lab.js","./walking-dijkstra.js","./data/yakutsk-center-walking.json","./mobile-ux.css","./map-viewport.css","./map-viewport.js","./mascot-collection.css","./mascot-collection.js","./welcome-auth.css","./route-ai.js","./interface-interactions.css","./graphite-theme.css","./graphite-theme.js","./simple-home.css","./marshik-guide.css","./marshik-guide.js","./marshik-ai.css","./marshik-ai.js","./marshik-ai-worker.js","./route-navigation.js","./route-navigation.css","./map-fallback.js","./smart-route-chat.js","./smart-route-chat.css","./street-audit.js","./street-audit.css","./daily-quests.js","./daily-quests.css","./developer-diagnostics.js","./developer-diagnostics.css","./tap-targets.js","./tap-targets.css","./manifest.webmanifest","./icons/smart-route.svg","./icons/favicon.svg","./icons/smart-route-maskable.svg","./icons/mascot-marshik.svg"];
 self.addEventListener("install",event=>{
   // Cache the graph independently: one failed optional asset must not erase it.

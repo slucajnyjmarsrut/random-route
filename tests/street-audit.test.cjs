@@ -39,4 +39,7 @@ assert(q.includes('[out:json]')&&q.includes('out tags geom'));
 assert(q.includes('footway|path|pedestrian'));
 assert.throws(()=>audit.routeBbox([{lat:62.0,lon:129.4},{lat:62.1,lon:129.9}]),/слишком большой/);
 assert.match(audit.summaries(noData)[0],/0%.*lit=yes/);
-console.log('Street audit: 23 checks passed');
+assert.equal(audit.importantMessages(noData).length,0,'unknown data must not be reported as safe');
+assert.ok(audit.importantMessages(risky).some(x=>/проход|лестницы/.test(x)),'show confirmed real risks');
+assert.ok(audit.importantMessages(flagged).length<=3,'limit visual noise to three important cautions');
+console.log('Street audit: real tags and automatic compact warnings passed');
