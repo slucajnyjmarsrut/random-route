@@ -841,7 +841,18 @@ try {
   const YAKUTSK = {lat:62.0274,lng:129.7320};
   const pilotBounds = {south:61.85,north:62.20,west:129.30,east:130.20};
   const SESSION_KEY='rr_yakutsk_session_v8';
-  const saved=(()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}})();
+  const PEDESTRIAN_ROUTING_SCHEMA='pedestrian-only-v51';
+  const rawSaved=(()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}})();
+  // Old saved walking legs were calculated with vehicle road centrelines.
+  // Never show that previously generated geometry after a routing safety fix.
+  // Retain preferences, past verified awards and the real GPS setting.
+  const retiredRoadRoute=!!(rawSaved?.legs?.length&&rawSaved.routeSchema!==PEDESTRIAN_ROUTING_SCHEMA);
+  const saved=retiredRoadRoute
+    ?{...rawSaved,legs:[],checkpoints:[],routeDistance:0,routeEngine:'',current:1,
+       stage:'idle',currentPoi:null,photoProof:null,routeId:null,routeStartedAt:0,
+       usePhotoOptional:false,routeSynthetic:false,activeScreen:'home',legProgress:{},
+       trackedDistanceM:0,trackLastPos:null,trackLastAt:0}
+    :rawSaved;
   const rr = window.__yakutskRR = {
     start:saved?.start||{...YAKUTSK}, startMode:saved?.startMode||'pending',
     legs:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.legs||[]), checkpoints:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?[]:(saved?.checkpoints||[]), current:(saved?.legs?.length&&saved?.routeEngine!=='dijkstra-osm')?1:(saved?.current||1),
@@ -1036,7 +1047,7 @@ try {
   }
 
   const saveSession=()=>{
-    const payload={start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true,routeSynthetic:rr.routeSynthetic===true,photoProof:rr.photoProof||null};
+    const payload={routeSchema:PEDESTRIAN_ROUTING_SCHEMA,start:rr.start,startMode:rr.startMode,legs:rr.legs,checkpoints:rr.checkpoints,current:rr.current,routeDistance:rr.routeDistance,routeEngine:rr.routeEngine,routeTheme:rr.routeTheme,requestedDistance:rr.requestedDistance,stage:rr.stage,currentPoi:rr.currentPoi?{type:rr.currentPoi.type,id:rr.currentPoi.id,tags:rr.currentPoi.tags||{},_lat:rr.currentPoi._lat,_lng:rr.currentPoi._lng,_d:rr.currentPoi._d,_referenceUrl:rr.currentPoi._referenceUrl||null,_verifyMode:rr.currentPoi._verifyMode||null}:null,currentCategory:rr.currentCategory,livePos:rr.livePos,activeScreen:rr.activeScreen,scrolls:rr.scrolls,gpsAccuracy:rr.gpsAccuracy,lastGpsAt:rr.lastGpsAt,lastGpsPos:rr.lastGpsPos,suspiciousGps:rr.suspiciousGps,routeVariant:rr.routeVariant,replacementsUsed:rr.replacementsUsed||0,routeId:rr.routeId,dailyOfferId:rr.dailyOfferId||null,dailyOfferDay:rr.dailyOfferDay||null,routeStartedAt:rr.routeStartedAt,trackedDistanceM:rr.trackedDistanceM||0,trackLastPos:rr.trackLastPos,trackLastAt:rr.trackLastAt||0,legProgress:rr.legProgress||{},noGoZones:rr.noGoZones,usePhotoOptional:rr.usePhotoOptional===true,routeSynthetic:rr.routeSynthetic===true,photoProof:rr.photoProof||null};
     try{localStorage.setItem('rr_no_go_zones',JSON.stringify(rr.noGoZones||[]))}catch(e){}
     try{localStorage.setItem(SESSION_KEY,JSON.stringify(payload))}catch(e){console.warn('session save',e)}
   };
@@ -3141,7 +3152,7 @@ try {
   }
 
   // v9.3: вход без кода, GPS запускается сразу после загрузки интерфейса.
-  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{
+  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(retiredRoadRoute)toast('Пешеходные маршруты обновлены. Постройте прогулку заново.');if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{
     if(!rr.legs.length||rr.stage==='idle'||rr.stage==='completed')setStart(YAKUTSK,'demo',false);
     else status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');
   }})}
@@ -3174,7 +3185,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=51',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=52',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
