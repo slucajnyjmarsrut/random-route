@@ -84,13 +84,64 @@
   function osmQuery(bounds){
     return '[out:json][timeout:19];way["highway"~"^('+ROAD_TYPES+')$"]('+bounds.map(v=>Number(v).toFixed(6)).join(',')+');out body geom qt;';
   }
+  // Drawing the centreline of a car road (even one tagged with a sidewalk)
+  // tells a walker to follow the carriageway. Use independently mapped walking
+  // geometry instead. Fail to build rather than draw unsafe-looking shortcuts.
+  const PEDESTRIAN_TYPES=new Set(['footway','pedestrian','path','steps']);
+  const VEHICLE_TYPES=new Set(['motorway','trunk','primary','secondary','tertiary',
+    'residential','service','unclassified','living_street','track']);
   function allowed(tags){
     const t=tags||{},h=t.highway;
-    if(!h||!(new RegExp('^('+ROAD_TYPES+')$')).test(h))return false;
-    if(['no','private','customers','delivery'].includes(t.foot)||['no','private'].includes(t.access))return false;
+    if(!PEDESTRIAN_TYPES.has(h))return false;
+    if(['no','private','customers','delivery'].includes(t.foot)||
+      ['no','private'].includes(t.access))return false;
     if(t.area==='yes'||t.construction==='yes'||t.disused==='yes')return false;
-    if(h==='service'&&t.foot!=='yes'&&t.foot!=='designated'&&t.sidewalk!=='yes'&&t.sidewalk!=='both')return false;
-    if(['primary','secondary','tertiary','track','cycleway'].includes(h)&&t.foot!=='yes'&&t.foot!=='designated'&&!['yes','both','left','right','separate'].includes(t.sidewalk))return false;
+    return true;
+  }
+  // Major-road centrelines are not safe places to end a walking checkpoint.
+  // OSM can map a crosswalk as a footway through the road: let the path pass,
+  // but never choose the middle of that road as a destination.
+  const RISK_LAT=.001,RISK_LON=.002;
+  function roadRiskIndex(ways){
+    const cells=new Map();
+    for(const way of ways){
+      const t=way?.tags||{},h=t.highway,g=way.geometry||[];
+      if(!VEHICLE_TYPES.has(h)||g.length<2)continue;
+      const major=['motorway','trunk','primary','secondary','tertiary'].includes(h);
+      const riskRadius=major?10:4.5;
+      for(let i=1;i<g.length;i++){
+        const a=g[i-1],b=g[i];
+        if(!Number.isFinite(a?.lat)||!Number.isFinite(a?.lon)||!Number.isFinite(b?.lat)||!Number.isFinite(b?.lon))continue;
+        const lowY=Math.floor((Math.min(a.lat,b.lat)-.00015)/RISK_LAT);
+        const highY=Math.floor((Math.max(a.lat,b.lat)+.00015)/RISK_LAT);
+        const lowX=Math.floor((Math.min(a.lon,b.lon)-.00035)/RISK_LON);
+        const highX=Math.floor((Math.max(a.lon,b.lon)+.00035)/RISK_LON);
+        if((highY-lowY+1)*(highX-lowX+1)>150)continue;
+        const edge={a,b,riskRadius};
+        for(let y=lowY;y<=highY;y++)for(let x=lowX;x<=highX;x++){
+          const key=y+':'+x;
+          if(!cells.has(key))cells.set(key,[]);
+          cells.get(key).push(edge);
+        }
+      }
+    }
+    return cells;
+  }
+  function distanceToRoadSegment(p,{a,b}){
+    const dx=111195*Math.cos(p.lat*Math.PI/180),dy=111195;
+    const ax=(a.lon-p.lng)*dx,ay=(a.lat-p.lat)*dy;
+    const vx=(b.lon-a.lon)*dx,vy=(b.lat-a.lat)*dy,den=vx*vx+vy*vy;
+    const t=den?Math.max(0,Math.min(1,-(ax*vx+ay*vy)/den)):0;
+    return Math.hypot(ax+t*vx,ay+t*vy);
+  }
+  function isPedestrianStop(graph,id){
+    const p=graph?.nodes?.get(id);
+    if(!p)return false;
+    const risk=graph.roadRisk;
+    if(!risk)return true; // isolated unit graph with no vehicle geometry
+    const cell=Math.floor(p.lat/RISK_LAT)+':'+Math.floor(p.lng/RISK_LON);
+    for(const edge of risk.get(cell)||[])
+      if(distanceToRoadSegment(p,edge)<edge.riskRadius)return false;
     return true;
   }
   function factor(tags){
@@ -129,12 +180,13 @@
       if(nodes.size>LIMIT_NODES||edgeCount>LIMIT_EDGES)throw Error('GraphTooLarge');
     }
     if(nodes.size<20||edgeCount<20)throw Error('GraphIncomplete');
-    return {nodes,adj,edgeCount};
+    return {nodes,adj,edgeCount,roadRisk:roadRiskIndex(ways)};
   }
-  function nearestNode(graph,p,maxDistance=100){
+  function nearestNode(graph,p,maxDistance=100,{safeStop=false}={}){
     let nearest=null,best=maxDistance;
     for(const [id,node] of graph.nodes){
       if(Math.abs(p.lat-node.lat)>.0015||Math.abs(p.lng-node.lng)>.004)continue;
+      if(safeStop&&!isPedestrianStop(graph,id))continue;
       const d=distance(p,node);
       if(d<best){best=d;nearest=id;}
     }
@@ -195,7 +247,10 @@
   function route(graph,points,options={}){
     if(!Array.isArray(points)||points.length<2)throw Error('NoPoints');
     const zones=(options.zones||[]).map(z=>({lat:Number(z.lat),lng:Number(z.lng),radius:Number(z.radius||300)})).filter(z=>Number.isFinite(z.lat)&&Number.isFinite(z.lng)&&z.radius>0);
-    const ids=points.map((p,i)=>nearestNode(graph,p,i===0||i===points.length-1?145:180));
+    // Never snap a checkpoint to the centre of a vehicle road or 180 m
+    // to an unrelated path across a junction.
+    const ids=points.map((p,i)=>nearestNode(graph,p,
+      i===0||i===points.length-1?70:55,{safeStop:true}));
     if(ids.some(id=>id===null))throw Error('NoNearbyFootpath');
     const legs=[];let full=0;const usedEdges=new Map();
     for(let i=1;i<ids.length;i++){
@@ -212,7 +267,7 @@
       geometry:{type:'LineString',coordinates:allCoords}}],waypoints:locs};
   }
   function reachableNodes(graph,start,zones=[],maxSnap=145){
-    const origin=nearestNode(graph,start,maxSnap);
+    const origin=nearestNode(graph,start,Math.min(maxSnap,70),{safeStop:true});
     if(origin===null)throw Error('NoNearbyFootpath');
     const visited=new Set([origin]),stack=[origin];
     while(stack.length){
@@ -231,7 +286,7 @@
     for(const poi of pois||[]){
       const ll={lat:Number(poi._lat??poi.lat),lng:Number(poi._lng??poi.lng)};
       if(!Number.isFinite(ll.lat)||!Number.isFinite(ll.lng))continue;
-      const id=nearestNode(graph,ll,opts.maxSnap||180);
+      const id=nearestNode(graph,ll,Math.min(opts.maxSnap||55,55),{safeStop:true});
       if(id===null||!reachable.visited.has(id)||used.has(id))continue;
       used.add(id);items.push(poi);
     }
@@ -244,7 +299,7 @@
     for(const id of reachable.visited){
       if(index++%17!==0)continue;
       const p=graph.nodes.get(id),m=distance(p,start);
-      if(m<minimum||m>maximum)continue;
+      if(m<minimum||m>maximum||!isPedestrianStop(graph,id))continue;
       points.push({id,lat:p.lat,lng:p.lng,straightM:m});
     }
     points.sort((a,b)=>a.id.localeCompare(b.id));
@@ -333,5 +388,5 @@
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,shortest,route,reachableNodes,reachableStops,walkingWaypoints,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,isPedestrianStop,shortest,route,reachableNodes,reachableStops,walkingWaypoints,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
 });

@@ -1486,7 +1486,7 @@ try {
     // Не допускаем сильное "прилипание" промежуточных точек к другим улицам.
     for(let i=0;i<rough.length;i++){
       const snapped=waypointPoint(w[i+1]);if(!snapped)return false;
-      if(distMeters(rough[i],snapped)>190)return false;
+      if(distMeters(rough[i],snapped)>55)return false;
       // Для кольца точка не должна оказаться физически дальше, чем позволяет
       // вся заявленная длина маршрута.
       const maxFromStart=Math.max(700,Number(inputKm)*1000*.56+140);
@@ -1679,7 +1679,7 @@ try {
       // Public tourist POIs may be far from the user's position or isolated
       // from a real walking path. Remove inaccessible/duplicate snapped nodes
       // BEFORE spending 4 Dijkstra attempts on impossible waypoint combinations.
-      near=window.RRWalkingDijkstra.reachableStops(streetGraph,rr.start,near,{zones:rr.noGoZones,maxSnap:180});
+      near=window.RRWalkingDijkstra.reachableStops(streetGraph,rr.start,near,{zones:rr.noGoZones,maxSnap:55});
       let syntheticWalk=false;
       if(near.length<2){
         // Honest fallback: a walk through ACTUAL OSM road nodes, not fabricated
@@ -1740,7 +1740,7 @@ try {
           const remainingMs=Math.max(900,Math.min(6000,routeBudgetMs-(performance.now()-startedAt)-100));
           const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80,distanceKm:input,timeoutMs:remainingMs}),route=data.routes[0];
           factor=route.distance/Math.max(200,c.raw);
-          const snapOk=c.pois.every((p,i)=>{const sp=waypointPoint(data.waypoints[i+1]);return sp&&distMeters(sp,ll(p))<=120});
+          const snapOk=c.pois.every((p,i)=>{const sp=waypointPoint(data.waypoints[i+1]);return sp&&distMeters(sp,ll(p))<=55});
           if(!snapOk)continue;
           if(routeHitsNoGo(route)){rejectedByZones++;continue}
           const diff=Math.abs(route.distance-targetM);
@@ -1849,7 +1849,7 @@ try {
       if(e?.message==='NoDifferentDirection')toast('Не нашли действительно другое направление. Попробуем другой сектор.');
       else if(e?.message==='BadWaypointSnap')toast('Маршрутизатор привязал точки слишком далеко. Попробуйте ещё раз.');
       else if(osmError){/* One inline error, not a duplicate dark toast. */}
-      else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason))toast('По данным OSM здесь нет связанного пешеходного пути. Измените старт или дистанцию.');
+      else if(['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason))toast('Не найден непрерывный путь по отмеченным пешеходным дорожкам. Попробуйте другую точку старта.');
       else if(reason==='NoTouristPois')toast('Рядом со стартом мало туристических мест. Начните ближе к центру Якутска или увеличьте дистанцию.');
       else if(reason==='NoRouteOutsideZones')toast('Не нашли маршрут в обход выбранных зон. Уменьшите зоны или измените дистанцию.');
       else if(reason==='DistanceMismatch'){rr.routeVariant+=5;saveSession();toast('Не удалось построить маршрут длиной '+Number(e.requestedKm).toFixed(1).replace('.',',')+' км. Ближайший найденный: '+Number(e.bestKm).toFixed(1).replace('.',',')+' км.');}
@@ -1860,7 +1860,7 @@ try {
         statusEl.textContent=osmError
           ?'Не удалось загрузить дорожную сеть OSM для выбранного старта. Маршрут не построен. Попробуйте «Повторить построение» или отдельный пробный маршрут из центра Якутска (без GPS).'
           :['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason)
-            ?'Возле точки старта нет соединённого пешеходного пути. Попробуйте другое место старта или расстояние, затем повторите построение.'
+            ?'Не удалось найти непрерывную пешеходную дорожку без выхода на проезжую часть. Измените старт или дистанцию.'
             :'Маршрут пока не построен. Измените расстояние или нажмите «Повторить построение».';
       }
       return false;
@@ -3174,7 +3174,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=50',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=51',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3190,7 +3190,7 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=2.4"></script>
+<script src="walking-dijkstra.js?v=2.5"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
