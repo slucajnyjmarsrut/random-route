@@ -1,5 +1,5 @@
-/* Route-specific OSM audit, initiated by user. Not a street-safety guarantee.
- * Only the bounding box of the planned route is shared with Overpass, not GPS traces.
+/* Automatic unobtrusive route street-tag audit, not a safety guarantee.
+ * Only the planned route's bounding box is shared, not GPS logs.
  */
 (function(root,factory){
  "use strict";
@@ -185,97 +185,97 @@ function summaries(c){
   "Совпадение линии с дорожными объектами OSM: "+pct(c.matched,n)+"%. Это приблизительная геометрическая проверка, не осмотр на месте."
  ];
 }
+/* Quiet route audit: no manual button, technical reports or safety claims. */
+function importantMessages(c){
+ if(!c?.matched||!c.total)return [];
+ const messages=[];
+ if(c.lighting.no>0)messages.push("⚠️ На пути отмечены улицы без освещения. Будь осторожен в темноте.");
+ if(c.restricted>0)messages.push("⚠️ На части маршрута по OSM ограничен проход.");
+ if(c.sidewalk.no>0)messages.push("⚠️ На части маршрута по OSM нет тротуара.");
+ if(c.stairs>0)messages.push("⚠️ На пути есть лестницы. В мороз возможен лёд.");
+ if(c.winter.no+c.winter.limited>0)messages.push("⚠️ На отдельных участках может не быть зимней уборки.");
+ if(c.rough>0)messages.push("⚠️ Есть участки с неровным покрытием по данным OSM.");
+ if(c.lighting.unknown>c.total*.6||c.winter.unknown>c.total*.6)
+  messages.push("Освещение и уборка подтверждены не везде — проверь условия на месте.");
+ return messages.slice(0,3);
+}
 function mount(doc){
  const route=doc.getElementById("route"),card=doc.getElementById("srs-route");
  if(!route||!card)return;
- const panel=doc.createElement("section");panel.className="sra-panel";
- const heading=doc.createElement("strong");heading.textContent="🔎 Проверить улицы маршрута";panel.append(heading);
- const intro=doc.createElement("p");intro.textContent="Проверяем настоящие отметки об освещении, тротуарах и зимнем обслуживании из OpenStreetMap. Это не проверка гололёда или фактической уборки снега.";panel.append(intro);
- const button=doc.createElement("button");button.type="button";button.className="sra-btn";button.textContent="Проверить маршрут по OSM";panel.append(button);
- const note=doc.createElement("p");note.className="sra-note";note.textContent="По нажатию область построенного маршрута (не GPS-трек) отправляется в OpenStreetMap Overpass. Для точной проверки уборки снега нужны свежие данные городских служб.";panel.append(note);
- const result=doc.createElement("div");result.className="sra-result";result.setAttribute("aria-live","polite");result.textContent="Сначала постройте маршрут, затем нажмите кнопку проверки.";panel.append(result);
- const source=doc.createElement("a");source.href="https://www.openstreetmap.org/copyright";source.rel="noopener noreferrer";source.target="_blank";source.textContent="Источник картографических данных: © OpenStreetMap";source.className="sra-source";panel.append(source);
- card.append(panel);
- let state={status:"idle"},busy=false;
- function line(t,cls){
-   const e=doc.createElement("p");e.className="sra-line"+(cls?" "+cls:"");e.textContent=t;result.append(e);
+ const panel=doc.createElement("aside");panel.className="sra-panel";panel.hidden=true;
+ panel.setAttribute("aria-label","Важные сведения об улицах");
+ const result=doc.createElement("div");result.className="sra-result";
+ result.setAttribute("role","status");result.setAttribute("aria-live","polite");
+ panel.append(result);card.append(panel);
+ let state={status:"idle"},signature="",generation=0,controller=null;
+ function showWarnings(messages){
+  result.replaceChildren();panel.hidden=!messages.length;
+  for(const text of messages){
+   const node=doc.createElement("p");node.className="sra-alert";
+   node.textContent=text;result.append(node);
+  }
  }
- function setState(s){state=s;result.replaceChildren();}
+ function reportFor(sig,version,pts,id,ways,source,date){
+  if(version!==generation||sig!==signature)return;
+  const report=analyze(sampleRoute(pts),ways);
+  state={status:report.matched?(source==="bundled"?"partial":"ok"):"insufficient",
+   source,report,routeId:id,date};
+  panel.dataset.source=source;
+  showWarnings(importantMessages(report));
+ }
  async function check(){
-   if(busy)return;
-   const rr=window.__yakutskRR,pts=getRouteGeometry(rr?.legs),id=String(rr?.routeId||"");
-   if(pts.length<2){setState({status:"idle"});line("Сначала постройте маршрут по пешеходным дорогам.");return;}
-   let bbox;
-   try{bbox=routeBbox(pts);}catch(e){setState({status:"error"});line(e.message,"warn");return;}
-   busy=true;button.disabled=true;button.textContent="Проверяем данные OSM…";
-   setState({status:"loading"});line("Запрашиваем отмеченные на карте улицы и сопоставляем их с маршрутом.");
+  const rr=window.__yakutskRR,pts=getRouteGeometry(rr?.legs);
+  if(!route.classList.contains("active")||pts.length<2)return;
+  const id=String(rr.routeId||"");
+  const sig=[id,pts.length,rr.legs.length,
+   pts[0].lat.toFixed(6),pts[0].lon.toFixed(6),
+   pts[pts.length-1].lat.toFixed(6),pts[pts.length-1].lon.toFixed(6)].join(":");
+  if(sig===signature)return;
+  signature=sig;const version=++generation;
+  if(controller)controller.abort();
+  controller=null;showWarnings([]);delete panel.dataset.source;
+  state={status:"loading",routeId:id};
+  let bbox;
+  try{bbox=routeBbox(pts);}
+  catch(_){state={status:"unavailable",routeId:id};return;}
+  // Start with bundled real street tags; no connection needed for this part.
+  try{
+   const bundled=await bundledOsmForRoute(pts);
+   if(bundled)reportFor(sig,version,pts,id,bundled.ways,"bundled",bundled.createdAt);
+  }catch(_){/* No technical error appears to the walker. */}
+  if(version!==generation)return;
+  // Background refresh: only the planned-route bounding box, never GPS traces.
+  const query=queryFor(bbox);
+  for(const endpoint of ENDPOINTS){
+   if(version!==generation)return;
+   const task=new AbortController();controller=task;
+   const timer=setTimeout(()=>task.abort(),5500);
    try{
-     const samples=sampleRoute(pts),query=queryFor(bbox);
-     let ways=null,date=null,source="online",remoteProblem=null;
-     for(const endpoint of ENDPOINTS){
-       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7500);
-       try{
-         // A form POST avoids oversized URLs and is accepted by Overpass.
-         // The request sends ONLY the route bounding box, never user's GPS log.
-         const response=await fetch(endpoint,{
-           method:"POST",body:"data="+encodeURIComponent(query),signal:controller.signal,
-           cache:"no-store",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"}
-         });
-         if(!response.ok)throw Error("Overpass HTTP "+response.status);
-         const json=await response.json();
-         if(!Array.isArray(json.elements))throw Error("Invalid Overpass response");
-         const candidate=json.elements.filter(e=>e.type==="way"&&Array.isArray(e.geometry));
-         if(!candidate.length)throw Error("Empty Overpass road extract");
-         ways=candidate;date=json.osm3s?.timestamp_osm_base||null;
-         break;
-       }catch(e){remoteProblem=e;}
-       finally{clearTimeout(timer);}
-     }
-     if(!ways){
-       let local=null;
-       try{local=await bundledOsmForRoute(pts);}
-       catch(e){console.warn("Bundled OSM audit unavailable",e?.message||e);}
-       if(!local)throw remoteProblem||Error("Overpass unavailable");
-       ways=local.ways;date=local.createdAt;source="bundled";
-     }
-     const report=analyze(samples,ways);
-     const status=source==="bundled"?"partial":report.matched?"ok":"insufficient";
-     setState({status,source,report,routeId:id,date});
-     result.dataset.source=source;
-     if(source==="bundled"){
-       line("⚠️ Онлайн-проверка не ответила. Показаны только сохранённые данные OSM для центра Якутска (снимок от "+snapshotDateLabel(date)+"). Это ограниченная справка, не актуальная проверка маршрута.","warn");
-     }else{
-       line("Получены отметки улиц из OpenStreetMap Overpass. Наличие меток не подтверждает обстановку на месте.","small");
-     }
-     if(report.matched===0){
-       line("Не удалось сопоставить линию маршрута с дорожными объектами. Проверка условий не выполнена.","warn");
-     }else{
-       for(const item of summaries(report))line(item);
-       if(report.lighting.no>0)line("⚠️ В OSM есть участки с lit=no. В темноте лучше проверить альтернативный маршрут.","warn");
-       if(report.sidewalk.no>0)line("⚠️ Часть участков помечена как не имеющая тротуара.","warn");
-       if(report.stairs>0)line("⚠️ На пути нанесены лестницы — зимой они могут быть скользкими.","warn");
-       if(report.restricted>0)line("⚠️ Есть объекты OSM с ограничениями доступа. Проверьте маршрут на месте.","warn");
-       if(report.service>0)line("⚠️ Часть пути совпадает со служебными проездами; возможен проход через двор.","warn");
-       if(report.winter.no+report.winter.limited>0)line("⚠️ Есть участки с отсутствующим или ограниченным зимним обслуживанием по данным OSM.","warn");
-     }
-     if(source==="bundled"){
-       line("В сохранённом снимке могли отсутствовать сведения об освещении и зимней уборке. Неизвестные значения НЕ означают, что улица освещена или очищена.","warn");
-     }
-     line("Важно: OSM не подтверждает работающие сейчас фонари, уборку снега сегодня, отсутствие льда или происшествий. Безопасность не гарантируется.","small");
-     if(date)line((source==="bundled"?"Дата создания локального снимка":"Дата состояния базы OSM")+": "+snapshotDateLabel(date)+".","small");
-   }catch(e){
-     result.removeAttribute("data-source");
-     setState({status:"error",routeId:id,source:"none"});
-     line("Онлайн-серверы OSM сейчас не ответили, а сохранённая карта не покрывает этот маршрут или недоступна. Проверка улиц не выполнена. Повторите запрос позже.","warn");
-     line("Не считайте маршрут проверенным: оцените реальные условия, особенно освещение, мороз и гололёд.","small");
-   }finally{
-     busy=false;button.disabled=false;
-     button.textContent=state.status==="ok"?"Обновить проверку по OSM":"↻ Повторить онлайн-проверку";
-   }
+    const response=await fetch(endpoint,{
+     method:"POST",body:"data="+encodeURIComponent(query),signal:task.signal,
+     cache:"no-store",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"}
+    });
+    if(!response.ok)continue;
+    const json=await response.json();
+    if(!Array.isArray(json.elements))continue;
+    const ways=json.elements.filter(e=>e.type==="way"&&Array.isArray(e.geometry));
+    if(!ways.length)continue;
+    reportFor(sig,version,pts,id,ways,"online",json.osm3s?.timestamp_osm_base||null);
+    return;
+   }catch(_){/* Retry another Overpass server silently. */}
+   finally{clearTimeout(timer);if(controller===task)controller=null;}
+  }
+  if(version===generation&&state.status==="loading"){
+   state={status:"unavailable",routeId:id,source:"none"};
+   showWarnings([]); // Data unavailable does not imply a safe street.
+  }
  }
- button.addEventListener("click",check);
  window.SmartRouteAudit.check=check;
- window.SmartRouteAudit.getState=function(){return state;};
+ window.SmartRouteAudit.getState=()=>state;
+ window.addEventListener("rr:route-built",()=>{check().catch(()=>{});});
+ // A saved route is restored asynchronously on page load.
+ setTimeout(()=>{check().catch(()=>{});},650);
 }
-return {getRouteGeometry,sampleRoute,routeBbox,queryFor,analyze,summaries,routeWithinBounds,parseBundledOsm,bundledOsmForRoute,mount};
+
+return {getRouteGeometry,sampleRoute,routeBbox,queryFor,analyze,summaries,importantMessages,routeWithinBounds,parseBundledOsm,bundledOsmForRoute,mount};
 });

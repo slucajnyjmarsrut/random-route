@@ -145,7 +145,7 @@ try {
 } catch(e) {}
 </script><link rel="stylesheet" href="smart-safety.css?v=1.0" />
 
-<link rel="stylesheet" href="street-audit.css?v=1.1"/>
+<link rel="stylesheet" href="street-audit.css?v=1.2"/>
 <link rel="stylesheet" href="daily-quests.css?v=2.1"/>
 <link rel="stylesheet" href="tap-targets.css?v=1.0"/>
 <link rel="stylesheet" href="developer-diagnostics.css?v=1.0"/>
@@ -1838,6 +1838,7 @@ try {
       $('#sumDistance').textContent=(route.distance/1000).toFixed(1).replace('.',',')+' км';$('#sumPoints').textContent=$('#pointTotal').textContent=rr.checkpoints.length;
       resetPointUI();saveSession();showScreen('route',{restoreScroll:false});requestAnimationFrame(()=>setTimeout(()=>showLeg(0,true),120));toast((dailyOffer?'Маршрут дня: ':'Маршрут ')+(route.distance/1000).toFixed(1).replace('.',',')+' км готов');
       window.dispatchEvent(new Event('rr:daily-route-built'));
+      window.dispatchEvent(new Event('rr:route-built')); // Check street tags silently in background.
       routeSucceeded=true;
       return true;
     }catch(e){
@@ -3173,7 +3174,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=49',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=50',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3182,7 +3183,7 @@ try {
 <script src="smart-safety.js?v=1.2"></script>
 
 <script src="developer-diagnostics.js?v=1.0"></script>
-<script src="street-audit.js?v=1.1"></script>
+<script src="street-audit.js?v=1.2"></script>
 <script src="daily-quests.js?v=2.1"></script>
 <script src="map-fallback.js?v=1.1"></script>
 <script src="tap-targets.js?v=1.0"></script>
