@@ -1,0 +1,58 @@
+/* Qwen chat lives in a modal; it never covers the route CTA or navigation until opened. */
+.rr-ai-home-open{position:relative;display:flex;justify-content:center;align-items:center;flex:0 0 92px;
+  width:92px;height:100px;min-width:92px;padding:0;border:0;background:transparent;
+  border-radius:18px;cursor:pointer;outline-offset:2px}
+.rr-welcome-mascot .rr-ai-home-open img{display:block;width:92px!important;height:100px!important;flex:none!important}
+.rr-welcome-mascot .rr-ai-home-open .rr-ai-avatar-tag{position:absolute;right:-6px;top:0;
+  background:#25594a;color:#fff;border:1px solid #a2efbe;padding:2px 5px;
+  border-radius:99px;font-size:11px!important;line-height:1.1!important;font-weight:900}
+.rr-ai-home-open:focus-visible,.rr-ai-guide-open:focus-visible{outline:3px solid #ffe08a}
+.rr-ai-guide-open{position:relative;display:grid;place-items:center;flex:0 0 58px;
+  width:58px;height:62px;padding:0;border:0;background:transparent;border-radius:13px;cursor:pointer}
+.rr-ai-guide-open:after{content:"💬";position:absolute;top:-8px;right:-5px;font-size:17px;
+  line-height:1.1;pointer-events:none;filter:drop-shadow(0 1px 2px #142a24)}
+.rr-marshik-step .rr-ai-guide-open img{width:58px;height:62px;flex:none}
+.rr-ai-dialog{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+.rr-ai-dialog.hidden{display:none!important}
+.rr-ai-backdrop{position:absolute;inset:0;background:rgba(7,16,18,.8)}
+.rr-ai-panel{position:relative;width:min(650px,100%);max-height:100%;min-height:0;display:flex;flex-direction:column;
+  background:#243339;color:#f1f8f5;border:1px solid #648a79;border-radius:21px;
+  padding:14px;box-shadow:0 28px 80px #071318ab;gap:9px;overflow:hidden}
+.rr-ai-header{display:flex;align-items:center;gap:10px;min-width:0}
+.rr-ai-header img{width:46px;height:50px;flex:none}
+.rr-ai-header div{flex:1;min-width:0}
+.rr-ai-header h2{font-size:18px;line-height:1.2;color:#9ef0bf;margin:0}
+.rr-ai-header p{font-size:12px;color:#c3d6cd;margin:4px 0 0}
+.rr-ai-close{width:40px;height:40px;flex:none;border:1px solid #789287;border-radius:12px;background:#334d4f;color:#fff;cursor:pointer;font-size:19px}
+.rr-ai-notice{font-size:12px;line-height:1.5;color:#e4eacf;margin:0;padding:10px;border-radius:11px;background:#3c4339}
+.rr-ai-controls{display:flex;gap:8px;flex-wrap:wrap}
+.rr-ai-controls button,.rr-ai-form button{min-height:44px;padding:9px 15px;border:0;border-radius:13px;
+  background:#238466;color:#fff;font-size:14px;font-weight:800;cursor:pointer}
+.rr-ai-controls .rr-ai-stop{background:#415761}
+.rr-ai-controls button:disabled,.rr-ai-form button:disabled{opacity:.55;cursor:not-allowed}
+.rr-ai-status{min-height:20px;font-size:12px;color:#dfefde;margin:0;line-height:1.45}
+.rr-ai-log{display:flex;flex-direction:column;gap:9px;min-height:105px;max-height:36vh;overflow-y:auto;
+  padding:8px 4px 8px;overscroll-behavior:contain}
+.rr-ai-greeting,.rr-ai-bubble{margin:0;padding:10px 12px;border-radius:14px;max-width:94%;
+  font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.rr-ai-greeting,.rr-ai-bubble.assistant{align-self:flex-start;color:#edf7ee;background:#365148}
+.rr-ai-bubble.user{align-self:flex-end;color:#fff;background:#27765b}
+.rr-ai-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}
+.rr-ai-form label{grid-column:1/-1;font-size:12px;font-weight:800;color:#e2eee7}
+.rr-ai-form textarea{box-sizing:border-box;min-width:0;width:100%;max-height:115px;resize:vertical;
+  padding:10px 11px;border-radius:12px;border:1px solid #95a99c;background:#f8fffb;color:#15271e;
+  font-size:16px;line-height:1.4}
+.rr-ai-form textarea:disabled{opacity:.6}
+.rr-ai-footnote{font-size:10px;color:#cddcd5;margin:0;line-height:1.5}
+@media(max-width:599px){
+ .rr-ai-panel{padding:10px;border-radius:16px}
+ .rr-ai-header h2{font-size:16px}
+ .rr-ai-notice{font-size:11px}
+ .rr-ai-log{max-height:29vh}
+ .rr-marshik-step .rr-ai-guide-open{width:46px;height:50px;flex-basis:46px}
+ .rr-marshik-step .rr-ai-guide-open img{width:46px;height:50px}
+}
+@media(prefers-reduced-motion:reduce){
+ .rr-ai-home-open,.rr-ai-guide-open,.rr-ai-panel{animation:none!important;scroll-behavior:auto}
+}

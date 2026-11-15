@@ -1,0 +1,27 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('index.html','utf8');
+const ui=fs.readFileSync('marshik-ai.js','utf8');
+const worker=fs.readFileSync('marshik-ai-worker.js','utf8');
+const guide=fs.readFileSync('marshik-guide.js','utf8');
+const css=fs.readFileSync('marshik-ai.css','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+for(const name of ['marshik-ai.js','marshik-ai.css','marshik-ai-worker.js'])
+ assert.ok(html.includes(name)||name==='marshik-ai-worker.js'&&ui.includes(name),'AI asset loaded: '+name);
+for(const x of ['rrAiDialog','rrAiQuestion','rrAiStart','rrAiSend','rrAiStop','rrAiLog','rr-ai-home-open'])
+ assert.ok(html.includes(x),'missing AI UI: '+x);
+assert.ok(guide.includes('rr-ai-guide-open'),'Marshik guide should also open chat');
+assert.ok(ui.includes('navigator.gpu.requestAdapter'),'must check hardware before loading');
+assert.ok(ui.includes("start.addEventListener('click',launch)"),'no automatic 800MB download');
+assert.ok(ui.includes("new Worker('marshik-ai-worker.js?v=1.0'"),'inference stays off the UI thread');
+assert.ok(worker.includes("onnx-community/Qwen2.5-0.5B-Instruct"));
+assert.ok(worker.includes("dtype:'q4',device:'webgpu'"),'real quantized browser Qwen');
+assert.ok(worker.includes('pipeline(')&&worker.includes("max_new_tokens:140"),'actual inference, bounded generation');
+assert.ok(!/api[_-]?key|bearer\s+[a-z0-9]/i.test(ui+worker),'no hardcoded API key');
+assert.ok(ui.includes('textarea.value.trim().slice(0,500)'));
+assert.ok(ui.includes('window.__yakutskRR')&&!ui.includes('route.livePos'),'no precise GPS prompt');
+assert.ok(sw.includes('"./marshik-ai.js"')&&sw.includes('"./marshik-ai-worker.js"'));
+assert.ok(css.includes('prefers-reduced-motion:reduce'));
+assert.ok(html.includes("register('sw.js?v=48',{updateViaCache:'none'})"));
+console.log('MARSHIK_QWEN_STATIC_OK local WebGPU model, explicit launch, privacy, progressive coach, UI');
