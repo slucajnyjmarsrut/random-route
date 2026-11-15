@@ -13,9 +13,14 @@
 })(typeof window!=="undefined"?window:null,function(){
 "use strict";
 const ENDPOINTS=[
+ "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
  "https://overpass.private.coffee/api/interpreter",
  "https://overpass-api.de/api/interpreter"
 ];
+// The site ships a real OSM snapshot for a bounded downtown area. It has no
+// reliable live lighting/snow-clearance readings; use only as *partial* evidence.
+const LOCAL_OSM_PATH="./data/yakutsk-center-walking.json?v=1";
+const LOCAL_OSM_BOUNDS={south:62.016,west:129.708,north:62.046,east:129.760};
 const RADIUS=12,MAX_SAMPLES=220,LAT_CELL=.001,LON_CELL=.002;
 function finite(n){return typeof n==="number"&&Number.isFinite(n);}
 function dist(a,b){
@@ -62,6 +67,40 @@ function routeBbox(pts){
 function queryFor(b){
  const f=x=>x.toFixed(6);
  return '[out:json][timeout:22];way["highway"~"^(footway|path|pedestrian|steps|living_street|residential|service|tertiary|secondary|primary|unclassified|track|cycleway)$"]('+[b.south,b.west,b.north,b.east].map(f).join(",")+');out tags geom qt;';
+}
+
+function routeWithinBounds(pts,bounds=LOCAL_OSM_BOUNDS){
+ if(!Array.isArray(pts)||pts.length<2||!bounds)return false;
+ return pts.every(p=>finite(p.lat)&&finite(p.lon)
+  &&p.lat>=bounds.south+.00001&&p.lat<=bounds.north-.00001
+  &&p.lon>=bounds.west+.00001&&p.lon<=bounds.east-.00001);
+}
+function parseBundledOsm(data,pts){
+ if(data?.version!==1||!Array.isArray(data.ways)||data.ways.length<100
+    ||!routeWithinBounds(pts,data.bbox)||!routeWithinBounds(pts,LOCAL_OSM_BOUNDS))
+   throw Error("LocalSnapshotOutOfCoverage");
+ return {ways:data.ways.filter(w=>Array.isArray(w.geometry)&&w.geometry.length>=2),
+         createdAt:data.created_at||null,source:"bundled"};
+}
+async function bundledOsmForRoute(pts){
+ // Never make a small downtown snapshot appear to cover another district.
+ if(!routeWithinBounds(pts))return null;
+ if(typeof caches!=="undefined"&&typeof caches.match==="function"){
+   try{
+     const cached=await caches.match("./data/yakutsk-center-walking.json",{ignoreSearch:true});
+     if(cached?.ok)return parseBundledOsm(await cached.clone().json(),pts);
+   }catch(e){console.warn("OSM audit cache unavailable",e?.message||e);}
+ }
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+ try{
+   const response=await fetch(LOCAL_OSM_PATH,{signal:controller.signal,cache:"force-cache"});
+   if(!response.ok)throw Error("LocalSnapshotHTTP"+response.status);
+   return parseBundledOsm(await response.json(),pts);
+ }finally{clearTimeout(timer);}
+}
+function snapshotDateLabel(value){
+ const d=new Date(value||"");
+ return Number.isFinite(d.getTime())?d.toLocaleDateString("ru-RU"):"неизвестной даты";
 }
 function getTags(way){return way?.tags||{};}
 function mkIndex(ways){
@@ -157,7 +196,7 @@ function mount(doc){
  const result=doc.createElement("div");result.className="sra-result";result.setAttribute("aria-live","polite");result.textContent="Сначала постройте маршрут, затем нажмите кнопку проверки.";panel.append(result);
  const source=doc.createElement("a");source.href="https://www.openstreetmap.org/copyright";source.rel="noopener noreferrer";source.target="_blank";source.textContent="Источник картографических данных: © OpenStreetMap";source.className="sra-source";panel.append(source);
  card.append(panel);
- let lastId="",state={status:"idle"},busy=false;
+ let state={status:"idle"},busy=false;
  function line(t,cls){
    const e=doc.createElement("p");e.className="sra-line"+(cls?" "+cls:"");e.textContent=t;result.append(e);
  }
@@ -166,31 +205,51 @@ function mount(doc){
    if(busy)return;
    const rr=window.__yakutskRR,pts=getRouteGeometry(rr?.legs),id=String(rr?.routeId||"");
    if(pts.length<2){setState({status:"idle"});line("Сначала постройте маршрут по пешеходным дорогам.");return;}
-   if(id&&id===lastId&&state.status==="ok"){line("Повторная проверка не нужна: результат относится к этому же маршруту.");return;}
    let bbox;
    try{bbox=routeBbox(pts);}catch(e){setState({status:"error"});line(e.message,"warn");return;}
    busy=true;button.disabled=true;button.textContent="Проверяем данные OSM…";
    setState({status:"loading"});line("Запрашиваем отмеченные на карте улицы и сопоставляем их с маршрутом.");
    try{
      const samples=sampleRoute(pts),query=queryFor(bbox);
-     let json=null,fail=null;
+     let ways=null,date=null,source="online",remoteProblem=null;
      for(const endpoint of ENDPOINTS){
-       const controller=new AbortController(),t=setTimeout(()=>controller.abort(),12500);
+       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7500);
        try{
-         const response=await fetch(endpoint+"?data="+encodeURIComponent(query),{signal:controller.signal,cache:"no-store"});
-         if(!response.ok)throw Error("HTTP "+response.status);
-         json=await response.json();
-         if(!Array.isArray(json.elements))throw Error("Пустой ответ Overpass");
+         // A form POST avoids oversized URLs and is accepted by Overpass.
+         // The request sends ONLY the route bounding box, never user's GPS log.
+         const response=await fetch(endpoint,{
+           method:"POST",body:"data="+encodeURIComponent(query),signal:controller.signal,
+           cache:"no-store",headers:{"Content-Type":"application/x-www-form-urlencoded",Accept:"application/json"}
+         });
+         if(!response.ok)throw Error("Overpass HTTP "+response.status);
+         const json=await response.json();
+         if(!Array.isArray(json.elements))throw Error("Invalid Overpass response");
+         const candidate=json.elements.filter(e=>e.type==="way"&&Array.isArray(e.geometry));
+         if(!candidate.length)throw Error("Empty Overpass road extract");
+         ways=candidate;date=json.osm3s?.timestamp_osm_base||null;
          break;
-       }catch(e){fail=e;}
-       finally{clearTimeout(t);}
+       }catch(e){remoteProblem=e;}
+       finally{clearTimeout(timer);}
      }
-     if(!json)throw fail||Error("Overpass недоступен");
-     const ways=json.elements.filter(e=>e.type==="way"&&Array.isArray(e.geometry));
-     const report=analyze(samples,ways),date=json.osm3s?.timestamp_osm_base||null;
-     setState({status:"ok",report,routeId:id,date});lastId=id;
-     if(report.matched===0){line("Недостаточно нанесённых на карту объектов рядом с маршрутом. Проверка не дала результата.","warn");}
-     else{
+     if(!ways){
+       let local=null;
+       try{local=await bundledOsmForRoute(pts);}
+       catch(e){console.warn("Bundled OSM audit unavailable",e?.message||e);}
+       if(!local)throw remoteProblem||Error("Overpass unavailable");
+       ways=local.ways;date=local.createdAt;source="bundled";
+     }
+     const report=analyze(samples,ways);
+     const status=source==="bundled"?"partial":report.matched?"ok":"insufficient";
+     setState({status,source,report,routeId:id,date});
+     result.dataset.source=source;
+     if(source==="bundled"){
+       line("⚠️ Онлайн-проверка не ответила. Показаны только сохранённые данные OSM для центра Якутска (снимок от "+snapshotDateLabel(date)+"). Это ограниченная справка, не актуальная проверка маршрута.","warn");
+     }else{
+       line("Получены отметки улиц из OpenStreetMap Overpass. Наличие меток не подтверждает обстановку на месте.","small");
+     }
+     if(report.matched===0){
+       line("Не удалось сопоставить линию маршрута с дорожными объектами. Проверка условий не выполнена.","warn");
+     }else{
        for(const item of summaries(report))line(item);
        if(report.lighting.no>0)line("⚠️ В OSM есть участки с lit=no. В темноте лучше проверить альтернативный маршрут.","warn");
        if(report.sidewalk.no>0)line("⚠️ Часть участков помечена как не имеющая тротуара.","warn");
@@ -199,15 +258,24 @@ function mount(doc){
        if(report.service>0)line("⚠️ Часть пути совпадает со служебными проездами; возможен проход через двор.","warn");
        if(report.winter.no+report.winter.limited>0)line("⚠️ Есть участки с отсутствующим или ограниченным зимним обслуживанием по данным OSM.","warn");
      }
-     line("Важно: разметка OSM не подтверждает, что фонари сейчас работают, улица сегодня очищена, нет льда или происшествий. Безопасность не гарантируется.","small");
-     if(date)line("Дата состояния базы OSM: "+new Date(date).toLocaleDateString("ru-RU")+".","small");
+     if(source==="bundled"){
+       line("В сохранённом снимке могли отсутствовать сведения об освещении и зимней уборке. Неизвестные значения НЕ означают, что улица освещена или очищена.","warn");
+     }
+     line("Важно: OSM не подтверждает работающие сейчас фонари, уборку снега сегодня, отсутствие льда или происшествий. Безопасность не гарантируется.","small");
+     if(date)line((source==="bundled"?"Дата создания локального снимка":"Дата состояния базы OSM")+": "+snapshotDateLabel(date)+".","small");
    }catch(e){
-     setState({status:"error"});line("Не удалось получить картографические данные. Попробуйте повторить позже. Без проверки маршрут нельзя считать безопасным.","warn");
-   }finally{busy=false;button.disabled=false;button.textContent="Проверить маршрут по OSM";}
+     result.removeAttribute("data-source");
+     setState({status:"error",routeId:id,source:"none"});
+     line("Онлайн-серверы OSM сейчас не ответили, а сохранённая карта не покрывает этот маршрут или недоступна. Проверка улиц не выполнена. Повторите запрос позже.","warn");
+     line("Не считайте маршрут проверенным: оцените реальные условия, особенно освещение, мороз и гололёд.","small");
+   }finally{
+     busy=false;button.disabled=false;
+     button.textContent=state.status==="ok"?"Обновить проверку по OSM":"↻ Повторить онлайн-проверку";
+   }
  }
  button.addEventListener("click",check);
  window.SmartRouteAudit.check=check;
  window.SmartRouteAudit.getState=function(){return state;};
 }
-return {getRouteGeometry,sampleRoute,routeBbox,queryFor,analyze,summaries,mount};
+return {getRouteGeometry,sampleRoute,routeBbox,queryFor,analyze,summaries,routeWithinBounds,parseBundledOsm,bundledOsmForRoute,mount};
 });
