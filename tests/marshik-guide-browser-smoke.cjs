@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
        el.hidden=false;el.textContent='Маршрут не найден. Попробуйте выбрать другую длину прогулки.';
      });
      await expectStep('create:error');
-     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Не удалось подобрать/);
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Маршрут не построен/);
      await page.locator('#routeBuildStatus').evaluate(el=>{el.hidden=true;el.textContent='';});
      await expectStep('create:distance');
    }
@@ -51,12 +51,14 @@ const {chromium}=require('playwright');
      });
      await page.locator('#buildBtn').click();
      await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error',null,{timeout:20000});
-     await expectStep('create:error');
+     await expectStep('create:preview-recovery');
      assert.match(await page.locator('#buildBtn').innerText(),/Повторить построение/);
-     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Дороги временно недоступны/);
+     assert.match(await page.locator('#rrMarshikGuideText').innerText(),/Дороги для этого старта не загрузились/);
      assert.equal(await page.locator('#routeBuildStatus').isVisible(),true);
      assert.equal(await page.locator('#tryDemoRouteBtn').isVisible(),true,
        'show a clearly labelled demo alternative after an OSM outage');
+     assert.equal(await page.locator('#tryDemoRouteBtn').evaluate(el=>el.classList.contains('rr-marshik-current-target')),true,
+       'Marshik must point to the demo instead of an endless Retry loop');
      assert.equal(await page.locator('#buildBtn').isEnabled(),true);
      // The Retry button must trigger another real attempt, not a dead label.
      await page.locator('#buildBtn').click();
