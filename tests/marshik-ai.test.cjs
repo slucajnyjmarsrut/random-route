@@ -23,7 +23,7 @@ assert.ok(ui.includes('textarea.value.trim().slice(0,500)'));
 assert.ok(ui.includes('window.__yakutskRR')&&!ui.includes('route.livePos'),'no precise GPS prompt');
 assert.ok(sw.includes('"./marshik-ai.js"')&&sw.includes('"./marshik-ai-worker.js"'));
 assert.ok(css.includes('prefers-reduced-motion:reduce'));
-assert.ok(html.includes("register('sw.js?v=51',{updateViaCache:'none'})"));
+assert.ok(html.includes("register('sw.js?v=52',{updateViaCache:'none'})"));
 assert.ok(html.includes('id="rrAiForm" class="rr-ai-form" hidden')&&html.includes('id="rrAiLog" class="rr-ai-log"'));
 assert.ok(!html.includes('rr-ai-footnote')&&!html.includes('rr-ai-greeting'),'no redundant always-visible text');
 assert.ok(html.includes('Первый запуск загрузит около 800 МБ'),'first-time user knows the model download size');
