@@ -17,6 +17,10 @@ const {chromium}=require('playwright');
   await page.locator('#buildBtn').click();
   await page.waitForFunction(()=>document.querySelector('#routeBuildStatus')?.dataset.state==='error');
   assert.equal(await page.locator('#tryDemoRouteBtn').isVisible(),true);
+  await page.waitForFunction(()=>document.querySelector('#rrMarshikGuide')?.dataset.rrGuideStep==='create:preview-recovery');
+  assert.equal(await page.locator('#tryDemoRouteBtn').evaluate(el=>el.classList.contains('rr-marshik-current-target')),true,
+    'Marshik should guide to the demo alternative after an OSM error');
+  assert.equal(await page.locator('#buildBtn').evaluate(el=>el.classList.contains('rr-marshik-current-target')),false);
   await page.evaluate(()=>{
     window.RRWalkingDijkstra.loadGraph=window.__savedLoadGraph;
     // Simulate a saved location outside the bundled OSM area.

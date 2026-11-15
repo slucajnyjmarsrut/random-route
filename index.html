@@ -1829,7 +1829,7 @@ try {
         statusEl.hidden=false;statusEl.dataset.state='error';statusEl.dataset.errorCode=osmError?'osm':reason;
         $('#tryDemoRouteBtn')?.classList.remove('hidden');
         statusEl.textContent=osmError
-          ?'Дорожные данные OSM сейчас недоступны. Маршрут не построен. Нажмите «Повторить построение». Если ошибка повторится, проверьте интернет или попробуйте позже.'
+          ?'Не удалось загрузить дорожную сеть OSM для выбранного старта. Маршрут не построен. Попробуйте «Повторить построение» или отдельный пробный маршрут из центра Якутска (без GPS).'
           :['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason)
             ?'Возле точки старта нет соединённого пешеходного пути. Попробуйте другое место старта или расстояние, затем повторите построение.'
             :'Маршрут пока не построен. Измените расстояние или нажмите «Повторить построение».';
@@ -3145,7 +3145,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=45',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=46',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3161,11 +3161,11 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=2.3"></script>
+<script src="walking-dijkstra.js?v=2.4"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
 <script src="mascot-collection.js?v=1.0"></script>
-<script src="marshik-guide.js?v=1.1"></script>
+<script src="marshik-guide.js?v=1.2"></script>
 </body>
 </html>
