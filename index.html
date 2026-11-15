@@ -856,7 +856,7 @@ try {
   const retiredDistanceRoute=!!(rawSaved?.legs?.length&&
     Number.isFinite(Number(rawSaved?.requestedDistance))&&
     Number(rawSaved.requestedDistance)>=1&&Number(rawSaved.requestedDistance)<=12&&
-    Math.abs(Number(rawSaved.routeDistance)-Number(rawSaved.requestedDistance)*1000)>
+    Number(rawSaved.routeDistance)-Number(rawSaved.requestedDistance)*1000>
       routeDistanceToleranceM(rawSaved.requestedDistance));
   const retiredRoadRoute=!!(rawSaved?.legs?.length&&
     (rawSaved.routeSchema!==PEDESTRIAN_ROUTING_SCHEMA||retiredDistanceRoute));
