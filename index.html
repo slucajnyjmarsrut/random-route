@@ -842,11 +842,24 @@ try {
   const pilotBounds = {south:61.85,north:62.20,west:129.30,east:130.20};
   const SESSION_KEY='rr_yakutsk_session_v8';
   const PEDESTRIAN_ROUTING_SCHEMA='pedestrian-only-v51';
+  // Maximum difference from the user-selected walking distance (real OSM metres).
+  // A 2 km selection must never silently become a 2.8 km walk.
+  function routeDistanceToleranceM(km){
+    const metres=Number(km)*1000;
+    if(!Number.isFinite(metres)||metres<1000||metres>12000)return 0;
+    return Math.max(120,Math.min(500,metres*.08));
+  }
   const rawSaved=(()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}})();
   // Old saved walking legs were calculated with vehicle road centrelines.
   // Never show that previously generated geometry after a routing safety fix.
   // Retain preferences, past verified awards and the real GPS setting.
-  const retiredRoadRoute=!!(rawSaved?.legs?.length&&rawSaved.routeSchema!==PEDESTRIAN_ROUTING_SCHEMA);
+  const retiredDistanceRoute=!!(rawSaved?.legs?.length&&
+    Number.isFinite(Number(rawSaved?.requestedDistance))&&
+    Number(rawSaved.requestedDistance)>=1&&Number(rawSaved.requestedDistance)<=12&&
+    Math.abs(Number(rawSaved.routeDistance)-Number(rawSaved.requestedDistance)*1000)>
+      routeDistanceToleranceM(rawSaved.requestedDistance));
+  const retiredRoadRoute=!!(rawSaved?.legs?.length&&
+    (rawSaved.routeSchema!==PEDESTRIAN_ROUTING_SCHEMA||retiredDistanceRoute));
   const saved=retiredRoadRoute
     ?{...rawSaved,legs:[],checkpoints:[],routeDistance:0,routeEngine:'',current:1,
        stage:'idle',currentPoi:null,photoProof:null,routeId:null,routeStartedAt:0,
@@ -1709,7 +1722,7 @@ try {
       if(near.length===0)throw new Error('NoTouristPois');
       const selectedTheme=$('#typeChoices .choice.active')?.dataset.type||'city';
       const nMax=input<=2?3:Math.max(3,Math.min(8,Math.round(input/1.35)));
-      const tolOk=Math.max(150,targetM*.08),tolAccept=Math.max(350,targetM*.18);
+      const tolAccept=routeDistanceToleranceM(input),tolOk=Math.max(80,tolAccept*.6);
       const ll=p=>({lat:p._lat,lng:p._lng});
       const mkCandidate=()=>{
         const kMax=Math.min(nMax,near.length),k=kMax===1?1:2+Math.floor(dailyRandom()*(kMax-1));
@@ -1811,16 +1824,40 @@ try {
           }
         }
       }
+      // If scenic loops missed the requested distance, choose a real path
+      // along pedestrian ways out and back; never force an extra 800 metres.
+      if(!best||best.diff>tolAccept){
+        const returnStops=window.RRWalkingDijkstra.returnTripStops(streetGraph,rr.start,input,{
+          zones:rr.noGoZones
+        });
+        for(const stop of returnStops.slice(0,12)){
+          if(performance.now()-startedAt>routeBudgetMs+7000)break;
+          try{
+            const pois=[{type:'walk_node',id:'osm-return:'+stop.id,
+              _lat:stop.lat,_lng:stop.lng,_isTouristGuide:false,_hasRef:false,
+              _referenceUrl:null,_verifyMode:'none',_fullAddress:'Пешеходная дорожка OpenStreetMap',
+              tags:{name:'Точка разворота'}}];
+            const data=await requestFootRoute([rr.start,{lat:stop.lat,lng:stop.lng},rr.start],
+              {distanceKm:input}),route=data.routes[0];
+            if(routeHitsNoGo(route))continue;
+            const diff=Math.abs(route.distance-targetM);
+            if(!best||diff<best.diff){
+              best={data,route,pois,diff,actual:route.distance/1000,rank:diff,
+                synthetic:true,outAndBack:true};
+            }
+            if(diff<=tolAccept)break;
+          }catch(e){console.info('OSM return-trip candidate',e?.message||e);}
+        }
+      }
       const chosen=best;
       if(!chosen){
         if(options.requireDifferentFirst&&rejectedAsSame)throw new Error('NoDifferentDirection');
         if(rejectedByZones)throw new Error('NoRouteOutsideZones');
         throw new Error('NoRoute')
       }
-      // Do not discard a safe, fully routed walking path just because its
-      // length missed a very tight target. Show the ACTUAL distance to the user.
-      // Reject routes wildly different from their request.
-      if(chosen.diff>Math.max(700,targetM*.42)){
+      // Never silently exceed the distance the user selected.
+      // Keep real routed metres; reject rather than relabel a 2.8 km walk as 2 km.
+      if(chosen.diff>tolAccept){
         const err=new Error('DistanceMismatch');err.bestKm=chosen.actual;err.requestedKm=input;throw err;
       }
       const {data,route}=chosen;
@@ -1835,9 +1872,10 @@ try {
         :backed>0
           ?'Фотозадания: '+backed+' из '+chosen.pois.length+' точек имеют предварительно найденные эталонные снимки. Для остальных попробуем загрузить фото при прибытии.'
           :'Фотозадания: эталонные снимки заранее не найдены. У точек можно повторить поиск, заменить место или пройти без фотонаграды.';
-      if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
+      if(chosen.outAndBack)toast('Построен пешеходный маршрут туда и обратно нужной длины.');
+      else if(syntheticWalk)toast('Построена прогулка по настоящим улицам OSM. Рядом мало известных объектов; фотозадания не требуются.');
       else if(usePhotoOptional)toast('Маршрут построен без фотозаданий: эталонные фотографии недоступны.');
-      if(chosen.diff>tolAccept)toast('Найден безопасный маршрут длиной '+chosen.actual.toFixed(1).replace('.',',')+' км вместо '+input.toFixed(1).replace('.',',')+' км.');
+
       rr.legs=route.legs;
       rr.routeEngine='dijkstra-osm';rr.routeTheme=selectedTheme;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
@@ -1872,7 +1910,9 @@ try {
           ?'Не удалось загрузить дорожную сеть OSM для выбранного старта. Маршрут не построен. Попробуйте «Повторить построение» или отдельный пробный маршрут из центра Якутска (без GPS).'
           :['NoNearbyFootpath','DisconnectedWalkingGraph'].includes(reason)
             ?'Не удалось найти непрерывную пешеходную дорожку без выхода на проезжую часть. Измените старт или дистанцию.'
-            :'Маршрут пока не построен. Измените расстояние или нажмите «Повторить построение».';
+            :reason==='DistanceMismatch'
+             ?'Не нашли пешеходный маршрут достаточно близкий к выбранной длине. Попробуйте другое расстояние или место старта.'
+             :'Маршрут пока не построен. Измените расстояние или нажмите «Повторить построение».';
       }
       return false;
     }finally{
@@ -3152,7 +3192,9 @@ try {
   }
 
   // v9.3: вход без кода, GPS запускается сразу после загрузки интерфейса.
-  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(retiredRoadRoute)toast('Пешеходные маршруты обновлены. Постройте прогулку заново.');if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{
+  let gpsBooted=false;function bootGps(){if(gpsBooted)return;gpsBooted=true;requestAnimationFrame(()=>{restoreUI();if(retiredRoadRoute)toast(retiredDistanceRoute
+      ?'Исправили длину прогулок. Прежний маршрут слишком длинный — постройте новый.'
+      :'Пешеходные маршруты обновлены. Постройте прогулку заново.');if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(yMap)try{yMap.container.fitToViewport()}catch(e){}if(isDeveloperMode())setDeveloperMode(true);else if(!demoMode){explainGeoState();requestLocation(true);startWatching()}else{
     if(!rr.legs.length||rr.stage==='idle'||rr.stage==='completed')setStart(YAKUTSK,'demo',false);
     else status('Демонстрационный режим: точка старта в центре Якутска. GPS не подтверждён.');
   }})}
@@ -3185,7 +3227,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=52',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=53',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3201,7 +3243,7 @@ try {
 <script src="responsive-layout.js?v=1.0"></script>
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
-<script src="walking-dijkstra.js?v=2.5"></script>
+<script src="walking-dijkstra.js?v=2.6"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
