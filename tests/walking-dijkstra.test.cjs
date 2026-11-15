@@ -60,8 +60,8 @@ assert.equal(protectedGraph.nodes.has('p1'),true,'genuine footway geometry stays
 assert.equal(route.isPedestrianStop(protectedGraph,'p1'),false,'checkpoint beside major road carriageway is rejected');
 assert.equal(route.nearestNode(protectedGraph,{lat:vertices[1].lat,lng:vertices[1].lon},8,{safeStop:true}),null,
  'never snap a checkpoint onto the centre of the car road');
-assert.equal(route.walkingWaypoints(protectedGraph,start,3).some(p=>p.id==='p5'),false,
- 'random walking checkpoints must avoid roadside/carriageway nodes');
+assert.throws(()=>route.walkingWaypoints(protectedGraph,start,3),/NoNearbyFootpath/,
+ 'if every footpath sits on the vehicle-road centreline, refuse to build a route');
 
 console.log('OSM Dijkstra: pedestrian-only paths, carriageway checkpoint guard, real geometry OK');
 
