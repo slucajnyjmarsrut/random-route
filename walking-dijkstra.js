@@ -292,6 +292,42 @@
     }
     return items;
   }
+  function returnTripStops(graph,start,requestedKm,opts={}){
+    const target=Number(requestedKm)*1000,origin=nearestNode(graph,start,70,{safeStop:true});
+    if(!Number.isFinite(target)||target<1000||target>12000||origin===null)return [];
+    // A single Dijkstra pass measures *along the pedestrian graph*, rather
+    // than guessing a return trip's length from straight-line distances.
+    const heap=new Heap(),costs=new Map([[origin,0]]),metres=new Map([[origin,0]]);
+    const settled=new Set(),zones=opts.zones||[],ranked=[];
+    heap.push([0,origin]);
+    while(heap.size){
+      const [score,id]=heap.pop();
+      if(settled.has(id)||score>(costs.get(id)??Infinity))continue;
+      settled.add(id);
+      const p=graph.nodes.get(id),walked=metres.get(id)||0;
+      if(id!==origin&&walked>target*.27&&walked<target*.74&&
+        isPedestrianStop(graph,id)&&distance(p,start)>120){
+        ranked.push({id,lat:p.lat,lng:p.lng,
+          error:Math.abs(2*walked-target),estimatedMetres:2*walked});
+      }
+      for(const edge of graph.adj.get(id)||[]){
+        if(settled.has(edge.to))continue;
+        if(zones.length&&zones.some(z=>intersectZone(p,graph.nodes.get(edge.to),z)))continue;
+        const next=score+edge.cost;
+        if(next<(costs.get(edge.to)??Infinity)){
+          costs.set(edge.to,next);
+          metres.set(edge.to,walked+edge.metres);
+          heap.push([next,edge.to]);
+        }
+      }
+    }
+    ranked.sort((a,b)=>a.error-b.error||a.id.localeCompare(b.id));
+    const result=[];
+    for(const item of ranked){
+      if(result.every(p=>distance(p,item)>=65) && result.push(item)>=12)break;
+    }
+    return result;
+  }
   function walkingWaypoints(graph,start,requestedKm,opts={}){
     const zones=opts.zones||[],reachable=reachableNodes(graph,start,zones);
     const target=Math.max(1,Number(requestedKm)||3)*1000,minimum=Math.min(400,target*.20),maximum=Math.min(2400,target*.46);
@@ -388,5 +424,5 @@
     const graph=await loadGraph(points[0],lengthKm);
     return route(graph,points,options);
   }
-  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,isPedestrianStop,shortest,route,reachableNodes,reachableStops,walkingWaypoints,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
+  return {distance,bbox,osmQuery,allowed,factor,makeGraph,nearestNode,isPedestrianStop,shortest,route,reachableNodes,reachableStops,walkingWaypoints,returnTripStops,canUseStatic,loadStaticGraph,loadGraph,hasWarmGraph,preload,requestRoute};
 });

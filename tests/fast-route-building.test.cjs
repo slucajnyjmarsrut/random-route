@@ -14,6 +14,9 @@ assert.match(build,/await prefetchTouristPhotos\(rr\.start,input\)/,'route build
 assert.match(html,/withPhotoDeadline\(resolveTouristGuideItem\(item\),2100\)/,'never wait for the entire photo catalogue');
 assert.match(build,/remainingMs=.*routeBudgetMs/,'HTTP timeout must use the remaining time budget');
 assert.match(build,/if\(diff<=tolAccept\)break/,'stop once a route is acceptable');
+assert.match(build,/if\(chosen\.diff>tolAccept\)/,'never accept a route outside the selected distance range');
+assert.doesNotMatch(build,/Math\.max\(700,targetM\*\.42\)/,'remove old 42% distance overrun');
+assert.match(build,/returnTripStops\(streetGraph,rr\.start,input/,'attempt a measured pedestrian return route before giving up');
 assert.match(build,/if\(!best\|\|best\.diff>tolAccept\)/,
  'even a street-only route should try the robust real-OSM fallback');
 assert.match(build,/ranked\.sort\(\(a,b\)=>a\.score-b\.score\)/,

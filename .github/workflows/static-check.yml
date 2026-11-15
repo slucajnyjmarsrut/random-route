@@ -41,6 +41,7 @@ jobs:
           node --check route-ai.js
           node tests/route-ai.test.cjs
           node tests/fast-route-building.test.cjs
+          node tests/strict-route-distance.test.cjs
           node tests/osm-recovery.test.cjs
           node tests/osm-static-retry.test.cjs
           node tests/mobile-real-route.test.cjs
@@ -82,7 +83,7 @@ jobs:
           if(!html.includes('yakutsk-weather.js?v=1.1')||!html.includes('smart-safety.js?v=1.2'))throw new Error('Independent auto-weather module missing');
           if(!html.includes('smart-safety.js') || !html.includes('map-fallback.js'))throw new Error('Missing integrations');
           if(!html.includes('weather-background.js?v=1.0')||!html.includes('weather-background.css?v=1.0'))throw new Error('Animated weather background not loaded');
-          if(!html.includes('mobile-ux.css?v=1.1')||!html.includes('walking-dijkstra.js?v=2.5'))throw new Error('Mobile layout or real OSM dataset integration missing');
+          if(!html.includes('mobile-ux.css?v=1.1')||!html.includes('walking-dijkstra.js?v=2.6'))throw new Error('Mobile layout or real OSM dataset integration missing');
           if(!html.includes('responsive-layout.js?v=1.0')||!html.includes('responsive-layout.css?v=1.0'))throw new Error('Responsive desktop and phone assets missing');
           if(html.includes('user-scalable=no'))throw new Error('Viewport must allow zoom for accessibility');
           if(!html.includes('window.__rrResizeMaps'))throw new Error('Yandex map resize hook missing');
@@ -132,6 +133,7 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/rr-mobile-test-server.log 2>&1 &
           node tests/mobile-browser-smoke.cjs
           node tests/route-recovery-browser-smoke.cjs
+          node tests/distance-choice-browser-smoke.cjs
           node tests/retired-road-route-browser-smoke.cjs
           node tests/street-audit-browser-smoke.cjs
           node tests/photo-browser-smoke.cjs
