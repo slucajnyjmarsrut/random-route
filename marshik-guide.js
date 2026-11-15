@@ -167,7 +167,14 @@
     message.id = 'rrMarshikGuideText';
     message.textContent = step.message;
     bubble.append(heading, message);
-    guide.append(img, bubble);
+    const talk=document.createElement('button');
+    talk.type='button';
+    talk.className='rr-ai-guide-open';
+    talk.setAttribute('aria-label','Задать вопрос Маршику с нейросетью Qwen');
+    talk.setAttribute('aria-controls','rrAiDialog');
+    talk.title='Нажми на Маршика, чтобы поговорить с ИИ';
+    talk.append(img);
+    guide.append(talk,bubble);
     if (!step.done) {
       const arrow = document.createElement('span');
       arrow.className = 'rr-marshik-step-arrow';
