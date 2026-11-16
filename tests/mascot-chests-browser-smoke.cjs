@@ -11,6 +11,9 @@ const {chromium}=require('playwright');
   await page.locator('.nav [data-screen="mascots"]').click();
   await page.locator('#mascotChestGrid .mascot-chest-card').first().waitFor();
   assert.equal(await page.locator('#mascotChestGrid .mascot-chest-card').count(),3);
+  const odds=await page.evaluate(()=>window.RRMascotChests.CHESTS.map(c=>c.weights));
+  for(const w of odds)assert.ok(w.common>w.uncommon+w.rare+w.epic+w.legendary);
+  assert.doesNotMatch(await page.locator('#mascotChestProgress').innerText(),/до гарантии/i);
   await page.evaluate(()=>{window.state.coins=1000;window.__rrChestRefresh()});
   await page.locator('[data-open-mascot-chest="trail"]').click();
   assert.match(await page.locator('#mascotChestResult').innerText(),/спутник!/);
@@ -22,6 +25,7 @@ const {chromium}=require('playwright');
   assert.equal(before.coins,920);
   assert.equal(before.count,'2/20');
   assert.equal(before.data.owned.length,1);
+  assert.equal('pity' in before.data,false);
   const mascot=before.data.owned[0];
   await page.reload({waitUntil:'domcontentloaded'});
   await page.locator('.nav [data-screen="mascots"]').click();
@@ -29,21 +33,22 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('[data-mascot-id="'+mascot+'"] .mascot-action').isEnabled(),true);
   await page.locator('[data-mascot-id="'+mascot+'"] .mascot-action').click();
   assert.match(await page.locator('#mascotEquipped').innerText(),/ВАШ СПУТНИК/);
+  // Old saved pity values must not change the next roll or guarantee a prize.
   await page.evaluate(()=>{
     const k='rr_mascot_chests_v1',x=JSON.parse(localStorage.getItem(k));
-    x.pity=11;localStorage.setItem(k,JSON.stringify(x));window.__rrChestRefresh();
+    x.pity=999;localStorage.setItem(k,JSON.stringify(x));window.__rrChestRefresh();
   });
   await page.locator('[data-open-mascot-chest="aurora"]').click();
-  assert.match(await page.locator('#mascotChestResult').innerText(),/Сработала гарантия/);
-  const forced=await page.evaluate(()=>{
+  assert.doesNotMatch(await page.locator('#mascotChestResult').innerText(),/гаранти/i);
+  const second=await page.evaluate(()=>{
     const x=JSON.parse(localStorage.getItem('rr_mascot_chests_v1'));
-    return {last:x.last,coins:window.state.coins,owned:x.owned};
+    return {last:x.last,coins:window.state.coins,owned:x.owned,pity:x.pity};
   });
-  assert.equal(forced.coins,320);
-  assert.equal(forced.last.guaranteed,true);
-  assert.equal(new Set(forced.owned).size,2);
-  assert.ok(['epic','legendary'].includes(windowRarity(forced.last.mascotId)));
-  // A tester wallet may buy test chests, but its rewards stay isolated.
+  assert.equal(second.coins,320);
+  assert.equal('guaranteed' in second.last,false);
+  assert.equal(second.pity,undefined);
+  assert.equal(new Set(second.owned).size,2);
+  // The developer tester wallet stays separate from the guest wallet.
   await page.evaluate(()=>{window.__rrSwitchWallet('tester');window.state.coins=200;window.__rrChestRefresh()});
   await page.locator('[data-open-mascot-chest="trail"]').click();
   const separated=await page.evaluate(()=>({
@@ -53,10 +58,6 @@ const {chromium}=require('playwright');
   assert.equal(separated.normal.length,2);
   assert.equal(separated.tester.length,1);
   assert.equal(errors.length,0,errors.join(' | '));
-  console.log('MASCOT_CHESTS_BROWSER_OK purchase, RouteCoin, persistence, equip, pity and tester isolation');
-  function windowRarity(id){return ({
-    'polar-dog':'epic','photographer-bear':'epic','cartographer-raven':'epic','snow-leopard':'epic',
-    'northern-deer':'legendary','yakut-bull':'legendary','robot-tourist':'legendary','taiga-spirit':'legendary'
-  })[id]}
+  console.log('MASCOT_CHESTS_BROWSER_OK common-first odds, no pity, purchase, persistence, equip and wallet isolation');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exitCode=1});
