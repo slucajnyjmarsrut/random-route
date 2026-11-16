@@ -21,7 +21,6 @@
 .mascot-chest-card button:hover:not(:disabled){background:#ffefb9}
 .mascot-chest-card button:disabled{opacity:.5;cursor:default}
 .mascot-chest-card button:focus-visible{outline:3px solid #fff;outline-offset:3px}
-.mascot-chest-guarantee{display:block;font-size:11px;line-height:1.4;color:#ffedb9;margin-bottom:8px}
 .mascot-chest-progress{color:#d2e0f2;font-size:12px;line-height:1.45;margin:12px 0 0}
 .mascot-chest-result{margin-top:12px;border:1px solid #96d7ba;background:#234b4d;
   border-radius:15px;padding:14px;font-size:14px;line-height:1.55;font-weight:850;color:#fff;
@@ -39,7 +38,6 @@
   .mascot-chest-card h3{margin:0}
   .mascot-chest-card p{margin:1px 0 6px}
   .mascot-chest-odds{grid-column:1 / -1;margin:7px 0 12px}
-  .mascot-chest-guarantee{grid-column:1 / -1}
   .mascot-chest-card button{grid-column:1 / -1}
 }
 @media(prefers-reduced-motion:reduce){.mascot-chest-result{animation:none}}
