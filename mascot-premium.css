@@ -1,0 +1,242 @@
+/* Mascot Aurora — premium collectible UI, layered over legacy mascot styles.
+   Real character portraits live in assets/mascots/3d/*.webp (CC0).
+   Works on phones, landscape, tablets and desktop; no real-money visuals. */
+#mascots.mascots-screen {
+  --m-ice:#c7edff;--m-text:#fff;--m-sub:#d5d9ff;--m-gold:#ffe398;
+  --m-border:rgba(173,175,255,.62);
+  position:relative;isolation:isolate;overflow:hidden;
+  color:var(--m-text);padding:clamp(10px,2vw,24px);
+  border-radius:26px;
+  background:radial-gradient(ellipse 50% 23% at 85% -8%,rgba(76,232,238,.24),transparent 70%),
+    radial-gradient(ellipse 53% 32% at -8% 14%,rgba(157,68,252,.31),transparent 72%),
+    radial-gradient(ellipse 66% 38% at 70% 39%,rgba(18,102,224,.16),transparent 75%),
+    linear-gradient(162deg,#0e1949 0%,#1f1c57 32%,#161a4a 58%,#0a2647 100%);
+  box-shadow:inset 0 0 0 1px rgba(159,153,255,.3),0 18px 48px rgba(2,10,41,.24);
+}
+#mascots.mascots-screen::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background-image:radial-gradient(2px 2px at 5% 5%,#fff 65%,transparent 75%),
+  radial-gradient(3px 3px at 83% 9%,#e3f9ff 65%,transparent 75%),
+  radial-gradient(2px 2px at 37% 12%,#fff 65%,transparent 75%),
+  radial-gradient(2px 2px at 92% 25%,#a3fff7 65%,transparent 75%),
+  radial-gradient(1px 1px at 47% 30%,#fff 65%,transparent 75%);
+ background-size:283px 287px,381px 367px,427px 349px,241px 389px,147px 167px;
+ opacity:.67;}
+#mascots [hidden]{display:none!important}
+#mascots .mascot-hero{min-height:245px;position:relative;display:flex;flex-direction:column;justify-content:center;
+ padding:clamp(22px,4vw,45px) min(42%,440px) clamp(24px,4vw,45px) clamp(21px,4vw,42px);
+ border-radius:30px;margin-bottom:15px;overflow:hidden;
+ border:2px solid rgba(165,147,255,.77);
+ background:radial-gradient(ellipse at 42% -10%,rgba(48,226,235,.35),transparent 48%),
+   radial-gradient(ellipse at 96% 14%,rgba(181,88,252,.53),transparent 48%),
+   linear-gradient(108deg,rgba(26,38,100,.96),rgba(72,38,112,.94) 63%,rgba(26,78,118,.9));
+ box-shadow:0 0 24px #5850fc45,inset 0 2px 0 #ffffff47,0 15px 35px #080d345e}
+#mascots .mascot-hero:before{content:"";position:absolute;left:0;right:0;bottom:0;height:31%;pointer-events:none;
+ background:linear-gradient(0deg,#11173cbd,transparent),
+  radial-gradient(ellipse at 70% 100%,#455ca3b8,transparent 74%);opacity:.85}
+#mascots .mascot-hero:after{content:"✦  ✧   ✦   ✧";top:18px;right:15%;letter-spacing:13px;
+ color:#e9fcff;text-shadow:0 0 14px #80eaff;opacity:.55}
+#mascots .mascot-hero>small{font-size:clamp(10px,1.1vw,14px);letter-spacing:.12em;
+ color:#b9faff;text-shadow:0 1px 5px #041b43;position:relative;z-index:2}
+#mascots .mascot-hero h1{font-size:clamp(30px,4.8vw,53px);font-weight:1000;line-height:1.03;
+ max-width:530px;letter-spacing:-.04em;margin:11px 0 12px;position:relative;z-index:2;
+ color:#fff;text-shadow:0 4px 0 #303b7f,0 7px 22px #020e42a0}
+#mascots .mascot-hero>p{font-size:clamp(12px,1.4vw,16px);color:#f0edff;
+ max-width:580px;line-height:1.55;position:relative;z-index:2}
+#mascots .mascot-hero-actions{position:relative;z-index:2;gap:9px}
+#mascots .mascot-hero-actions .mascot-owned{background:linear-gradient(135deg,#21498f,#306a99);
+ border:1px solid #a7dbff;color:#fff;box-shadow:inset 0 1px #ffffff63,0 4px 14px #00152d8c}
+#mascots .mascot-hero-actions button{background:linear-gradient(135deg,#7f68ea,#455fb7);
+ border-color:#c6c0ff;box-shadow:inset 0 1px #ffffff60,0 7px 20px #050b3b55}
+#mascots .mascot-hero-art{position:absolute;z-index:1;right:5%;bottom:-17px;width:min(37%,360px);
+ aspect-ratio:1;pointer-events:none;filter:drop-shadow(0 10px 20px #110e508f)}
+#mascots .mascot-hero-art::before{content:"";position:absolute;inset:8% 4% 4%;border-radius:50%;
+ background:radial-gradient(circle,#92e4ff82 0%,#7548d67a 50%,transparent 71%);filter:blur(15px)}
+#mascots .mascot-hero-art img{display:block;position:relative;width:100%;height:100%;
+ object-fit:cover;object-position:center 38%;border-radius:48% 48% 25% 25%;
+ mask-image:linear-gradient(#000 81%,transparent 100%);-webkit-mask-image:linear-gradient(#000 81%,transparent 100%)}
+#mascots .mascot-hero-art strong{position:absolute;right:0;top:8%;display:inline-flex;
+ align-items:center;justify-content:center;padding:8px 13px;border-radius:100px;
+ font-size:13px;font-weight:1000;color:#fff7c5;background:linear-gradient(#6e49d8,#2c3d9b);
+ border:2px solid #d8c1ff;box-shadow:0 0 18px #c593ff96;transform:rotate(6deg)}
+#mascots .mascot-how{display:grid;grid-template-columns:1.3fr repeat(3,minmax(0,1fr));
+ gap:8px;margin:0 0 14px;padding:13px;border:1px solid #7777c5;border-radius:20px;
+ background:linear-gradient(120deg,#20265bc9,#30245ec9,#192d65c9);
+ box-shadow:inset 0 1px #ffffff26}
+#mascots .mascot-how-title{font-size:13px;font-weight:900;align-self:center;
+ text-shadow:0 1px 4px #001b4f}
+#mascots .mascot-how-step{min-width:0;padding:10px 8px;border-radius:13px;text-align:center;
+ background:#131a49a9;border:1px solid #5b65b9;font-size:11px;line-height:1.35;
+ font-weight:800;color:#f0f8ff}
+#mascots .mascot-how-step i{font-style:normal;font-size:22px;display:block;margin-bottom:5px;
+ filter:drop-shadow(0 1px 5px #7ebdff)}
+#mascots .mascot-equipped{margin-bottom:12px;padding:12px 17px;
+ border:2px solid #9da5f2;background:linear-gradient(120deg,#282968,#142c69 60%,#37417b);
+ box-shadow:0 10px 25px #020d3461,inset 0 2px #ffffff26}
+#mascots .mascot-equipped-avatar{width:132px;height:132px;flex-basis:132px;aspect-ratio:1;
+ border:2px solid #bbe8ff;box-shadow:0 0 19px #b7e4ff82;overflow:hidden;
+ background:radial-gradient(circle,#759aff,#262064)}
+#mascots .mascot-equipped-avatar .mascot-art-img{display:block;height:100%;width:100%;
+ object-fit:cover;border-radius:21px}
+#mascots .mascot-equipped-copy h2{font-size:clamp(18px,2.5vw,25px);
+ text-shadow:0 2px 8px #16153c}
+#mascots .mascot-equipped-copy p{color:#d5e8ff;font-weight:750}
+#mascots .mascot-tabs{gap:5px;border:1px solid #a98df7;padding:6px;border-radius:19px;
+ background:linear-gradient(130deg,#252b66,#39265e 52%,#163d6b);
+ box-shadow:0 6px 20px #09123c80,inset 0 1px #ffffff30}
+#mascots .mascot-tabs button{border:1px solid #6b76ac;background:linear-gradient(120deg,#263d6c,#312d64);
+ box-shadow:inset 0 1px #ffffff23;color:#e5ebff;font-weight:950;min-height:53px;
+ transition:transform .2s,background .2s}
+#mascots .mascot-tabs button.active{background:linear-gradient(115deg,#8354f5,#4d8ef0);
+ border-color:#e1d2ff;box-shadow:0 0 16px #7f7cff97,inset 0 2px #ffffff85;
+ color:#fff;text-shadow:0 2px 4px #4d34a8}
+#mascots .mascot-tabs button:hover{transform:translateY(-1px)}
+#mascots .mascot-inventory-status{border:1px solid #5e88cb;
+ background:#1a2757b3;color:#d8eeff;letter-spacing:.02em;margin:10px 0 15px}
+#mascots .mascot-help{border-color:#6479b8;background:linear-gradient(115deg,#242d64,#203455);
+ box-shadow:inset 0 1px #ffffff2b;border-radius:20px}
+#mascots .mascot-help p{color:#cbdfff}
+#mascots .mascot-filters{scroll-snap-type:x proximity;padding:0 0 14px;gap:7px}
+#mascots .mascot-filters button{background:linear-gradient(#363c72,#232e5b);color:#eff0ff;
+ border:1px solid #718acf;box-shadow:inset 0 1px #ffffff24;min-height:46px;border-radius:14px}
+#mascots .mascot-filters button.active{color:#281646;background:linear-gradient(#ffe7a9,#ffcb66);
+ border-color:#fff2c1;box-shadow:0 0 12px #ffd26d76,inset 0 1px #fff}
+#mascots .mascot-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+#mascots .mascot-card{padding:9px;border-radius:19px;--rarity:#a6b4ee;--rarity-dark:#3e4977;
+ background:linear-gradient(157deg,color-mix(in srgb,var(--rarity) 38%,#1d2355),#151b4d 85%);
+ border:2px solid var(--rarity);box-shadow:0 5px 0 #080f3099,0 7px 18px #030b277d,
+ inset 0 1px 0 #fff8;transition:transform .2s,box-shadow .2s}
+#mascots .mascot-card.rarity-uncommon{--rarity:#81f5a4;--rarity-dark:#235f50}
+#mascots .mascot-card.rarity-rare{--rarity:#63dbff;--rarity-dark:#155ca0}
+#mascots .mascot-card.rarity-epic{--rarity:#f3a3ff;--rarity-dark:#6d2e9b}
+#mascots .mascot-card.rarity-legendary{--rarity:#ffdb6b;--rarity-dark:#9f5d16}
+#mascots .mascot-card.selected{box-shadow:0 0 0 3px #f6ebc1,0 0 27px color-mix(in srgb,var(--rarity),transparent 29%)}
+#mascots .mascot-card:not(.locked):hover{transform:translateY(-4px);
+ box-shadow:0 0 25px color-mix(in srgb,var(--rarity),transparent 60%),0 15px 26px #030b277d}
+#mascots .mascot-card-tier{font-size:10px;font-weight:1000;padding:5px 9px;
+ margin:0 0 6px;min-height:0;border:1px solid color-mix(in srgb,var(--rarity),#fff 28%);
+ background:linear-gradient(120deg,color-mix(in srgb,var(--rarity) 30%,#171a54),#121d458f);
+ border-radius:50px;color:#fff;text-shadow:0 1px 2px #0007;align-self:flex-start}
+#mascots .mascot-card-avatar{aspect-ratio:1/1.05;margin:0 0 7px;
+ overflow:hidden;border-radius:16px;border:1px solid #ffffffa3;
+ background:radial-gradient(circle at 50% 22%,#eff9ff68,transparent 55%),
+ linear-gradient(140deg,color-mix(in srgb,var(--rarity),#2c3164 38%),#1e245c);
+ box-shadow:inset 0 0 25px #fff3,0 0 9px color-mix(in srgb,var(--rarity),transparent 60%)}
+#mascots .mascot-card-avatar:before{content:"";position:absolute;inset:auto 0 0;height:40%;z-index:1;
+ background:linear-gradient(transparent,#0c14487a);pointer-events:none}
+#mascots .mascot-card-avatar .mascot-art-img{width:100%;height:100%;display:block;
+ object-fit:cover;object-position:50% 30%;border-radius:14px;transform:none;transition:transform .26s}
+#mascots .mascot-card:hover .mascot-art-img{transform:scale(1.055)}
+#mascots .mascot-card-avatar b{z-index:3;font-size:18px;right:6px;bottom:6px;
+ background:#182353bd;border:1px solid #ffffff6e;border-radius:9px;padding:3px 5px}
+#mascots .mascot-card-avatar:after{z-index:2;color:#fff7c7;font-size:19px;text-shadow:0 0 11px #fff}
+#mascots .mascot-card h3{font-size:clamp(12px,1.33vw,15px);font-weight:950;
+ line-height:1.22;min-height:36px;text-shadow:0 2px 4px #050934;word-break:normal}
+#mascots .mascot-card-condition{line-height:1.4;color:#dbeaff;font-size:11px;min-height:34px}
+#mascots .mascot-card .mascot-mini-meter{background:#101943;height:7px}
+#mascots .mascot-card .mascot-action{border-color:var(--rarity);
+ background:linear-gradient(#fffefa,#e4eeff);color:#20365c;
+ font-weight:950;border-radius:11px;min-height:43px}
+#mascots .mascot-card.locked{filter:none;opacity:.8}
+#mascots .mascot-card.locked .mascot-art-img{filter:grayscale(.58) brightness(.72)}
+#mascots .mascot-card.locked .mascot-action{background:#252e57;color:#b1bad7}
+#mascots .mascot-card.selected .mascot-action{background:linear-gradient(#6ee3b1,#319e8d);color:#fff}
+#mascots .mascot-chests,#mascots .mascot-inventory-panel{border:1px solid #9d81dd;
+ background:radial-gradient(ellipse at 75% -15%,#7664e953,transparent 60%),
+ linear-gradient(145deg,#22295c,#2c2759 60%,#182f61);
+ color:#f3f5ff;border-radius:24px;box-shadow:inset 0 2px #ffffff2b,0 11px 28px #0005}
+#mascots .mascot-chests-head h2,#mascots .mascot-inventory-panel h2{font-size:clamp(21px,3vw,28px);
+ font-weight:1000;text-shadow:0 2px #171a55}
+#mascots .mascot-chests-head span{background:linear-gradient(#336c6d,#224e66);
+ border:1px solid #93e8d5;color:#ebfff7}
+#mascots .mascot-chest-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#mascots .mascot-chest-card{padding:16px;border:2px solid #9aafee;border-radius:22px;
+ background:radial-gradient(circle at 45% 25%,#a4b5ff6c,transparent 46%),linear-gradient(#425fa3,#272a61);
+ box-shadow:inset 0 2px #ffffff64,0 11px 27px #050b3277;min-height:305px;text-align:center}
+#mascots .mascot-chest-card.chest-polar{border-color:#94e5fb;
+ background:radial-gradient(circle at 50% 25%,#5ac6ff6d,transparent 55%),linear-gradient(140deg,#176c9d,#292b76)}
+#mascots .mascot-chest-card.chest-aurora{border-color:#ffb2ff;
+ background:radial-gradient(circle at 50% 25%,#fa9eff70,transparent 50%),linear-gradient(140deg,#8337b7,#4b2679)}
+#mascots .mascot-chest-icon{position:relative;width:min(100%,180px);height:126px;margin:5px auto 13px;
+ font-size:0!important;filter:drop-shadow(0 9px 10px #09083390);display:grid;place-items:center}
+#mascots .mascot-chest-icon::before{content:"";display:block;width:122px;height:90px;border-radius:18px 18px 13px 13px;
+ border:6px ridge #c4cff4;background:
+ linear-gradient(0deg,#4b3064 0 23%,transparent 23%),
+ repeating-linear-gradient(90deg,#5b3671 0 17%,#a983bc 19% 22%,#533268 24% 42%),
+ linear-gradient(#ebd4ff,#6d548f);
+ box-shadow:inset 0 7px 8px #fff6,inset 0 -9px #161d69a6,0 0 23px #bdc1ff70;
+ transform:perspective(150px) rotateX(5deg)}
+#mascots .mascot-chest-icon::after{content:"★";display:grid;place-items:center;position:absolute;
+ bottom:19px;left:50%;transform:translateX(-50%);width:37px;height:41px;
+ border:5px solid #fff2ac;border-radius:12px;color:#714200;background:linear-gradient(#fff4b8,#f2a93b);
+ font-size:24px;box-shadow:0 0 14px #ffdf77}
+#mascots .chest-polar .mascot-chest-icon::before{border-color:#74dbff;background:
+ repeating-linear-gradient(90deg,#145f91 0 17%,#7ddaf4 19% 22%,#244ba2 24% 42%),
+ linear-gradient(#73deef,#2457bb)}
+#mascots .chest-aurora .mascot-chest-icon::before{border-color:#ffd381;background:
+ repeating-linear-gradient(90deg,#6e2a95 0 17%,#ffbc65 19% 22%,#7933a6 24% 42%),
+ linear-gradient(#ea82ff,#6632a9);box-shadow:inset 0 5px 8px #fff7,0 0 25px #c16affbf}
+#mascots .mascot-chest-card h3{font-size:clamp(16px,1.8vw,21px);font-weight:950;
+ text-shadow:0 2px 5px #020935}
+#mascots .mascot-chest-card p,#mascots .mascot-chest-odds{color:#ebeeff}
+#mascots .mascot-chest-odds{padding:8px;line-height:1.8;font-weight:700;font-size:11px;
+ background:#161f57a6;border:1px solid #ffffff32;border-radius:12px}
+#mascots .mascot-chest-card button{font-size:13px;font-weight:1000;
+ background:linear-gradient(#fff3b7,#ffbc4f);border:2px solid #fff9ca;
+ box-shadow:inset 0 1px #fff,0 0 14px #ffe96a69;border-radius:14px;color:#3d2354}
+#mascots .mascot-chest-card button:disabled{box-shadow:none}
+#mascots .mascot-chest-result{border:2px solid #bce8ff;
+ background:linear-gradient(130deg,#233f81,#413187);box-shadow:0 0 18px #8b6bff66;
+ font-size:15px;padding:16px 20px}
+#mascots .mascot-chest-result.rarity-legendary{border-color:#ffe77d;background:linear-gradient(#6a448a,#745020)}
+#mascots .mascot-inventory-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+#mascots .mascot-inventory-card{border:2px solid var(--rarity);
+ background:linear-gradient(135deg,color-mix(in srgb,var(--rarity) 26%,#293368),#19224f 86%);
+ border-radius:17px;box-shadow:inset 0 1px #ffffff69,0 9px 17px #01062383}
+#mascots .mascot-inventory-art{aspect-ratio:1/1.1;border-radius:14px;
+ border:1px solid color-mix(in srgb,var(--rarity),white 20%);object-position:50% 30%}
+#mascots .mascot-inventory-card h3{color:#fff;font-weight:900;text-shadow:0 2px 4px #080d36}
+#mascots .mascot-inventory-card p{color:#d7e6ff}
+#mascots .mascot-inventory-card button{background:linear-gradient(#ffe9a6,#ffc45f);
+ border:2px solid #fff1af;color:#352451;box-shadow:inset 0 1px #fff5}
+#mascots .mascot-inventory-card button.mascot-inventory-secondary{background:linear-gradient(#6385ff,#344ba1);
+ color:#fff;border-color:#9bb3ff}
+#mascots .mascot-capacity-bar{background:linear-gradient(120deg,#20245bbd,#172f63b8);border-color:#7f91f3}
+#mascots .mascot-capacity-bar button{color:#143b2a;background:linear-gradient(#a8ffb2,#52d890);
+ border:2px solid #d9ffda;box-shadow:0 0 11px #65efab77}
+#mascots [role=tabpanel]{animation:mascot-premium-enter .22s ease-out}
+#mascots .mascot-premium-footer{font-size:11px;color:#d0e9ff;text-align:center;padding:6px 14px 12px}
+@keyframes mascot-premium-enter{from{opacity:.64;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:1350px){#mascots .mascot-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+#mascots .mascot-inventory-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(min-width:700px) and (max-width:1050px){#mascots .mascot-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+#mascots .mascot-inventory-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:699px){
+ #mascots.mascots-screen{padding:10px;border-radius:18px}
+ #mascots .mascot-hero{min-height:215px;padding:20px 27% 22px 16px;border-radius:21px}
+ #mascots .mascot-hero h1{font-size:clamp(23px,6.2vw,34px);max-width:280px}
+ #mascots .mascot-hero>p{font-size:12px}
+ #mascots .mascot-hero-art{width:41%;right:-4%;bottom:-8px}
+ #mascots .mascot-hero-art strong{top:17%;font-size:10px;padding:6px 8px}
+ #mascots .mascot-how{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:8px}
+ #mascots .mascot-how-title{grid-column:1/-1;text-align:center}
+ #mascots .mascot-how-step{font-size:10px;padding:8px 2px}
+ #mascots .mascot-how-step i{font-size:18px}
+ #mascots .mascot-tabs{gap:3px;padding:4px}
+ #mascots .mascot-tabs button{font-size:10px;min-height:45px;padding:7px 3px;line-height:1.2}
+ #mascots .mascot-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ #mascots .mascot-card{padding:7px;border-radius:15px}
+ #mascots .mascot-card-avatar{aspect-ratio:1/1.04}
+ #mascots .mascot-card h3{font-size:13px;min-height:33px}
+ #mascots .mascot-card-tier{font-size:10px}
+ #mascots .mascot-chest-grid{grid-template-columns:1fr;gap:13px}
+ #mascots .mascot-chest-card{min-height:0;display:flex;flex-direction:column;text-align:center;padding:12px}
+ #mascots .mascot-chest-icon{height:115px;margin:0 auto 10px}
+ #mascots .mascot-chest-card button{width:100%}
+ #mascots .mascot-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ #mascots .mascot-equipped-avatar{width:92px;height:92px;flex-basis:92px}
+ #mascots .mascot-equipped{padding:10px;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ #mascots [role=tabpanel]{animation:none}
+ #mascots .mascot-card,#mascots .mascot-tabs button,#mascots .mascot-art-img{transition:none!important}
+}
