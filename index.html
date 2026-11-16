@@ -159,8 +159,9 @@ try {
 <link rel="stylesheet" href="route-navigation.css?v=1.0"/>
 <link rel="stylesheet" href="mobile-ux.css?v=1.1"/>
 <link rel="stylesheet" href="map-viewport.css?v=1.1"/>
-<link rel="stylesheet" href="mascot-collection.css?v=1.1"/>
-<link rel="stylesheet" href="mascot-chests.css?v=1.0"/>
+<link rel="stylesheet" href="mascot-collection.css?v=2.0"/>
+<link rel="stylesheet" href="mascot-inventory.css?v=1.0"/>
+<link rel="stylesheet" href="mascot-chests.css?v=2.0"/>
 <link rel="stylesheet" href="welcome-auth.css?v=1.3"/>
 </head>
 <body>
@@ -341,46 +342,23 @@ try {
 </div>
 </section>
 <section class="screen" id="shop">
-<div class="hero"><small>Магазин</small><h1>RouteCoin и функции</h1><p>Магазин подготовлен к подключению оплаты. Пока реальная оплата не подключена, покупки за рубли не изменяют баланс и функции.</p><div class="dev-mode-note">Режим разработчика: оплата за рубли отключена.</div><div class="paid-balance"><span>Ваш баланс</span><b>🪙 <span id="coinsShop">0</span> RC</b></div><div class="premium-chip hidden" id="premiumChip">✦ Route+ активен</div></div>
-<div class="store-tabs"><button class="store-tab active" data-store-tab="coins">RouteCoin</button><button class="store-tab" data-store-tab="features">Функции</button></div>
-<div class="store-panel active" id="storeCoins">
-<div class="store-section-title">Пополнить RouteCoin</div>
-<div class="pack-grid">
-<div class="coin-pack"><div class="coin-icon">🪙</div><h3>500 RC</h3><p>Небольшой набор</p><button class="buy-btn" data-buy-type="coins" data-coins="500" data-price="99 ₽" data-title="500 RouteCoin">99 ₽</button></div>
-<div class="coin-pack best"><span class="badge">Популярно</span><div class="coin-icon">🪙</div><h3>1 200 RC</h3><p>+200 RC бонусом</p><button class="buy-btn" data-buy-type="coins" data-coins="1200" data-price="199 ₽" data-title="1 200 RouteCoin">199 ₽</button></div>
-<div class="coin-pack"><div class="coin-icon">🪙</div><h3>3 000 RC</h3><p>Для магазина наград</p><button class="buy-btn" data-buy-type="coins" data-coins="3000" data-price="399 ₽" data-title="3 000 RouteCoin">399 ₽</button></div>
-<div class="coin-pack"><div class="coin-icon">💰</div><h3>8 000 RC</h3><p>Максимальный набор</p><button class="buy-btn" data-buy-type="coins" data-coins="8000" data-price="799 ₽" data-title="8 000 RouteCoin">799 ₽</button></div>
-</div>
-<div class="store-note"><b>Важно:</b> RouteCoin из магазина используются для косметики и дополнительных предметов. Их покупка сама по себе не добавляет километры и не влияет на место в рейтинге.</div>
-<div class="store-section-title">Потратить RouteCoin</div>
-<div class="reward-row"><div style="font-size:25px">🧢</div><div class="reward-main"><b>Скин исследователя</b><span>Для персонажа на карте</span></div><button class="feature-action" data-rc-item="Скин исследователя" data-rc-price="250" style="width:auto;padding:8px 10px">250 RC</button></div>
-<div class="reward-row"><div style="font-size:25px">🖼️</div><div class="reward-main"><b>Редкая рамка профиля</b><span>Косметическая награда</span></div><button class="feature-action" data-rc-item="Редкая рамка профиля" data-rc-price="700" style="width:auto;padding:8px 10px">700 RC</button></div>
-<div class="gold-section">
-<div class="store-section-title">Золотые слоты профиля</div>
-<div class="store-note"><b>Как работают:</b> значки за квесты нельзя купить. Золотой слот активирует способность закреплённого значка на маршрутах. Бонусы не добавляют километры и не повышают место в рейтинге.</div>
-<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅰ</div><div class="gold-main"><b>Золотой слот №1</b><span>Требуется уровень 10</span></div><div class="gold-price">15 000 RC</div></div><button class="gold-buy" data-gold-price="15000" data-gold-slot="1" data-level="10">Открыть за 15 000 RC</button></div>
-<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅱ</div><div class="gold-main"><b>Золотой слот №2</b><span>Требуется уровень 25</span></div><div class="gold-price">50 000 RC</div></div><button class="gold-buy" data-gold-price="50000" data-gold-slot="2" data-level="25">Открыть за 50 000 RC</button></div>
-<div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅲ</div><div class="gold-main"><b>Золотой слот №3</b><span>Требуется уровень 50</span></div><div class="gold-price">120 000 RC</div></div><button class="gold-buy" data-gold-price="120000" data-gold-slot="3" data-level="50">Открыть за 120 000 RC</button></div>
-</div>
-</div>
-<div class="store-panel" id="storeFeatures">
-<div class="feature-card">
-<div class="feature-head"><div class="feature-icon">✦</div><div class="feature-main"><h3>Route+</h3><p>Подписка для тех, кто гуляет регулярно.</p></div><div class="feature-price">199 ₽/мес</div></div>
-<ul class="feature-list"><li>Без рекламных баннеров</li><li>Расширенные фильтры маршрутов</li><li>История прогулок за 90 дней</li><li>Расширенная статистика</li></ul>
-<button class="feature-action paid" data-buy-type="feature" data-feature="routeplus" data-price="199 ₽" data-title="Route+ на 1 месяц" id="routePlusBtn">Подключить Route+</button>
-</div>
-<div class="feature-card">
-<div class="feature-head"><div class="feature-icon">🎨</div><div class="feature-main"><h3>Тематические маршруты</h3><p>Дополнительные темы для генерации прогулок.</p></div><div class="feature-price">149 ₽</div></div>
-<ul class="feature-list"><li>Архитектура</li><li>Стрит-арт</li><li>Набережные и видовые точки</li></ul>
-<button class="feature-action paid" data-buy-type="feature" data-feature="themes" data-price="149 ₽" data-title="Тематические маршруты" id="themesBtn">Открыть навсегда</button>
-</div>
-<div class="feature-card">
-<div class="feature-head"><div class="feature-icon">👥</div><div class="feature-main"><h3>Маршрут для компании</h3><p>Совместный квест с одним маршрутом для нескольких участников.</p></div><div class="feature-price">99 ₽</div></div>
-<ul class="feature-list"><li>До 6 участников</li><li>Общие контрольные точки</li><li>Общий итог прогулки</li></ul>
-<button class="feature-action paid" data-buy-type="feature" data-feature="group" data-price="99 ₽" data-title="Маршрут для компании" id="groupBtn">Открыть функцию</button>
-</div>
-
-</div>
+ <div class="hero"><small>Бесплатная игровая лавка</small><h1>Награды за прогулки</h1><p>Никаких рублей, подписок и покупок за реальные деньги. RouteCoin получают за настоящие прогулки и задания.</p>
+  <div class="paid-balance"><span>Заработано</span><b>🪙 <span id="coinsShop">0</span> RC</b></div>
+ </div>
+ <div class="card"><div class="title">Как получить RouteCoin</div>
+  <p>Исследуйте город, подтверждайте прохождение GPS, делайте фотозадания и выполняйте квесты. Награды выдаются за подтверждённые действия.</p>
+  <button class="secondary" type="button" data-open-screen="mascots">🎁 Открыть сундуки и коллекцию</button>
+ </div>
+ <div class="store-section-title">Бесплатные игровые предметы за RouteCoin</div>
+ <div class="reward-row"><div style="font-size:25px">🧢</div><div class="reward-main"><b>Скин исследователя</b><span>Косметический предмет</span></div><button class="feature-action" data-rc-item="Скин исследователя" data-rc-price="250" style="width:auto;padding:8px 10px">250 RC</button></div>
+ <div class="reward-row"><div style="font-size:25px">🖼️</div><div class="reward-main"><b>Рамка профиля</b><span>Косметическая награда</span></div><button class="feature-action" data-rc-item="Редкая рамка профиля" data-rc-price="700" style="width:auto;padding:8px 10px">700 RC</button></div>
+ <div class="gold-section">
+   <div class="store-section-title">Золотые слоты (внутриигровые награды)</div>
+   <div class="store-note">Получаются только за заработанные в прогулках RouteCoin. Реальные платежи отсутствуют.</div>
+   <div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅰ</div><div class="gold-main"><b>Золотой слот №1</b><span>Требуется уровень 10</span></div><div class="gold-price">15 000 RC</div></div><button class="gold-buy" data-gold-price="15000" data-gold-slot="1" data-level="10">Открыть за 15 000 RC</button></div>
+   <div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅱ</div><div class="gold-main"><b>Золотой слот №2</b><span>Требуется уровень 25</span></div><div class="gold-price">50 000 RC</div></div><button class="gold-buy" data-gold-price="50000" data-gold-slot="2" data-level="25">Открыть за 50 000 RC</button></div>
+   <div class="gold-card"><div class="gold-head"><div class="gold-icon">Ⅲ</div><div class="gold-main"><b>Золотой слот №3</b><span>Требуется уровень 50</span></div><div class="gold-price">120 000 RC</div></div><button class="gold-buy" data-gold-price="120000" data-gold-slot="3" data-level="50">Открыть за 120 000 RC</button></div>
+ </div>
 </section>
 <section class="screen" id="rating">
 <div class="hero"><small>Подтверждённая статистика</small><h1 id="ratingKm">0,0 км</h1><p>Здесь нет выдуманных участников: считаются только ваши реально завершённые маршруты и подтверждённые действия на этом устройстве.</p></div>
@@ -391,35 +369,55 @@ try {
 </section>
 <section class="screen mascots-screen" id="mascots" aria-label="Коллекция спутников">
  <div class="mascot-hero">
-  <small>🌟 СПУТНИКИ ВАШИХ ПРОГУЛОК</small>
+  <small>🌌 ПУТЕШЕСТВИЕ ПО МИРУ МАСКОТОВ</small>
   <h1>Коллекция маскотов</h1>
-  <p>Гуляйте, выполняйте фотозадания и квесты — открывайте персонажей и прокачивайте выбранного спутника. Чем больше подтверждённых приключений, тем больше ваша коллекция.</p>
-  <div class="mascot-hero-actions"><span class="mascot-owned">Открыто <b id="mascotOwnedCount">1/20</b></span>
-   <button type="button" data-open-screen="badges">Мои значки и достижения</button>
-  </div>
+  <p>145 ярких персонажей, пять редкостей, звёздные улучшения и бесплатные сундуки за заработанные RouteCoin.</p>
+  <div class="mascot-hero-actions"><span class="mascot-owned">Собрано <b id="mascotOwnedCount">1/145</b></span><button type="button" data-open-screen="badges">Мои достижения</button></div>
  </div>
  <section class="mascot-equipped" id="mascotEquipped" aria-label="Ваш действующий спутник"></section>
- <section class="mascot-chests" id="mascotChests" aria-label="Сундуки со спутниками">
+ <nav class="mascot-tabs" role="tablist" aria-label="Коллекция и инвентарь">
+   <button type="button" class="active" role="tab" aria-selected="true" data-mascot-tab="collection">✨ Коллекция</button>
+   <button type="button" role="tab" aria-selected="false" data-mascot-tab="chests">🎁 Сундуки</button>
+   <button type="button" role="tab" aria-selected="false" data-mascot-tab="inventory">🎒 Инвентарь</button>
+   <button type="button" role="tab" aria-selected="false" data-mascot-tab="upgrades">⭐ Улучшения</button>
+ </nav>
+ <p class="mascot-inventory-status" id="mascotInventoryStatus" role="status">Инвентарь: 0/50 мест</p>
+ <div id="mascotInventoryMessage" class="mascot-inventory-message" role="status" aria-live="polite" hidden></div>
+ <section id="mascotCollectionPanel" role="tabpanel">
+   <div class="mascot-help"><strong>⭐ Как развивается спутник?</strong>
+    <p>Прогулки: +100 XP · Фотопроверки: +50 XP · Задания: +50 XP · Серия 7 дней: +200 XP · Каждые 25 маршрутов: +300 XP. Повторные маскоты из сундуков повышают звёздный ранг до ★5.</p>
+    <p id="mascotXPStatus">Проверяем достижения…</p>
+   </div>
+   <div class="mascot-filters" role="group" aria-label="Фильтр редкости маскотов">
+    <button type="button" class="active" data-mascot-filter="all" aria-pressed="true">Все 145</button>
+    <button type="button" data-mascot-filter="common" aria-pressed="false">★ Обычные</button>
+    <button type="button" data-mascot-filter="uncommon" aria-pressed="false">🍃 Необычные</button>
+    <button type="button" data-mascot-filter="rare" aria-pressed="false">💎 Редкие</button>
+    <button type="button" data-mascot-filter="epic" aria-pressed="false">👑 Эпические</button>
+    <button type="button" data-mascot-filter="legendary" aria-pressed="false">🌟 Легендарные</button>
+   </div>
+   <div class="mascot-grid" id="mascotCollectionGrid" aria-label="Открытые и закрытые спутники"></div>
+ </section>
+ <section class="mascot-chests" id="mascotChestsPanel" role="tabpanel" hidden>
   <div class="mascot-chests-head"><h2>🎁 Сундуки маскотов</h2><span id="mascotChestBalance">Баланс: 0 RC</span></div>
-  <p class="mascot-chests-intro">Открывайте сундуки за заработанные RouteCoin. В каждом — один новый маскот. Шансы зависят от сундука и пересчитываются, когда редкость уже собрана. Никаких повторов и платежей за реальные деньги.</p>
+  <p class="mascot-chests-intro">Каждое открытие даёт одного маскота. Дубликаты выпадают и остаются в инвентаре — используйте их для улучшения звёзд. Всё только за внутриигровые RouteCoin.</p>
   <div class="mascot-chest-grid" id="mascotChestGrid"></div>
-  <p class="mascot-chest-progress" id="mascotChestProgress">Все выпадения случайны: гарантии редкого, эпического или легендарного маскота нет.</p>
+  <p class="mascot-chest-progress" id="mascotChestProgress">Сундуки не гарантируют редкость.</p>
   <div class="mascot-chest-result" id="mascotChestResult" role="status" aria-live="polite" hidden></div>
  </section>
- <div class="mascot-help"><strong>⭐ Как начисляется опыт?</strong>
-  <p>Подтверждённая GPS-прогулка +100 XP · Успешное фотозадание +50 XP · Правильный мини-квест +50 XP. Каждые 7 дней подтверждённых прогулок подряд — дополнительный бонус +200 XP, каждые 25 прогулок — +300 XP. Опыт получает выбранный в момент выполнения спутник. Пробный режим не засчитывается.</p>
-  <p id="mascotXPStatus">Проверяем достижения…</p>
- </div>
- <div class="mascot-filters" role="group" aria-label="Фильтр редкости маскотов">
-  <button type="button" class="active" data-mascot-filter="all" aria-pressed="true">Все</button>
-  <button type="button" data-mascot-filter="common" aria-pressed="false">★ Обычные</button>
-  <button type="button" data-mascot-filter="uncommon" aria-pressed="false">🍃 Необычные</button>
-  <button type="button" data-mascot-filter="rare" aria-pressed="false">💎 Редкие</button>
-  <button type="button" data-mascot-filter="epic" aria-pressed="false">♛ Эпические</button>
-  <button type="button" data-mascot-filter="legendary" aria-pressed="false">👑 Легендарные</button>
- </div>
- <div class="mascot-grid" id="mascotCollectionGrid" aria-label="Открытые и закрытые спутники"></div>
- <p class="hint" style="margin:14px 0 28px">Прогресс и новые маскоты из сундуков сохраняются в этом браузере. Сундуки используют только игровые RouteCoin, без реальных платежей.</p>
+ <section class="mascot-inventory-panel" id="mascotInventoryPanel" role="tabpanel" hidden>
+  <h2>🎒 Инвентарь маскотов</h2>
+  <p>Каждая копия занимает одно место. Когда места заканчиваются, улучшайте спутников за дубликаты или расширяйте инвентарь только за заработанные RC.</p>
+  <div class="mascot-capacity-bar"><strong id="mascotInventoryCapacity">Занято 0 из 50</strong><button type="button" id="mascotExpandCapacity">Добавить 10 мест за 150 RC</button></div>
+  <p id="mascotInventoryFull" class="mascot-inventory-warning" hidden>Инвентарь заполнен. Открытие сундуков временно недоступно.</p>
+  <div class="mascot-inventory-grid" id="mascotInventoryGrid"></div>
+ </section>
+ <section class="mascot-inventory-panel" id="mascotUpgradesPanel" role="tabpanel" hidden>
+  <h2>⭐ Улучшение маскотов</h2>
+  <p>Максимум ★5. Требуются повторные копии: для спутника из сундука сохраняется одна основная копия, а остальные расходуются на улучшение. Реальные платежи не нужны.</p>
+  <div class="mascot-inventory-grid" id="mascotUpgradesGrid"></div>
+ </section>
+ <p class="hint" style="margin:14px 0 25px;color:#bdd9f0">Прогресс сохраняется в этом браузере. Дубликаты и улучшения хранятся отдельно для обычного игрока и тестировщика.</p>
 </section>
 <section class="screen" id="badges"><div class="hero"><small>Коллекция достижений</small><h1>Значки</h1><p>Значки зарабатываются прохождением маршрутов, фотоконтролем и квестами. Всё хранится на этом устройстве.</p></div><div class="badge-showcase">
 <button type="button" class="secondary" data-open-screen="mascots" style="margin-bottom:14px">🐾 Открыть коллекцию спутников</button>
@@ -544,7 +542,7 @@ try {
 </section>
 </main>
 <nav class="nav" aria-label="Основные разделы"><button type="button" class="active" data-screen="home"><i aria-hidden="true">🗺️</i>Главная</button><button type="button" data-screen="rating"><i aria-hidden="true">🏆</i>Рейтинг</button><button type="button" data-screen="shop"><i aria-hidden="true">🛍️</i>Магазин</button><button type="button" data-screen="mascots"><i aria-hidden="true">🐾</i>Спутники</button><button type="button" data-screen="profile"><i aria-hidden="true">👤</i>Профиль</button></nav>
-<div class="modal-backdrop" id="purchaseModal"><div class="purchase-modal"><div class="grab"></div><h2 id="purchaseTitle">Покупка</h2><p id="purchaseDescription">Подтвердите покупку.</p><div class="purchase-total"><span>К оплате</span><b id="purchasePrice">0 ₽</b></div><div class="purchase-actions"><button class="purchase-cancel" id="purchaseCancel">Отмена</button><button class="purchase-confirm" id="purchaseConfirm">Подтвердить</button></div></div></div>
+
 <div class="modal-backdrop" id="exitRouteModal"><div class="purchase-modal exit-route-sheet"><div class="grab"></div><div class="exit-icon">↩️</div><h2>Выйти из маршрута?</h2><p>Если выйти сейчас, текущий маршрут будет закрыт.</p><div class="exit-warning"><b>Маршрут не сохраняется.</b><br>Открытые участки, текущая контрольная точка и прогресс незавершённого маршрута будут удалены.</div><div class="purchase-actions"><button class="purchase-cancel" id="exitRouteCancel" type="button">Остаться</button><button class="purchase-confirm exit-confirm" id="exitRouteConfirm" type="button">Выйти</button></div></div></div>
 
 <div class="modal-backdrop" id="infoModal"><div class="info-modal"><div class="grab"></div><div class="info-icon" id="infoModalIcon">ℹ️</div><h2 id="infoModalTitle">Подробнее</h2><p id="infoModalText"></p><button class="primary" id="infoModalClose" type="button">Понятно</button></div></div>
@@ -748,7 +746,7 @@ try {
   window.__completeStreakDay=completeStreakDay;window.__streakCoef=streakCoef;normalizeStreak();
   function sync(){syncStatsFromLedger();state.coef=streakCoef(state.streak);['#coinsTop','#coinsShop','#coinsProfile'].forEach(s=>{const e=$(s);if(e)e.textContent=state.coins});$('#streakTop').textContent=$('#streakProfile').textContent=state.streak;$('#coefTop').textContent=$('#coefProfile').textContent=$('#sumCoef').textContent=state.coef.toFixed(1);const lvl=$('#levelProfile');if(lvl)lvl.textContent=state.level;localStorage.setItem(wallets[walletMode].coins,state.coins);localStorage.setItem(wallets[walletMode].level,state.level);localStorage.setItem('rr_streak',state.streak);localStorage.setItem('rr_coef',state.coef);localStorage.setItem('rr_last_streak_date',state.lastStreakDate||'');localStorage.setItem('rr_streak_history',JSON.stringify(state.streakHistory||[]));localStorage.setItem('rr_distance',state.distance);localStorage.setItem('rr_type',state.type);localStorage.setItem('rr_partner',state.partner?'1':'0');for(let i=1;i<=3;i++)localStorage.setItem('rr_gold_'+i,state.goldSlots[i]?'1':'0');localStorage.setItem('rr_equipped',JSON.stringify(state.equipped));localStorage.setItem('rr_routeplus',state.routeplus?'1':'0');localStorage.setItem('rr_themes',state.themes?'1':'0');localStorage.setItem('rr_group',state.group?'1':'0');localStorage.setItem('rr_badge_stats',JSON.stringify(state.badgeStats||{}));localStorage.setItem('rr_earned_badges',JSON.stringify([...state.earnedBadges]));localStorage.setItem('rr_profile_pins',JSON.stringify(state.profilePins||[]));renderStreak();renderVerifiedStats();syncStore();syncGoldSlots();renderBadges();try{window.dispatchEvent(new Event('rr:coins-changed'))}catch(e){}}
   window.__rrSpendForMascotChest=function(price){
-    if(!Number.isSafeInteger(price)||![80,240,600].includes(price)||state.coins<price)return false;
+    if(!Number.isSafeInteger(price)||![80,240,600,150].includes(price)||state.coins<price)return false;
     const before=state.coins;
     state.coins-=price;
     try{sync();return true}catch(e){state.coins=before;try{sync()}catch(_){}return false}
@@ -838,10 +836,10 @@ try {
   }
   $$('[data-gold-slot]').forEach(b=>b.onclick=()=>{const i=+b.dataset.goldSlot,price=+b.dataset.goldPrice,need=+b.dataset.level;if(state.level<need){toast('Нужен уровень '+need);return}if(state.coins<price){toast('Недостаточно RouteCoin');return}state.coins-=price;state.goldSlots[i]=true;sync();toast('Золотой слот №'+i+' открыт')});
   $$('.store-tab').forEach(b=>b.onclick=()=>{ $$('.store-tab').forEach(x=>x.classList.toggle('active',x===b)); $('#storeCoins').classList.toggle('active',b.dataset.storeTab==='coins'); $('#storeFeatures').classList.toggle('active',b.dataset.storeTab==='features'); });
-  $$('[data-buy-type]').forEach(b=>b.onclick=()=>{if(window.__isDeveloperMode?.()){toast('Оплата отключена в режиме разработчика');return}if(b.disabled)return;pendingPurchase={type:b.dataset.buyType,title:b.dataset.title,price:b.dataset.price,coins:+(b.dataset.coins||0),feature:b.dataset.feature||''};$('#purchaseTitle').textContent=pendingPurchase.title;$('#purchasePrice').textContent=pendingPurchase.price;$('#purchaseDescription').textContent='Оплата пока не подключена. Подтверждение не изменит баланс и не активирует функцию.';$('#purchaseModal').classList.add('show')});
-  $('#purchaseCancel').onclick=()=>{$('#purchaseModal').classList.remove('show');pendingPurchase=null};
-  $('#purchaseModal').onclick=e=>{if(e.target===$('#purchaseModal'))$('#purchaseCancel').click()};
-  $('#purchaseConfirm').onclick=()=>{if(!pendingPurchase)return;$('#purchaseModal').classList.remove('show');pendingPurchase=null;toast('Оплата ещё не подключена — баланс не изменён')};
+
+
+
+
   $$('[data-rc-price]').forEach(b=>b.onclick=()=>{const price=+b.dataset.rcPrice;if(state.coins<price){toast('Недостаточно RouteCoin');return}state.coins-=price;sync();b.textContent='✓ Куплено';b.disabled=true;b.classList.add('active');toast('Предмет куплен')});
   $$('#typeChoices .choice').forEach(b=>b.onclick=()=>{state.type=b.dataset.type;$$('#typeChoices .choice').forEach(x=>x.classList.toggle('active',x===b))});
   $('#partnerToggle').onclick=()=>{state.partner=!state.partner;$('#partnerToggle').classList.toggle('on',state.partner)};
@@ -3242,7 +3240,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=53',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=56',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3262,8 +3260,10 @@ try {
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
-<script src="mascot-collection.js?v=1.1"></script>
-<script src="mascot-chests.js?v=1.1"></script>
+<script src="mascot-art.js?v=1.0"></script>
+<script src="mascot-collection.js?v=2.0"></script>
+<script src="mascot-chests.js?v=2.0"></script>
+<script src="mascot-inventory.js?v=1.0"></script>
 <script src="marshik-guide.js?v=1.2"></script>
 <script src="marshik-ai.js?v=1.1"></script>
 </body>
