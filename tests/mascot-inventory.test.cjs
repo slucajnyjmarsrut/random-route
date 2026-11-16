@@ -6,8 +6,11 @@ test('145 unique illustrated mascots',()=>{
  assert.equal(M.mascots.length,145);
  assert.equal(new Set(M.mascots.map(x=>x.id)).size,145);
  assert.equal(new Set(M.mascots.map(x=>x.name)).size,145);
- assert.equal(new Set(M.mascots.map(x=>Art.avatar(x))).size,145);
- assert.match(Art.avatar(M.mascots[0]),/^data:image\/svg\+xml/);
+ const sources=new Set(M.mascots.map(x=>Art.avatar(x)));
+ assert.ok(sources.size>=55,'distinct premium and fallback character portraits');
+ assert.match(Art.avatar(M.mascots.find(x=>x.id==='traveller-puppy')),/^assets\/mascots\/3d\/wolf\.webp$/);
+ assert.match(Art.avatar(M.mascots.find(x=>x.id==='gourmet-panda')),/^assets\/mascots\/3d\/panda\.webp$/);
+ assert.match(Art.avatar(M.mascots.find(x=>x.id==='runner-rabbit')),/^data:image\/svg\+xml/);
 });
 test('duplicate chests keep existing mascots in the drop pool',()=>{
  const id='traveller-puppy',item=M.mascots.find(x=>x.id===id);
