@@ -1745,7 +1745,7 @@ try {
       const picked=await window.RRRandomLoopRouter.findRoute({
         graph:streetGraph,routing:window.RRWalkingDijkstra,start:rr.start,
         pois:near,zones:rr.noGoZones,distanceKm:input,rng:dailyRandom,
-        maxAttempts:22,timeBudgetMs:Math.max(4500,routeBudgetMs-(performance.now()-startedAt)),
+        maxAttempts:35,timeBudgetMs:Math.max(4500,routeBudgetMs-(performance.now()-startedAt)),
         avoidFirstPoint:options.requireDifferentFirst?options.avoidFirstPoint:null,
         minDirectionChangeDeg:options.minDirectionChangeDeg||42,onStatus:report
       });
