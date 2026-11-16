@@ -21,7 +21,7 @@
    const m=M.mascots.find(m=>m.id===id),rank=state.ranks[id]||1,
      need=copiesNeeded(rank,M.unlocked(m,stats));
    const next={...state,copies:{...state.copies},ranks:{...state.ranks}};
-   next.copies[id]-=need;
+   next.copies[id]-=rank; // Consume duplicates; keep the base chest copy.
    if(next.copies[id]===0)delete next.copies[id];
    next.ranks[id]=rank+1;return next;
  }
@@ -75,7 +75,7 @@
      action.disabled=!eligible;
      item.append(image,name,text);
      if(forUpgrade){
-       const desc=doc.createElement('small');desc.textContent='Улучшение поглощает '+cost+' '+(cost===1?'копию':'копии')+'. '+(isEarned?'Базовый маскот открыт за достижения.':'Одна базовая копия сохраняется.');
+       const desc=doc.createElement('small');desc.textContent='Нужно иметь '+cost+' копий; улучшение расходует '+rank+' дубликат(ов). '+(isEarned?'Базовый маскот открыт за достижения.':'Одна базовая копия сохраняется.');
        item.append(desc,action);
      }else{
        const jump=doc.createElement('button');jump.type='button';jump.dataset.jumpUpgrade=m.id;
