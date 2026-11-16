@@ -9,7 +9,7 @@
   if(root)root.RRRandomLoopRouter=api;
 })(typeof window!=='undefined'?window:null,function(){
   'use strict';
-  const TOLERANCE=.05,MAX_ATTEMPTS=22;
+  const TOLERANCE=.05,MAX_ATTEMPTS=35;
   const radians=n=>n*Math.PI/180;
   const point=p=>({lat:Number(p._lat??p.lat),lng:Number(p._lng??p.lng)});
   function metres(a,b){
@@ -83,14 +83,14 @@
   }
   function propose(pool,start,targetM,radialScale,rng,settings={}){
     const aim=targetM/(2*Math.PI)*radialScale;
-    const kmax=Math.min(5,pool.length),k=kmax===2?2:2+Math.floor(rng()*(kmax-1));
+    const kmax=Math.min(pool.length,Math.min(5,Math.max(2,Math.ceil(targetM/700)+1))),k=kmax===2?2:2+Math.floor(rng()*(kmax-1));
     // Use a random sample with a preference for plausible distances, not
     // an assumption that straight-line distance is the real road distance.
     const ranked=pool.map(p=>({p,score:Math.abs(p.radius-aim)/targetM+
       rng()*.25-(p.photo?.025:0)})).sort((a,b)=>a.score-b.score);
     const selected=[];
     if(ranked.some(x=>x.p.photo)&&rng()<.8){
-      const favorite=ranked.find(x=>x.p.photo);
+      const favorite=ranked.find(x=>x.p.photo&&x.p.radius<=Math.max(150,aim*1.4));
       if(favorite)selected.push(favorite.p);
     }
     for(const {p} of ranked){
@@ -154,7 +154,7 @@
       }catch(e){
         if(e?.message==='DisconnectedWalkingGraph')continue;
         if(e?.message==='NoNearbyFootpath')continue;
-        if(zones.length)rejectedZones++;
+        if(zones.length&&/Zone|DisconnectedWalkingGraph/.test(String(e?.message||'')))rejectedZones++;
       }
       // Keep map/GPS UI responsive during a bounded search on mobile.
       if(attempts%4===0&&typeof setTimeout==='function')
