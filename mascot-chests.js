@@ -100,10 +100,24 @@
      const state=read();
      return {state,available:availableMascots(M.mascots)};
    }
-   function report(message,rarity){
+   function report(message,rarity,mascot){
      status.hidden=false;
      status.className="mascot-chest-result"+(rarity?" rarity-"+rarity:"");
-     status.textContent=message;
+     status.replaceChildren();
+     if(!mascot){status.textContent=message;return;}
+     const reveal=doc.createElement("div");
+     reveal.className="mascot-chest-reveal";
+     const art=doc.createElement("img");
+     art.className="mascot-chest-reveal-art";
+     art.src=win.RRMascotArt?.avatar?.(mascot)||"";
+     art.alt="";art.width=130;art.height=130;art.loading="eager";
+     const details=doc.createElement("div");
+     const heading=doc.createElement("strong");heading.textContent=message;
+     const rarityLabel=doc.createElement("span");
+     rarityLabel.textContent="★ "+LABELS[rarity]+" · Открыть коллекцию →";
+     details.append(heading,rarityLabel);
+     reveal.append(art,details);
+     status.append(reveal);
    }
    function refresh(){
      const {state,available}=collect(),balance=Number(win.state?.coins)||0;
@@ -152,7 +166,7 @@
          try{if(before===null)storage.removeItem(saveKey);else storage.setItem(saveKey,before)}catch(e){}
          report("Не удалось списать RouteCoin. Попробуйте ещё раз.");return;
        }
-       report((duplicate?"🔁 Дубликат! ":"🎉 Новый спутник! ")+result.mascot.name+" · "+LABELS[result.rarity].toLowerCase()+" · теперь копий: "+next.copies[result.mascot.id],result.rarity);
+       report((duplicate?"🔁 Дубликат! ":"🎉 Новый спутник! ")+result.mascot.name+" · "+LABELS[result.rarity].toLowerCase()+" · теперь копий: "+next.copies[result.mascot.id],result.rarity,result.mascot);
        win.dispatchEvent(new Event("rr:mascot-chest-opened"));
        refresh();
      }finally{busy=false}
