@@ -43,7 +43,32 @@
   {id:"robot-tourist",name:"Робо-турист",emoji:"🤖",gear:"🧭",rarity:"legendary",requires:{quests:60}},
   {id:"taiga-spirit",name:"Дух тайги",emoji:"🐺",gear:"🌌",rarity:"legendary",requires:{routes:75,photos:25}}
  ];
+ // Five themed classes for each of 25 additional animal species: 125 new unique collectibles.
+ // The 20 original mascots keep their IDs and earned XP.
+ const animalGroups=[
+  ['dog','Пёс','🐶'],['rabbit','Заяц','🐇'],['cat','Кот','🐱'],['hamster','Хомяк','🐹'],
+  ['owl','Сова','🦉'],['raccoon','Енот','🦝'],['fox','Лис','🦊'],['beaver','Бобр','🦫'],
+  ['panda','Панда','🐼'],['dino','Дино','🦖'],['seal','Тюлень','🦭'],['wolf','Волк','🐺'],
+  ['bear','Медведь','🐻'],['raven','Ворон','🐦‍⬛'],['leopard','Барс','🐆'],['deer','Олень','🦌'],
+  ['bull','Бычок','🐂'],['robot','Робот','🤖'],['spirit','Дух','🌌'],['hedgehog','Ёж','🦔'],
+  ['squirrel','Белка','🐿️'],['penguin','Пингвин','🐧'],['moose','Лось','🫎'],
+  ['otter','Выдра','🦦'],['lynx','Рысь','🐈']
+ ];
+ const careerGroups=[
+  ['trail','Следопыт'],['scholar','Мудрец'],['photo','Фотограф'],
+  ['winter','Полярник'],['magic','Звездочёт']
+ ];
+ for(let a=0;a<animalGroups.length;a++)for(let c=0;c<careerGroups.length;c++){
+   const [animal,noun,emoji]=animalGroups[a],[role,title]=careerGroups[c];
+   const roll=(a*17+c*23)%100;
+   const rarity=roll<35?'common':roll<63?'uncommon':roll<81?'rare':roll<94?'epic':'legendary';
+   const n=a*careerGroups.length+c;
+   mascots.push({id:'expedition-'+animal+'-'+role,name:noun+'-'+title,emoji,
+      gear:['🎒','📚','📷','❄️','✨'][c],animal,role,rarity,requires:{routes:45+n*2}});
+ }
+ // Individual roles and animal palettes drive character illustration, rather than an emoji portrait.
  const byId=new Map(mascots.map(x=>[x.id,x]));
+ const portrait=m=>typeof window!=='undefined'&&window.RRMascotArt?.avatar?.(m)||null;
  const metricNames={routes:"прогулок",photos:"фотопроверок",quests:"заданий",streak:"дней подряд"};
  function localDay(timestamp){
    const d=new Date(timestamp);
@@ -134,9 +159,10 @@
    const storage=win.localStorage;if(!storage)return;
    const $=s=>doc.querySelector(s);
    function chestOwned(){
-     const key=win.__rrWalletMode?.()==="tester"?"rr_mascot_chests_tester_v1":"rr_mascot_chests_v1";
-     const raw=safeJSON(storage,key,{});
-     return new Set((Array.isArray(raw.owned)?raw.owned:[]).filter(id=>byId.has(id)));
+     const tester=win.__rrWalletMode?.()==="tester";
+     const legacy=safeJSON(storage,tester?"rr_mascot_chests_tester_v1":"rr_mascot_chests_v1",{});
+     const newer=safeJSON(storage,tester?"rr_mascot_chests_tester_v2":"rr_mascot_chests_v2",{});
+     return new Set([...(legacy.owned||[]),...(newer.owned||[])].filter(id=>byId.has(id)));
    }
    let filter="all",current=initialProgress(safeJSON(storage,KEY,{}));
    function events(){return safeJSON(storage,LEDGER,[])}
@@ -154,7 +180,7 @@
      if(statsNote)statsNote.textContent="Подтверждено: "+stats.routes+" прогулок · "+stats.photos+" фото · "+stats.quests+" заданий";
      const hero=$("#mascotEquipped");
      if(hero){
-       hero.innerHTML='<div class="mascot-equipped-avatar rarity-'+selected.rarity+' level-'+(lv>=7?'star':lv>=4?'explorer':'beginner')+'"><span aria-hidden="true">'+selected.emoji+'</span><b>'+(lv>=7?'🌟':lv>=4?'✨':selected.gear)+'</b></div>'
+       hero.innerHTML='<div class="mascot-equipped-avatar rarity-'+selected.rarity+' level-'+(lv>=7?'star':lv>=4?'explorer':'beginner')+'"><img class="mascot-art-img" alt="" src="'+portrait(selected)+'"/><b>'+(lv>=7?'🌟':lv>=4?'✨':selected.gear)+'</b></div>'
          +'<div class="mascot-equipped-copy"><small>ВАШ СПУТНИК</small><h2>'+selected.name+'</h2>'
          +'<p>'+rarities[selected.rarity].name+' · Уровень '+lv+' · '+levelStage(lv)+'</p>'
          +'<div class="mascot-xp-meter" aria-label="Прогресс уровня"><span style="width:'+Math.round(bar(current.xp[selected.id])*100)+'%"></span></div>'
@@ -171,7 +197,7 @@
          card.dataset.mascotId=m.id;
          const tier=doc.createElement("div");tier.className="mascot-card-tier";tier.textContent=rarities[m.rarity].icon+" "+rarities[m.rarity].name;
          const avatar=doc.createElement("div");const mLevel=levelFor(current.xp[m.id]);avatar.className="mascot-card-avatar level-"+(mLevel>=7?"star":mLevel>=4?"explorer":"beginner");
-         const face=doc.createElement("span");face.setAttribute("aria-hidden","true");face.textContent=m.emoji;
+         const face=doc.createElement("img");face.className="mascot-art-img";face.alt="";face.loading="lazy";face.src=win.RRMascotArt?.avatar?.(m)||"";
          const gear=doc.createElement("b");gear.textContent=mLevel>=7?"🌟":mLevel>=4?"✨":m.gear;avatar.append(face,gear);
          const title=doc.createElement("h3");title.textContent=m.name;
          const hint=doc.createElement("p");hint.className="mascot-card-condition";
@@ -198,7 +224,7 @@
      const homeSub=$("#mascotHomeSubtitle");
      if(homeSub)homeSub.textContent="Ваш спутник в прогулках. Открывайте новых за маршруты, задания и сундуки.";
      const buddy=$("#mascotRouteBuddy");
-     if(buddy)buddy.innerHTML='<span aria-hidden="true">'+selected.emoji+'</span><div><b>'+selected.name+'</b><small>Ваш спутник · уровень '+lv+'</small></div>';
+     if(buddy)buddy.innerHTML='<img class="mascot-buddy-art" alt="" src="'+portrait(selected)+'"/><div><b>'+selected.name+'</b><small>Ваш спутник · уровень '+lv+'</small></div>';
      const profile=$("#mascotProfileCurrent");
      if(profile)profile.textContent=selected.emoji+" "+selected.name+" · уровень "+lv;
      doc.querySelectorAll("[data-mascot-filter]").forEach(b=>{
@@ -218,8 +244,9 @@
    });
    win.addEventListener("rr:verified-event",refresh);
    win.addEventListener("rr:mascot-chest-opened",refresh);
+   win.addEventListener("rr:mascot-upgraded",refresh);
    win.addEventListener("rr:wallet-changed",refresh);
-   win.addEventListener("storage",function(e){if(e.key===LEDGER||e.key===KEY||e.key==="rr_mascot_chests_v1"||e.key==="rr_mascot_chests_tester_v1"){if(e.key===KEY)current=initialProgress(safeJSON(storage,KEY,{}));refresh()}});
+   win.addEventListener("storage",function(e){if(e.key===LEDGER||e.key===KEY||e.key==="rr_mascot_chests_v1"||e.key==="rr_mascot_chests_tester_v1"||e.key==="rr_mascot_chests_v2"||e.key==="rr_mascot_chests_tester_v2"){if(e.key===KEY)current=initialProgress(safeJSON(storage,KEY,{}));refresh()}});
    win.__rrMascotRefresh=refresh;
    refresh();
  }
