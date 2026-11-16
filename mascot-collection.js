@@ -125,24 +125,30 @@
  function levelFor(xp){return Math.min(MAX_LEVEL,1+Math.floor(Math.max(0,Number(xp)||0)/350))}
  function levelStage(level){return level>=7?"Звезда":level>=4?"Исследователь":"Путник"}
  function bar(xp){return levelFor(xp)===MAX_LEVEL?1:(Math.max(0,Number(xp)||0)%350)/350}
- function select(progress,id,stats){
+ function select(progress,id,stats,chestOwned){
    const candidate=byId.get(id);
-   return candidate&&unlocked(candidate,stats)?{...initialProgress(progress),selected:id}:initialProgress(progress);
+   return candidate&&(unlocked(candidate,stats)||(chestOwned instanceof Set&&chestOwned.has(id)))?{...initialProgress(progress),selected:id}:initialProgress(progress);
  }
  function safeJSON(storage,key,fallback){try{return JSON.parse(storage.getItem(key)||"null")??fallback}catch(e){return fallback}}
  function mount(doc,win){
    const storage=win.localStorage;if(!storage)return;
    const $=s=>doc.querySelector(s);
+   function chestOwned(){
+     const key=win.__rrWalletMode?.()==="tester"?"rr_mascot_chests_tester_v1":"rr_mascot_chests_v1";
+     const raw=safeJSON(storage,key,{});
+     return new Set((Array.isArray(raw.owned)?raw.owned:[]).filter(id=>byId.has(id)));
+   }
    let filter="all",current=initialProgress(safeJSON(storage,KEY,{}));
    function events(){return safeJSON(storage,LEDGER,[])}
    function save(){try{storage.setItem(KEY,JSON.stringify(current))}catch(e){}}
    function refresh(){
      const raw=events(),stats=statsOf(raw);
      current=applyEvents(current,raw);
-     if(!unlocked(byId.get(current.selected),stats))current.selected="traveller-puppy";
+     const obtained=chestOwned();
+     if(!unlocked(byId.get(current.selected),stats)&&!obtained.has(current.selected))current.selected="traveller-puppy";
      save();
      const selected=byId.get(current.selected),lv=levelFor(current.xp[selected.id]);
-     const owned=mascots.filter(m=>unlocked(m,stats)).length;
+     const owned=mascots.filter(m=>unlocked(m,stats)||obtained.has(m.id)).length;
      const count=$("#mascotOwnedCount");if(count)count.textContent=owned+"/"+mascots.length;
      const statsNote=$("#mascotXPStatus");
      if(statsNote)statsNote.textContent="Подтверждено: "+stats.routes+" прогулок · "+stats.photos+" фото · "+stats.quests+" заданий";
@@ -159,7 +165,7 @@
        grid.replaceChildren();
        for(const m of mascots){
          if(filter!=="all"&&m.rarity!==filter)continue;
-         const isOwned=unlocked(m,stats),isSelected=current.selected===m.id;
+         const isOwned=unlocked(m,stats)||obtained.has(m.id),isSelected=current.selected===m.id;
          const card=doc.createElement("article");
          card.className="mascot-card rarity-"+m.rarity+(isOwned?"":" locked")+(isSelected?" selected":"");
          card.dataset.mascotId=m.id;
@@ -169,7 +175,7 @@
          const gear=doc.createElement("b");gear.textContent=mLevel>=7?"🌟":mLevel>=4?"✨":m.gear;avatar.append(face,gear);
          const title=doc.createElement("h3");title.textContent=m.name;
          const hint=doc.createElement("p");hint.className="mascot-card-condition";
-         hint.textContent=isOwned?"Уровень "+levelFor(current.xp[m.id])+" · "+levelStage(levelFor(current.xp[m.id])):requirement(m,stats);
+         hint.textContent=isOwned?(obtained.has(m.id)&&!unlocked(m,stats)?"Из сундука · ":"")+"Уровень "+levelFor(current.xp[m.id])+" · "+levelStage(levelFor(current.xp[m.id])):requirement(m,stats);
          const meter=doc.createElement("div");meter.className="mascot-mini-meter";
          const fill=doc.createElement("span");fill.style.width=Math.round((isOwned?bar(current.xp[m.id]):progressOf(m,stats))*100)+"%";
          meter.append(fill);
@@ -190,7 +196,7 @@
      if(homeImage)homeImage.hidden=selected.id!=="traveller-puppy";
      const homeTitle=$("#mascotHomeTitle");if(homeTitle)homeTitle.textContent=selected.name+" · ур. "+lv;
      const homeSub=$("#mascotHomeSubtitle");
-     if(homeSub)homeSub.textContent="Ваш спутник в прогулках. Открывайте новых за маршруты и задания.";
+     if(homeSub)homeSub.textContent="Ваш спутник в прогулках. Открывайте новых за маршруты, задания и сундуки.";
      const buddy=$("#mascotRouteBuddy");
      if(buddy)buddy.innerHTML='<span aria-hidden="true">'+selected.emoji+'</span><div><b>'+selected.name+'</b><small>Ваш спутник · уровень '+lv+'</small></div>';
      const profile=$("#mascotProfileCurrent");
@@ -207,11 +213,13 @@
      const equip=e.target.closest("[data-equip-mascot]");
      if(!equip)return;
      const id=equip.dataset.equipMascot,stats=statsOf(events());
-     if(!unlocked(byId.get(id),stats))return;
-     current=select(current,id,stats);save();refresh();
+     if(!unlocked(byId.get(id),stats)&&!chestOwned().has(id))return;
+     current=select(current,id,stats,chestOwned());save();refresh();
    });
    win.addEventListener("rr:verified-event",refresh);
-   win.addEventListener("storage",function(e){if(e.key===LEDGER||e.key===KEY){if(e.key===KEY)current=initialProgress(safeJSON(storage,KEY,{}));refresh()}});
+   win.addEventListener("rr:mascot-chest-opened",refresh);
+   win.addEventListener("rr:wallet-changed",refresh);
+   win.addEventListener("storage",function(e){if(e.key===LEDGER||e.key===KEY||e.key==="rr_mascot_chests_v1"||e.key==="rr_mascot_chests_tester_v1"){if(e.key===KEY)current=initialProgress(safeJSON(storage,KEY,{}));refresh()}});
    win.__rrMascotRefresh=refresh;
    refresh();
  }
