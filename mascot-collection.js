@@ -1,4 +1,4 @@
-/* Twenty collectible cosmetic companions. Progress is calculated from the
+/* 145 illustrated collectible cosmetic companions. Progress is calculated from the
  * existing verified GPS/photo/quest ledger; demo events earn no XP.
  * Offline/local storage is not a tamper-proof server leaderboard.
  */
