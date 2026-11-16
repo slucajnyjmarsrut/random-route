@@ -7,8 +7,8 @@ const event=(type,id,daysAgo=0,eligible=true)=>({
  data:{dailyEligible:eligible,routeDistanceM:3000}
 });
 const routes=n=>Array.from({length:n},(_,i)=>event('route_completed','walk-'+i,Math.min(i,60)));
-assert.equal(M.mascots.length,20);
-assert.equal(new Set(M.mascots.map(x=>x.id)).size,20);
+assert.equal(M.mascots.length,145);
+assert.equal(new Set(M.mascots.map(x=>x.id)).size,145);
 assert.deepEqual(Object.values(M.rarities).map(x=>x.name),
  ['Обычные','Необычные','Редкие','Эпические','Легендарные']);
 const starter=M.mascots.find(x=>x.starter);
@@ -57,4 +57,4 @@ assert.equal(M.unlocked(M.mascots.find(m=>m.id==='taiga-spirit'),ten),false);
 assert.equal(M.levelStage(1),'Путник');
 assert.equal(M.levelStage(4),'Исследователь');
 assert.equal(M.levelStage(7),'Звезда');
-console.log('MASCOTS_CORE_OK 20 characters, rarity, 10 walks, XP, streak bonuses, demo exclusion and selection');
+console.log('MASCOTS_CORE_OK 145 characters, rarity, 10 walks, XP, streak bonuses, demo exclusion and selection');
