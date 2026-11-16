@@ -11,7 +11,9 @@
  }
 })(typeof window!=="undefined"?window:null,function(){
  "use strict";
- const KEY="rr_mascot_chests_v1",TESTER_KEY="rr_mascot_chests_tester_v1";
+ const KEY="rr_mascot_chests_v2",TESTER_KEY="rr_mascot_chests_tester_v2";
+ const LEGACY_KEY="rr_mascot_chests_v1",LEGACY_TESTER_KEY="rr_mascot_chests_tester_v1";
+ const START_CAPACITY=50,MAX_CAPACITY=150;
  const TIERS=["common","uncommon","rare","epic","legendary"];
  const LABELS={common:"Обычный",uncommon:"Необычный",rare:"Редкий",epic:"Эпический",legendary:"Легендарный"};
  const CHESTS=[
@@ -20,19 +22,30 @@
    {id:"aurora",name:"Сияние",icon:"🌌",price:600,description:"Повышенный шанс эпических",weights:{common:55,uncommon:20,rare:14,epic:8,legendary:3}}
  ];
  function normalize(raw,mascots){
-   const ids=new Set((mascots||[]).map(m=>m.id));
-   const obj=raw&&typeof raw==="object"?raw:{};
+   const ids=new Set((mascots||[]).map(m=>m.id)),obj=raw&&typeof raw==="object"?raw:{};
    const owned=[...new Set((Array.isArray(obj.owned)?obj.owned:[]).filter(id=>ids.has(id)))];
+   const copies={};
+   if(obj.copies&&typeof obj.copies==="object"){
+     for(const [id,n] of Object.entries(obj.copies))
+       if(ids.has(id)&&Number.isSafeInteger(n)&&n>0)copies[id]=Math.min(10000,n);
+   }else{
+     // One-time migration from no-repeat chests: every previously collected
+     // mascot remains owned and has one inventory copy.
+     for(const id of owned)copies[id]=1;
+   }
+   const ranks={};
+   if(obj.ranks&&typeof obj.ranks==="object")
+     for(const [id,n] of Object.entries(obj.ranks))
+       if(ids.has(id)&&Number.isSafeInteger(n)&&n>=2)ranks[id]=Math.min(5,n);
    const opened=Number.isSafeInteger(obj.opened)?Math.min(1000000,Math.max(0,obj.opened)):0;
    const v=obj.last&&typeof obj.last==="object"?obj.last:null;
    const last=v&&ids.has(v.mascotId)&&CHESTS.some(c=>c.id===v.chestId)
-     ?{mascotId:v.mascotId,chestId:v.chestId}:null;
-   return {owned,opened,last};
+     ?{mascotId:v.mascotId,chestId:v.chestId,duplicate:!!v.duplicate}:null;
+   const capacity=Math.min(MAX_CAPACITY,Math.max(START_CAPACITY,Number.isSafeInteger(obj.capacity)?obj.capacity:START_CAPACITY));
+   return {owned,copies,ranks,capacity,opened,last};
  }
- function availableMascots(mascots,stats,owned,unlocked){
-   const granted=new Set(owned);
-   return mascots.filter(m=>!granted.has(m.id)&&!unlocked(m,stats));
- }
+ function occupied(state){return Object.values(state.copies||{}).reduce((sum,n)=>sum+n,0)}
+ function availableMascots(mascots){return Array.isArray(mascots)?mascots:[]}
  function weightMap(chest,available){
    const counts=Object.fromEntries(TIERS.map(t=>[t,available.filter(m=>m.rarity===t).length]));
    const weights=Object.fromEntries(TIERS.map(t=>[t,counts[t]>0?chest.weights[t]||0:0]));
@@ -75,13 +88,17 @@
    const mode=()=>win.__rrWalletMode?.()==="tester"?"tester":"normal";
    const key=()=>mode()==="tester"?TESTER_KEY:KEY;
    function read(){
-     try{return normalize(JSON.parse(storage.getItem(key())||"null"),M.mascots)}
-     catch(e){return normalize(null,M.mascots)}
+     try{
+       const actual=storage.getItem(key());
+       if(actual!==null)return normalize(JSON.parse(actual),M.mascots);
+       const prior=storage.getItem(mode()==="tester"?LEGACY_TESTER_KEY:LEGACY_KEY);
+       return normalize(prior===null?null:JSON.parse(prior),M.mascots);
+     }catch(e){return normalize(null,M.mascots)}
    }
    function collect(){
      let events=[];try{events=JSON.parse(storage.getItem(M.LEDGER)||"[]")}catch(e){}
      const state=read();
-     return {state,available:availableMascots(M.mascots,M.statsOf(events),state.owned,M.unlocked)};
+     return {state,available:availableMascots(M.mascots)};
    }
    function report(message,rarity){
      status.hidden=false;
@@ -91,7 +108,7 @@
    function refresh(){
      const {state,available}=collect(),balance=Number(win.state?.coins)||0;
      const counter=doc.getElementById("mascotChestProgress");
-     if(counter)counter.textContent="Открыто сундуков: "+state.opened+" · Все выпадения случайны, без гарантии редкости.";
+     if(counter)counter.textContent="Открыто сундуков: "+state.opened+" · Инвентарь "+occupied(state)+"/"+state.capacity+" · Повторы возможны, гарантий нет.";
      const wallet=doc.getElementById("mascotChestBalance");
      if(wallet)wallet.textContent="Баланс: "+balance+" RC";
      grid.replaceChildren();
@@ -106,8 +123,9 @@
        chance.textContent=hasPool?TIERS.filter(t=>odds.weights[t]>0).map(t=>
          LABELS[t]+": "+odds.weights[t].toFixed(1).replace(/\.0$/,"")+"%").join(" · "):"Все доступные награды этого сундука уже собраны";
        const button=doc.createElement("button");button.type="button";button.dataset.openMascotChest=chest.id;
-       button.textContent="Открыть за "+chest.price+" RC";button.disabled=!hasPool;
-       if(hasPool&&balance<chest.price)button.title="Не хватает RouteCoin";
+       button.textContent="Открыть за "+chest.price+" RC";button.disabled=!hasPool||occupied(state)>=state.capacity;
+       if(occupied(state)>=state.capacity)button.title="Инвентарь заполнен — используйте дубликаты или расширьте слоты";
+       else if(hasPool&&balance<chest.price)button.title="Не хватает RouteCoin";
        card.append(icon,title,description,chance,button);
        grid.append(card);
      }
@@ -118,21 +136,23 @@
      busy=true;
      try{
        const {state,available}=collect();
-       if(!available.length){report("Коллекция уже собрана!");return}
+       if(occupied(state)>=state.capacity){report("Инвентарь заполнен! Улучшите маскота или расширьте вместимость.");return}
        if((Number(win.state?.coins)||0)<chest.price){report("Недостаточно RouteCoin для этого сундука.");return}
        if(typeof win.__rrSpendForMascotChest!=="function"){report("Кошелёк ещё не готов. Откройте раздел повторно.");return}
        const result=draw(chest,available,secureRandom);
-       if(!result){report("В этом сундуке больше нет новых маскотов. Попробуйте другой.");return}
+       if(!result){report("В этом сундуке сейчас нет награды.");return}
        const saveKey=key(),before=storage.getItem(saveKey);
-       const next={...state,owned:[...state.owned,result.mascot.id],opened:state.opened+1,
-         last:{mascotId:result.mascot.id,chestId:chest.id}};
+       const duplicate=state.owned.includes(result.mascot.id)||M.unlocked(result.mascot,M.statsOf(JSON.parse(storage.getItem(M.LEDGER)||"[]")));
+       const next={...state,owned:[...new Set([...state.owned,result.mascot.id])],
+         copies:{...state.copies,[result.mascot.id]:(state.copies[result.mascot.id]||0)+1},opened:state.opened+1,
+         last:{mascotId:result.mascot.id,chestId:chest.id,duplicate}};
        try{storage.setItem(saveKey,JSON.stringify(next))}
        catch(e){report("Не удалось сохранить коллекцию. Монеты не списаны.");return}
        if(!win.__rrSpendForMascotChest(chest.price)){
          try{if(before===null)storage.removeItem(saveKey);else storage.setItem(saveKey,before)}catch(e){}
          report("Не удалось списать RouteCoin. Попробуйте ещё раз.");return;
        }
-       report("🎉 "+result.mascot.emoji+" "+result.mascot.name+" — "+LABELS[result.rarity].toLowerCase()+" спутник!",result.rarity);
+       report((duplicate?"🔁 Дубликат! ":"🎉 Новый спутник! ")+result.mascot.name+" · "+LABELS[result.rarity].toLowerCase()+" · теперь копий: "+next.copies[result.mascot.id],result.rarity);
        win.dispatchEvent(new Event("rr:mascot-chest-opened"));
        refresh();
      }finally{busy=false}
@@ -148,5 +168,5 @@
    win.__rrChestRefresh=refresh;
    refresh();
  }
- return {KEY,TESTER_KEY,CHESTS,TIERS,LABELS,normalize,availableMascots,weightMap,draw,mount};
+ return {KEY,TESTER_KEY,LEGACY_KEY,LEGACY_TESTER_KEY,CHESTS,TIERS,LABELS,START_CAPACITY,MAX_CAPACITY,occupied,normalize,availableMascots,weightMap,draw,mount};
 });

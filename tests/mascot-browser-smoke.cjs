@@ -11,10 +11,10 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#home .mascot-home-current').count(),0,'no duplicate home banner');
    await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
-   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),20);
+   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),145);
    assert.match(await page.locator('#mascotEquipped').innerText(),/Щенок-путник/);
    assert.equal(await page.locator('[data-mascot-id="tourist-hamster"] button').isDisabled(),true);
-   assert.equal(await page.locator('#mascotOwnedCount').innerText(),'1/20');
+   assert.equal(await page.locator('#mascotOwnedCount').innerText(),'1/145');
    // Simulate verified events from the real ledger, including ten completed
    // GPS walks. This tests UI display but not GPS itself.
    await page.evaluate(()=>{
@@ -29,11 +29,11 @@ const {chromium}=require('playwright');
      localStorage.setItem('rr_verified_events_v1',JSON.stringify(ev));
      dispatchEvent(new Event('rr:verified-event'));
    });
-   await page.waitForFunction(()=>document.querySelector('#mascotOwnedCount')?.textContent==='6/20'
-     ||document.querySelector('#mascotOwnedCount')?.textContent==='5/20'
+   await page.waitForFunction(()=>document.querySelector('#mascotOwnedCount')?.textContent==='6/145'
+     ||document.querySelector('#mascotOwnedCount')?.textContent==='5/145'
      ||document.querySelector('[data-mascot-id="tourist-hamster"] .mascot-action')?.disabled===false);
    assert.equal(await page.locator('[data-mascot-id="tourist-hamster"] .mascot-action').isEnabled(),true);
-   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),20);
+   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),145);
    await page.locator('[data-mascot-id="tourist-hamster"] .mascot-action').click();
    assert.match(await page.locator('#mascotEquipped').innerText(),/Хомяк-турист/);
    await page.evaluate(()=>{
@@ -53,10 +53,10 @@ const {chromium}=require('playwright');
    assert.equal(after.xp['tourist-hamster'],100,'XP must survive reload without double credit');
    assert.equal(after.selected,'tourist-hamster');
    await page.locator('[data-mascot-filter="legendary"]').click();
-   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),4);
+   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),11);
    assert.equal(await page.locator('#mascotCollectionGrid button:enabled').count(),0);
    await page.locator('[data-mascot-filter="all"]').click();
-   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),20);
+   assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),145);
    // Guest profile requires no account, retains visible mascot progress.
    await page.locator('.nav [data-screen="profile"]').click();
    await page.locator('#profile.active').waitFor({state:'visible'});
@@ -71,6 +71,6 @@ const {chromium}=require('playwright');
    await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
    assert.equal(errors.filter(x=>/TypeError|ReferenceError/.test(x)).length,0,errors.join(' | '));
-   console.log('MASCOTS_BROWSER_OK 20 cards, 10 verified routes unlock hamster, equip, future XP, reload and rarity filter');
+   console.log('MASCOTS_BROWSER_OK 145 illustrated cards, 10 verified routes unlock hamster, equip, future XP, reload and rarity filter');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exitCode=1});
