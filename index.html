@@ -1383,7 +1383,7 @@ try {
       },200);
     }
     rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Алгоритм Дейкстры по дорожкам OSM · случайные точки и обучаемый локальный подбор.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🎲 Случайный подбор · Дейкстра по настоящим дорожкам OSM · проверка расстояния ±5% и повторов.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1736,60 +1736,22 @@ try {
       }
       if(near.length===0)throw new Error('NoTouristPois');
       const selectedTheme=$('#typeChoices .choice.active')?.dataset.type||'city';
-      const nMax=input<=2?3:Math.max(3,Math.min(8,Math.round(input/1.35)));
-      const tolAccept=routeDistanceToleranceM(input),tolOk=Math.max(80,tolAccept*.6);
+      // Research B1-inspired algorithm: propose random POI loops, measure
+      // REAL street metres with Dijkstra, retry when too long or too short.
+      const tolAccept=Math.min(routeDistanceToleranceM(input),targetM*.05);
       const ll=p=>({lat:p._lat,lng:p._lng});
-      const mkCandidate=()=>{
-        const kMax=Math.min(nMax,near.length),k=kMax===1?1:2+Math.floor(dailyRandom()*(kMax-1));
-        const picked=[];
-        // Try at least one verified reference per proposed sightseeing route.
-        // A route still has to pass actual Dijkstra length and connectivity checks.
-        const photoCandidates=near.filter(p=>!!p._referenceUrl);
-        if(photoCandidates.length)picked.push(photoCandidates[Math.floor(dailyRandom()*photoCandidates.length)]);
-        for(const p of [...near].sort(()=>dailyRandom()-.5)){if(picked.length>=k)break;if(picked.every(q=>distMeters(ll(q),ll(p))>=120))picked.push(p)}
-        if(picked.length<1)return null;
-        const off=dailyRandom()*360,cw=dailyRandom()<.5?1:-1;
-        const ang=p=>((bearingDeg(rr.start,ll(p))-off)*cw+720)%360;
-        picked.sort((x,y)=>ang(x)-ang(y));
-        const pts=[rr.start,...picked.map(ll),rr.start];let raw=0;for(let i=0;i<pts.length-1;i++)raw+=distMeters(pts[i],pts[i+1]);
-        return {pois:picked,raw,key:picked.map(p=>p.id).join('|')};
-      };
-      let best=null,factor=1.35,rejectedByZones=0,rejectedAsSame=0;const tried=new Set();
-      for(let iter=0;iter<maxAttempts;iter++){
-        const elapsed=performance.now()-startedAt;
-        if(iter>0&&elapsed>=routeBudgetMs-950)break;
-        report('Строим пешеходный маршрут · попытка '+(iter+1)+' из '+maxAttempts);
-        let cands=[],seen=new Set();
-        for(let i=0;i<140;i++){const c=mkCandidate();if(c&&!tried.has(c.key)&&!seen.has(c.key)){seen.add(c.key);cands.push(c)}}
-        if(options.requireDifferentFirst&&options.avoidFirstPoint){
-          const old=options.avoidFirstPoint,oldB=bearingDeg(rr.start,old),minAngle=Number(options.minDirectionChangeDeg||42);
-          const f=cands.filter(c=>distMeters(ll(c.pois[0]),old)>=150&&bearingDiff(oldB,bearingDeg(rr.start,ll(c.pois[0])))>=minAngle);
-          const f2=f.length?f:cands.filter(c=>distMeters(ll(c.pois[0]),old)>=150);
-          if(f2.length)cands=f2;else if(cands.length)rejectedAsSame++;
-        }
-        if(!cands.length)break;
-        cands.forEach(c=>{
-          // Local learned ranking guides random choices without overriding road distance.
-          c.score=Math.abs(c.raw*factor-targetM)-Math.min(tolOk*.55,window.RRRouteAI?.score?.(c.pois,selectedTheme)||0);
-        });
-        cands.sort((x,y)=>x.score-y.score);
-        const c=cands[iter===0?Math.floor(dailyRandom()*Math.min(4,cands.length)):0];
-        tried.add(c.key);
-        try{
-          const remainingMs=Math.max(900,Math.min(6000,routeBudgetMs-(performance.now()-startedAt)-100));
-          const data=await requestFootRoute([rr.start,...c.pois.map(ll),rr.start],{allBreak:true,radius:80,distanceKm:input,timeoutMs:remainingMs}),route=data.routes[0];
-          factor=route.distance/Math.max(200,c.raw);
-          const snapOk=c.pois.every((p,i)=>{const sp=waypointPoint(data.waypoints[i+1]);return sp&&distMeters(sp,ll(p))<=55});
-          if(!snapOk)continue;
-          if(routeHitsNoGo(route)){rejectedByZones++;continue}
-          const diff=Math.abs(route.distance-targetM);
-          const candidateRank=diff-Math.min(tolOk*.5,window.RRRouteAI?.score?.(c.pois,selectedTheme)||0);
-          // Do not trade a valid distance for an unacceptable one to satisfy a theme.
-          if(!best||((diff<=tolAccept||best.diff>tolAccept)&&candidateRank<best.rank))
-            best={data,route,pois:c.pois,diff,actual:route.distance/1000,rank:candidateRank};
-          if(diff<=tolAccept)break; // The route is already within the accepted distance tolerance.
-        }catch(e){console.warn('route candidate',e)}
-      }
+      let best=null,rejectedByZones=0,rejectedAsSame=0;
+      if(!window.RRRandomLoopRouter?.findRoute)throw new Error('RandomRouterUnavailable');
+      const picked=await window.RRRandomLoopRouter.findRoute({
+        graph:streetGraph,routing:window.RRWalkingDijkstra,start:rr.start,
+        pois:near,zones:rr.noGoZones,distanceKm:input,rng:dailyRandom,
+        maxAttempts:35,timeBudgetMs:Math.max(4500,routeBudgetMs-(performance.now()-startedAt)),
+        avoidFirstPoint:options.requireDifferentFirst?options.avoidFirstPoint:null,
+        minDirectionChangeDeg:options.minDirectionChangeDeg||42,onStatus:report
+      });
+      best=picked.best;rejectedByZones=picked.rejectedZones;rejectedAsSame=picked.rejectedDirection;
+      // Existing deterministic real-OSM node and out-and-back rescues stay in
+      // place. An unsuitable random choice is NEVER relabelled as a valid length.
       // If a sightseeing route cannot match the user's requested distance,
       // attempt a simple walking loop using only REAL OSM road nodes. It will
       // never claim to visit monuments or unlock a photograph reward.
@@ -3242,7 +3204,7 @@ try {
         else toast('Доступно обновление. Обновите страницу после прогулки.');
       }catch(e){}
     });
-    navigator.serviceWorker.register('sw.js?v=53',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=54',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3259,6 +3221,7 @@ try {
 <script src="graphite-theme.js?v=1.0"></script>
 <script src="dijkstra-lab.js?v=1.0"></script>
 <script src="walking-dijkstra.js?v=2.6"></script>
+<script src="random-loop-router.js?v=1.0"></script>
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
