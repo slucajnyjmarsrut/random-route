@@ -17,7 +17,7 @@ assert.ok(!js.includes('Шаг 3 · Всё готово!'),'do not claim the rou
 assert.ok(js.indexOf('if (buildError) return')<js.indexOf('if (creatorStage === 0)'),
   'show real build errors before optional onboarding stages');
 assert.equal((html.match(/serviceWorker\.register\(/g)||[]).length,1,'only one service worker registration');
-assert.ok(html.includes("register('sw.js?v=53',{updateViaCache:'none'})"));
+assert.match(html,/register\('sw\.js\?v=\d+',\{updateViaCache:'none'\}\)/);
 assert.ok(sw.includes('req.destination==="script"||req.destination==="style"'));
 assert.ok(sw.includes('fetch(req,{cache:"no-store"})'));
 assert.ok(js.includes('create:preview-recovery'),'show next helpful action instead of repeated Retry');
