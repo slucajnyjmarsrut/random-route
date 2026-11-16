@@ -1,4 +1,4 @@
-/* Illustrated mascot portraits. Individually generated vector characters; no emoji placeholders. */
+/* Premium mascot art: locally cached 3D animal WebP when species match, unique vector fallback otherwise. */
 (function(root,factory){
  'use strict';const api=factory();
  if(typeof module==='object'&&module.exports)module.exports=api;
@@ -21,6 +21,15 @@
   moose:['#e2b37c','#a4774b','#59402f','antler'],otter:['#caa178','#906748','#4c3d36','round'],
   lynx:['#e3b77f','#bd865a','#694b37','point']
  };
+ // Real 3D raster artwork, stored locally in the project (CC0 Animoon pack).
+ // Only map animal types to a visually matching species; keep the original
+ // character-specific SVG fallback instead of showing a wrong animal.
+ const rasterSpecies={
+   dog:'wolf',cat:'lion',raccoon:'redpanda',fox:'redpanda',
+   panda:'panda',wolf:'wolf',bear:'polarbear',leopard:'leopard',
+   spirit:'wolf',squirrel:'redpanda',penguin:'penguin',lynx:'leopard'
+ };
+ const rasterPath=kind=>rasterSpecies[kind]?'assets/mascots/3d/'+rasterSpecies[kind]+'.webp':null;
  const roles=['trail','scholar','photo','winter','magic','music'];
  function escapeXML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));}
  function avatar(m){
@@ -33,6 +42,8 @@
    'gamer-cat':'cat','gourmet-panda':'panda','dino-explorer':'dino','traveller-seal':'seal','polar-dog':'wolf',
    'photographer-bear':'bear','cartographer-raven':'raven','snow-leopard':'leopard','northern-deer':'deer',
    'yakut-bull':'bull','robot-tourist':'robot','taiga-spirit':'spirit'}[id])||keys[hash%keys.length];
+  const raster=rasterPath(kind);
+  if(raster){cache.set(id,raster);return raster;}
   const [skin,shade,ink,ears]=species[kind]||species.dog;
   const role=m.role||roles[(hash>>>4)%roles.length];
   const hue=(hash>>>7)%360,accent='hsl('+hue+' 82% 62%)';
@@ -78,5 +89,5 @@
   if(cache.size>300)cache.clear();cache.set(id,url);
   return url;
  }
- return {avatar,roles,species};
+ return {avatar,roles,species,rasterPath,rasterSpecies};
 });

@@ -113,6 +113,8 @@
      return {state,status,used};
    }
    doc.addEventListener('click',function(e){
+     const shortcut=e.target.closest('[data-mascot-shortcut]');
+     if(shortcut){switchTab(shortcut.dataset.mascotShortcut);return;}
      const tab=e.target.closest('[data-mascot-tab]');
      if(tab){switchTab(tab.dataset.mascotTab);return;}
      const jump=e.target.closest('[data-jump-upgrade]');

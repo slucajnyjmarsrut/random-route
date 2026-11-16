@@ -54,6 +54,16 @@ jobs:
           node --check tests/welcome-contrast-browser-smoke.cjs
           node --check tests/night-weather-browser-smoke.cjs
           node --check mascot-art.js
+          node - <<'NODE'
+          const fs=require('fs');
+          for(const name of ["giraffe","gorilla","hyena","kangaroo","koala","leopard","lion","orca","panda","penguin","polarbear","redpanda","rhinoceros","toucan","turtle","wolf","zebra"]){
+            const path='assets/mascots/3d/'+name+'.webp';
+            const b=fs.readFileSync(path);
+            if(b.toString('ascii',0,4)!=='RIFF'||b.toString('ascii',8,12)!=='WEBP')throw Error('Bad mascot WebP: '+path);
+          }
+          if(!fs.readFileSync('index.html','utf8').includes('mascot-premium.css'))throw Error('Premium mascot UI styles not wired');
+          console.log('PREMIUM_MASCOT_ART_OK 17 valid local WebP portraits');
+          NODE
           node --check mascot-inventory.js
           node tests/mascot-inventory.test.cjs
           node --check mascot-collection.js
@@ -83,7 +93,7 @@ jobs:
           const html=fs.readFileSync('index.html','utf8');
           const blocks=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
           blocks.forEach((x,i)=>{new Function(x[1]);console.log('inline',i,'OK')});
-          for(const name of ['smart-safety.js','yakutsk-weather.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','route-ai.js','mobile-ux.css','map-viewport.css','map-viewport.js','mascot-collection.css','mascot-collection.js','mascot-art.js','mascot-inventory.css','mascot-inventory.js','mascot-chests.css','mascot-chests.js','welcome-auth.css','data/yakutsk-center-walking.json','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','marshik-guide.css','marshik-guide.js','marshik-ai.css','marshik-ai.js','marshik-ai-worker.js','route-navigation.js','route-navigation.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
+          for(const name of ['smart-safety.js','yakutsk-weather.js','smart-safety.css','weather-background.js','weather-background.css','responsive-layout.js','responsive-layout.css','dijkstra-lab.js','walking-dijkstra.js','route-ai.js','mobile-ux.css','map-viewport.css','map-viewport.js','mascot-collection.css','mascot-premium.css','mascot-collection.js','mascot-art.js','mascot-inventory.css','mascot-inventory.js','mascot-chests.css','mascot-chests.js','welcome-auth.css','data/yakutsk-center-walking.json','interface-interactions.css','graphite-theme.css','graphite-theme.js','simple-home.css','marshik-guide.css','marshik-guide.js','marshik-ai.css','marshik-ai.js','marshik-ai-worker.js','route-navigation.js','route-navigation.css','map-fallback.js','smart-route-chat.js','smart-route-chat.css','street-audit.js','street-audit.css','daily-quests.js','daily-quests.css','sw.js','manifest.webmanifest','icons/smart-route.svg','icons/smart-route-maskable.svg','icons/favicon.svg','icons/mascot-marshik.svg','developer-diagnostics.js','developer-diagnostics.css','tap-targets.js','tap-targets.css']){
             if(!fs.existsSync(name))throw new Error('Missing file '+name);
           }
           if(!html.includes('yakutsk-weather.js?v=1.1')||!html.includes('smart-safety.js?v=1.2'))throw new Error('Independent auto-weather module missing');

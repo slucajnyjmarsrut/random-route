@@ -11,6 +11,13 @@ const {chromium}=require('playwright');
    assert.equal(await page.locator('#home .mascot-home-current').count(),0,'no duplicate home banner');
    await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
+   const portrait=page.locator('[data-mascot-id="traveller-puppy"] .mascot-art-img');
+   assert.match(await portrait.getAttribute('src'),/assets\/mascots\/3d\/wolf\.webp/);
+   await portrait.scrollIntoViewIfNeeded();
+   await portrait.evaluate(img=>img.decode());
+   assert.equal(await portrait.evaluate(img=>img.naturalWidth>100),true,'genuine raster portrait loaded');
+   assert.equal(await page.locator('#mascots .mascot-hero-art img').count(),1);
+
    assert.equal(await page.locator('#mascotCollectionGrid .mascot-card').count(),145);
    assert.match(await page.locator('#mascotEquipped').innerText(),/Щенок-путник/);
    assert.equal(await page.locator('[data-mascot-id="tourist-hamster"] button').isDisabled(),true);
