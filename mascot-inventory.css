@@ -1,0 +1,68 @@
+/* Star-collector design: original vector character portraits, bright rarity frames. */
+.mascots-screen{color:#f4f5ff}
+.mascot-hero{position:relative;overflow:hidden;border:1px solid #9f87d1;background:
+ radial-gradient(ellipse at 92% -10%,#7e56de8c,transparent 46%),
+ radial-gradient(ellipse at 6% 90%,#2ba4c388,transparent 48%),
+ linear-gradient(135deg,#1b2254,#36235f 55%,#0d4664);box-shadow:0 14px 40px #10173588}
+.mascot-hero:after{content:"✦ ✧   ✦    ✧    ✦";position:absolute;right:4%;top:17%;font-size:25px;
+ letter-spacing:15px;color:#ffecb8;opacity:.66;pointer-events:none}
+.mascot-hero h1{text-shadow:0 4px 11px #0e1b36;font-weight:1000;max-width:80%}
+.mascot-hero p{position:relative;z-index:1}
+.mascot-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 12px;padding:6px;
+ background:linear-gradient(145deg,#212c55,#242043);border:1px solid #8374bc;border-radius:17px}
+.mascot-tabs button{min-width:0;min-height:47px;padding:10px 5px;border-radius:12px;color:#e9ddff;background:transparent;
+ font-size:clamp(10px,1.65vw,13px);font-weight:900;line-height:1.22;border:1px solid transparent;cursor:pointer}
+.mascot-tabs button.active{background:linear-gradient(130deg,#8963ff,#4d7de9);color:#fff;
+ border-color:#cac1ff;box-shadow:0 5px 18px #0005}
+.mascot-tabs button:focus-visible,.mascot-capacity-bar button:focus-visible,
+.mascot-inventory-card button:focus-visible{outline:3px solid #ffe08a;outline-offset:2px}
+.mascot-inventory-status{margin:6px 0 12px;padding:8px 12px;font-size:12px;font-weight:850;
+ color:#e4f7ff;background:#243655;border:1px solid #547ca5;border-radius:13px}
+.mascot-inventory-message{padding:11px 14px;color:#e9ffef;background:#244c4b;border:1px solid #7ee7c4;border-radius:14px;margin:0 0 12px}
+.mascot-inventory-message[data-warning="1"]{color:#ffe8e5;background:#65313e;border-color:#efaab4}
+.mascot-equipped{background:radial-gradient(circle at 88% 13%,#916af14c,transparent 55%),linear-gradient(140deg,#202e54,#343063)}
+.mascot-equipped-avatar{overflow:hidden}
+.mascot-equipped-avatar .mascot-art-img{width:100%;height:100%;border-radius:20px;object-fit:cover;display:block}
+.mascot-card{background:radial-gradient(circle at 26% 10%,color-mix(in srgb,var(--rarity) 50%,transparent),transparent 70%),
+ linear-gradient(148deg,var(--rarity-dark),#181d3f 90%);
+ border-color:var(--rarity);box-shadow:0 7px 16px #070e3360, inset 0 1px #fff6}
+.mascot-card-avatar{overflow:hidden;box-shadow:inset 0 0 20px #fff2,0 4px 16px #040f2d77}
+.mascot-card-avatar .mascot-art-img{width:100%;height:100%;border-radius:15px;object-fit:cover;display:block;transform:scale(1.01)}
+.mascot-card-avatar b{z-index:2;font-size:18px;background:#20243ecc;border:1px solid #ffffff65;border-radius:9px;padding:3px}
+.mascot-card-avatar:after{z-index:2;text-shadow:0 0 9px #fff}
+.mascot-card.locked .mascot-art-img{filter:saturate(.55) brightness(.75)}
+.mascot-route-buddy .mascot-buddy-art{width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid #95e5d5;flex:0 0 48px}
+.mascot-inventory-panel{padding:16px;border:1px solid #7d78bc;border-radius:21px;
+ background:radial-gradient(circle at top right,#8e5df03d,transparent 47%),linear-gradient(150deg,#222c58,#2b2b55);margin-bottom:14px}
+.mascot-inventory-panel h2{font-size:clamp(18px,2.7vw,24px);margin:0 0 7px;color:#fff}
+.mascot-inventory-panel>p{font-size:13px;line-height:1.5;color:#d8e5ff;margin:0 0 15px}
+.mascot-capacity-bar{padding:12px;background:#161f40b8;border:1px solid #626fa8;border-radius:14px;
+ display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.mascot-capacity-bar strong{font-size:13px;color:#fff}
+.mascot-capacity-bar button,.mascot-inventory-card button{min-height:43px;padding:9px 12px;border-radius:12px;
+ border:1px solid #ffe49d;color:#2e2544;background:linear-gradient(150deg,#ffeaa0,#ffd177);font-weight:900;cursor:pointer}
+.mascot-capacity-bar button:disabled,.mascot-inventory-card button:disabled{opacity:.55;cursor:default}
+.mascot-inventory-warning{color:#ffddda!important;background:#7c3550;padding:10px 12px;border-radius:11px}
+.mascot-inventory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.mascot-inventory-card{--rarity:#a3b3e7;min-width:0;padding:10px;border-radius:17px;border:1px solid var(--rarity);
+ display:flex;flex-direction:column;gap:6px;background:linear-gradient(160deg,#38467b,#1e2a4c);box-shadow:0 6px 16px #1017324f}
+.mascot-inventory-card.rarity-uncommon{--rarity:#76f7b0}
+.mascot-inventory-card.rarity-rare{--rarity:#68dcf4}
+.mascot-inventory-card.rarity-epic{--rarity:#e6a3ff}
+.mascot-inventory-card.rarity-legendary{--rarity:#ffd871}
+.mascot-inventory-art{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:13px;
+ border:1px solid var(--rarity);background:#29385e}
+.mascot-inventory-card h3{font-size:13px;line-height:1.25;min-height:32px;margin:2px 0 0;color:#fff}
+.mascot-inventory-card p{font-size:11px;margin:0 0 6px;color:#dfedff;line-height:1.4}
+.mascot-inventory-card small{font-size:10px;line-height:1.35;color:#d3cafa;min-height:44px}
+.mascot-inventory-card button{font-size:11px;margin-top:auto;line-height:1.25}
+.mascot-inventory-card button.mascot-inventory-secondary{background:#253e70;color:#fff;border-color:#85b0ef}
+@media(min-width:1100px){.mascot-inventory-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:699px){.mascot-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .mascot-inventory-panel{padding:11px}
+ .mascot-tabs{gap:3px;padding:4px}
+ .mascot-tabs button{font-size:10px;padding:8px 2px;min-height:44px}
+ .mascot-card-avatar .mascot-art-img{border-radius:12px}
+ .mascot-hero h1{max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){.mascot-card-avatar .mascot-art-img{transform:none}}
