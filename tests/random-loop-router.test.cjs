@@ -29,7 +29,12 @@ test('random Dijkstra loop closes and respects distance ±5% without a model',as
   assert.ok(result.best.metrics.repeatPercent>=0);
 });
 test('out and back counts reversed physical streets as repeated metres',()=>{
-  const {graph,start}=grid(),end=graph.nodes.get(String(8*17+10));
+  // A cul-de-sac has no alternative return street: backtracking is unavoidable.
+  const ids=[],coords=[];
+  for(let i=0;i<25;i++){ids.push(i);coords.push({lat:62.02,lon:129.72+i*.0004});}
+  const graph=walk.makeGraph([{nodes:ids,geometry:coords,tags:{highway:'footway'}}]);
+  const start={lat:coords[0].lat,lng:coords[0].lon};
+  const end={lat:coords[4].lat,lng:coords[4].lon};
   const data=walk.route(graph,[start,end,start]),m=random.evaluate(data,start,data.routes[0].distance);
   assert.equal(m.withinTolerance,true);
   assert.ok(m.repeatM>0);
