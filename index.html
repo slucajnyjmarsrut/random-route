@@ -13,6 +13,7 @@
 <link href="manifest.webmanifest" rel="manifest"/>
 <link rel="icon" href="icons/favicon.svg?v=4" type="image/svg+xml" sizes="any"/>
 <link rel="shortcut icon" href="icons/favicon.svg?v=4" type="image/svg+xml"/>
+<meta name="rr-h1-api" content=""/>
 <meta name="description" content="Случайный маршрут — каждый день новый путь по Якутску. Ежедневные пешеходные маршруты, квесты и RouteCoin."/>
 <title>Случайный маршрут — Якутск</title>
 <!-- v10.5: безопасные туристические фототочки; административные/силовые/чувствительные объекты исключены -->
@@ -246,6 +247,9 @@ try {
 <details class="rr-create-details rr-more-wishes"><summary>Дополнительные пожелания</summary>
  <div class="rr-extra-wishes"><p>По возможности добавим остановку в кафе по пути.</p>
   <div class="row"><span>☕ Кафе по пути</span><button type="button" aria-label="Добавить кафе по пути" aria-pressed="true" class="toggle on" id="partnerToggle"></button></div>
+  <label for="h1Wishes" style="display:block;margin:12px 0 6px;font-size:12px;font-weight:800">Пожелания для ИИ-маршрута H1</label>
+  <textarea id="h1Wishes" maxlength="400" rows="2" placeholder="Хочу пройти через парк и кафе, подальше от шумных улиц" style="width:100%;padding:12px;border-radius:12px;border:1px solid #cbd9d1;background:var(--card);color:var(--ink);font:inherit;resize:vertical"></textarea>
+  <p class="hint">Учитывается при подключённом сервере H1. Без него работает обычный локальный генератор.</p>
  </div>
 </details>
 <button class="primary orange rr-create-go" id="buildBtn" type="button">Построить прогулку <span aria-hidden="true">→</span></button>
@@ -1383,7 +1387,7 @@ try {
       },200);
     }
     rr.activeScreen=id; $('.app').dataset.rrScreen=id; localStorage.setItem('rr_active_screen',id);saveSession();
-    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='dijkstra-osm'?'🧮 Алгоритм Дейкстры по дорожкам OSM · случайные точки и обучаемый локальный подбор.':'';
+    const algorithm=$('#routeEngineStatus');if(algorithm)algorithm.textContent=rr.routeEngine==='h1-dijkstra-osm'?'🤖 Гибрид H1: ИИ выбрал проверенные места, Дейкстра проложила путь, независимая проверка подтвердила маршрут.':rr.routeEngine==='dijkstra-osm'?'🧮 Алгоритм Дейкстры по дорожкам OSM · случайные точки и обучаемый локальный подбор.':'';
     $$('.screen').forEach(x=>x.classList.toggle('active',x.id===id));
     $$('.nav button').forEach(x=>x.classList.toggle('active',(x.dataset.screen==='home'&&id==='route')||x.dataset.screen===id));
     requestAnimationFrame(()=>{
@@ -1755,7 +1759,22 @@ try {
         return {pois:picked,raw,key:picked.map(p=>p.id).join('|')};
       };
       let best=null,factor=1.35,rejectedByZones=0,rejectedAsSame=0;const tried=new Set();
-      for(let iter=0;iter<maxAttempts;iter++){
+      // H1 is an optional REAL LLM tool-calling planner, not the local preference scorer.
+      // The street graph, all distances, no-go zones and final evaluation stay in this browser.
+      const h1Endpoint=window.RRH1Planner?.chatEndpoint?.();
+      if(h1Endpoint&&near.length>=2&&!dailyOffer){
+        try{
+          best=await window.RRH1Planner.plan({graph:streetGraph,routing:window.RRWalkingDijkstra,
+            start:rr.start,pois:near,zones:rr.noGoZones,distanceKm:input,endpoint:h1Endpoint,
+            preferences:($('#h1Wishes')?.value||'').trim()||selectedTheme,
+            onStatus:report});
+        }catch(e){
+          console.warn('H1 agent was not able to submit a verified route:',e?.message||e);
+          toast('ИИ H1 недоступен или не нашёл маршрут. Пробуем локальный подбор по Дейкстре.');
+          report('Подбираем проверенный маршрут без ИИ…');
+        }
+      }
+      for(let iter=0;iter<maxAttempts&&(!best||best.diff>tolAccept);iter++){
         const elapsed=performance.now()-startedAt;
         if(iter>0&&elapsed>=routeBudgetMs-950)break;
         report('Строим пешеходный маршрут · попытка '+(iter+1)+' из '+maxAttempts);
@@ -1892,7 +1911,7 @@ try {
       else if(usePhotoOptional)toast('Маршрут построен без фотозаданий: эталонные фотографии недоступны.');
 
       rr.legs=route.legs;
-      rr.routeEngine='dijkstra-osm';rr.routeTheme=selectedTheme;
+      rr.routeEngine=chosen.h1?'h1-dijkstra-osm':'dijkstra-osm';rr.routeTheme=selectedTheme;
       rr.checkpoints=data.waypoints.slice(1,-1).map((w,i)=>({lat:w.location[1],lng:w.location[0],name:w.name||'',guideName:chosen.pois[i]?.tags?.name||'',fullAddress:chosen.pois[i]?._fullAddress||''}));
       rr.current=1;rr.routeDistance=route.distance;rr.requestedDistance=input;rr.currentPoi=null;rr.currentCategory='city';rr.legProgress={};
       rr.dailyOfferId=dailyOffer?.id||null;rr.dailyOfferDay=dailyOffer?.day||null;
@@ -3260,6 +3279,7 @@ try {
 <script src="dijkstra-lab.js?v=1.0"></script>
 <script src="walking-dijkstra.js?v=2.6"></script>
 <script src="route-ai.js?v=1.0"></script>
+<script src="h1-planner.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
 <script src="mascot-collection.js?v=1.1"></script>
