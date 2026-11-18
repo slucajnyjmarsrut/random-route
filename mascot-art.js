@@ -6,6 +6,7 @@
 })(typeof window!=='undefined'?window:null,function(){
  'use strict';
  const cache=new Map();
+ const premiumPortraits=Object.freeze({'runner-rabbit':'assets/mascots/premium/runner-rabbit.webp'});
  const species={
   dog:['#fff0ca','#c97b3b','#5c3424','point'],rabbit:['#fff6fb','#e5a5d0','#8b497f','long'],
   cat:['#d7e8ff','#7582b5','#303956','point'],hamster:['#ffe2a0','#d69e58','#784225','round'],
@@ -35,6 +36,7 @@
  function avatar(m){
   const id=String(m?.id||'mascot');
   if(cache.has(id))return cache.get(id);
+  if(premiumPortraits[id]){cache.set(id,premiumPortraits[id]);return premiumPortraits[id];}
   const hash=[...id].reduce((h,ch)=>((h*33)^ch.charCodeAt(0))>>>0,5381);
   const keys=Object.keys(species);
   const kind=m.animal||({ 'runner-rabbit':'rabbit','student-cat':'cat','traveller-puppy':'dog','tourist-hamster':'hamster',
@@ -89,5 +91,5 @@
   if(cache.size>300)cache.clear();cache.set(id,url);
   return url;
  }
- return {avatar,roles,species,rasterPath,rasterSpecies};
+ return {avatar,roles,species,rasterPath,rasterSpecies,premiumPortraits};
 });

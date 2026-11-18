@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "runner-rabbit",
+      "name": "Заяц-бегун",
+      "path": "assets/mascots/premium/runner-rabbit.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    }
+  ]
+}
