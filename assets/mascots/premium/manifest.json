@@ -168,6 +168,70 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-dog-scholar",
+      "name": "Пёс-мудрец",
+      "path": "assets/mascots/premium/expedition-dog-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-photo",
+      "name": "Пёс-фотограф",
+      "path": "assets/mascots/premium/expedition-dog-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-winter",
+      "name": "Пёс-полярник",
+      "path": "assets/mascots/premium/expedition-dog-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-magic",
+      "name": "Пёс-звездочёт",
+      "path": "assets/mascots/premium/expedition-dog-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-trail",
+      "name": "Заяц-следопыт",
+      "path": "assets/mascots/premium/expedition-rabbit-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-scholar",
+      "name": "Заяц-мудрец",
+      "path": "assets/mascots/premium/expedition-rabbit-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-photo",
+      "name": "Заяц-фотограф",
+      "path": "assets/mascots/premium/expedition-rabbit-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-winter",
+      "name": "Заяц-полярник",
+      "path": "assets/mascots/premium/expedition-rabbit-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
