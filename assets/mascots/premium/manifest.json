@@ -944,6 +944,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-winter",
+      "name": "Ёж-полярник",
+      "path": "assets/mascots/premium/expedition-hedgehog-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-magic",
+      "name": "Ёж-звездочёт",
+      "path": "assets/mascots/premium/expedition-hedgehog-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-trail",
+      "name": "Белка-следопыт",
+      "path": "assets/mascots/premium/expedition-squirrel-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-scholar",
+      "name": "Белка-мудрец",
+      "path": "assets/mascots/premium/expedition-squirrel-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-photo",
+      "name": "Белка-фотограф",
+      "path": "assets/mascots/premium/expedition-squirrel-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-winter",
+      "name": "Белка-полярник",
+      "path": "assets/mascots/premium/expedition-squirrel-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-magic",
+      "name": "Белка-звездочёт",
+      "path": "assets/mascots/premium/expedition-squirrel-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-trail",
+      "name": "Пингвин-следопыт",
+      "path": "assets/mascots/premium/expedition-penguin-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
