@@ -424,6 +424,70 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-fox-winter",
+      "name": "Лис-полярник",
+      "path": "assets/mascots/premium/expedition-fox-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-magic",
+      "name": "Лис-звездочёт",
+      "path": "assets/mascots/premium/expedition-fox-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-trail",
+      "name": "Бобр-следопыт",
+      "path": "assets/mascots/premium/expedition-beaver-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-scholar",
+      "name": "Бобр-мудрец",
+      "path": "assets/mascots/premium/expedition-beaver-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-photo",
+      "name": "Бобр-фотограф",
+      "path": "assets/mascots/premium/expedition-beaver-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-winter",
+      "name": "Бобр-полярник",
+      "path": "assets/mascots/premium/expedition-beaver-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-magic",
+      "name": "Бобр-звездочёт",
+      "path": "assets/mascots/premium/expedition-beaver-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-panda-trail",
+      "name": "Панда-следопыт",
+      "path": "assets/mascots/premium/expedition-panda-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
