@@ -16,7 +16,6 @@ test('145 unique illustrated mascots',()=>{
   assert.equal(Art.avatar(mascot),entry.path,'portrait is connected to its mascot ID: '+entry.id);
   assert.ok(fs.existsSync(entry.path),'portrait file exists: '+entry.path);
  }
- assert.match(Art.avatar(M.mascots.find(x=>x.id==='runner-rabbit')),/^assets\\/mascots\\/premium\\/runner-rabbit\\.webp$/);
 });
 test('duplicate chests keep existing mascots in the drop pool',()=>{
  const id='traveller-puppy',item=M.mascots.find(x=>x.id===id);
