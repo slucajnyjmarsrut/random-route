@@ -232,6 +232,70 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-magic",
+      "name": "Заяц-звездочёт",
+      "path": "assets/mascots/premium/expedition-rabbit-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-trail",
+      "name": "Кот-следопыт",
+      "path": "assets/mascots/premium/expedition-cat-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-scholar",
+      "name": "Кот-мудрец",
+      "path": "assets/mascots/premium/expedition-cat-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-photo",
+      "name": "Кот-фотограф",
+      "path": "assets/mascots/premium/expedition-cat-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-winter",
+      "name": "Кот-полярник",
+      "path": "assets/mascots/premium/expedition-cat-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-magic",
+      "name": "Кот-звездочёт",
+      "path": "assets/mascots/premium/expedition-cat-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-trail",
+      "name": "Хомяк-следопыт",
+      "path": "assets/mascots/premium/expedition-hamster-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-scholar",
+      "name": "Хомяк-мудрец",
+      "path": "assets/mascots/premium/expedition-hamster-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
