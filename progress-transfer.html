@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Перенос прогресса — Случайный маршрут</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;background:#f3f6f4;color:#173b2f;margin:0;padding:24px}main{max-width:640px;margin:36px auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 12px 35px #173b2f12}h1{font-size:26px}button,.button{display:inline-block;border:0;border-radius:12px;background:#0d6a4f;color:#fff;padding:12px 16px;font:700 16px system-ui;cursor:pointer;text-decoration:none}button:disabled{opacity:.5}input[type=file]{max-width:100%;margin:12px 0}label{display:block;margin:12px 0}section{border-top:1px solid #dcebe4;margin-top:24px;padding-top:14px}small{color:#536e62}#status{min-height:1.5em;font-weight:700}</style></head><body><main>
+<a href="./">← На сайт</a><h1>Перенос прогресса</h1>
+<p>Данные хранятся только в браузере. Скачайте копию на старом сайте и откройте этот файл здесь, на новом сайте. Файл никуда не отправляется. Старый прогресс останется на месте.</p>
+<section><h2>1. Сохранить копию</h2><button id="export" type="button">Скачать прогресс</button><p><small>Файл может содержать адрес электронной почты и данные локальной учётной записи. Храните его в безопасном месте.</small></p></section>
+<section><h2>2. Восстановить на этом сайте</h2><input id="file" type="file" accept=".json,application/json"><label><input id="replace" type="checkbox"> Разрешить замену уже существующего прогресса на этом сайте</label><button id="import" type="button">Восстановить из файла</button><p id="status" role="status" aria-live="polite"></p></section>
+</main><script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const allowed = key => (key.startsWith('rr_') || key === 'visual_theme_v1') &&
+    !/^rr_yandex_(api|geocoder)_key$/.test(key) && !/^rr_cf_transfer_/.test(key) &&
+    !/^rr_user_session/.test(key);
+  const snapshot = () => {
+    const data = {};
+    for (let i=0; i<localStorage.length; i++) {
+      const key=localStorage.key(i);
+      if (key && allowed(key)) data[key]=localStorage.getItem(key);
+    }
+    return data;
+  };
+  const save = (value, name) => {
+    const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  };
+  $('export').onclick = () => {
+    try { const data=snapshot();save({format:'random-route-progress',version:1,source:location.origin,exportedAt:new Date().toISOString(),data},'random-route-progress.json');
+      $('status').textContent=`Сохранено записей: ${Object.keys(data).length}.`; }
+    catch(e){$('status').textContent='Не удалось скачать копию: '+e.message;}
+  };
+  $('import').onclick = async () => {
+    const file=$('file').files[0];
+    if(!file){$('status').textContent='Выберите файл прогресса.';return;}
+    try {
+      if(file.size>15*1024*1024) throw Error('Файл слишком большой.');
+      const parsed=JSON.parse(await file.text()), data=parsed?.data;
+      if(parsed?.format!=='random-route-progress'||parsed.version!==1||!data||Array.isArray(data)||typeof data!=='object') throw Error('Это не файл прогресса «Случайного маршрута».');
+      const entries=Object.entries(data);
+      if(!entries.length||entries.some(([k,v])=>!allowed(k)||typeof v!=='string')) throw Error('Некорректные данные прогресса.');
+      const old=snapshot(), overlaps=entries.some(([k])=>Object.hasOwn(old,k));
+      if(overlaps&&!$('replace').checked) throw Error('Здесь уже есть прогресс. Поставьте отметку для его замены; сначала можно скачать его копию.');
+      try {
+        localStorage.setItem('rr_v8_reset_done','1');
+        for(const [k,v] of entries) localStorage.setItem(k,v);
+        // A copied session must not silently authenticate a different browser origin.
+        for(let i=0;i<localStorage.length;i++) {const k=localStorage.key(i);if(k?.startsWith('rr_user_session')){localStorage.removeItem(k);i--;}}
+      } catch(e) {
+        for(const [k] of entries) if(!Object.hasOwn(old,k)) localStorage.removeItem(k);
+        for(const [k,v] of Object.entries(old)) localStorage.setItem(k,v);
+        throw e;
+      }
+      $('status').textContent=`Восстановлено записей: ${entries.length}. Откройте сайт и войдите в локальную учётную запись повторно.`;
+    } catch(e){$('status').textContent='Перенос не выполнен: '+e.message;}
+  };
+})();
+</script></body></html>
