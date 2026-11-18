@@ -752,6 +752,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-deer-magic",
+      "name": "Олень-звездочёт",
+      "path": "assets/mascots/premium/expedition-deer-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-trail",
+      "name": "Бычок-следопыт",
+      "path": "assets/mascots/premium/expedition-bull-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-scholar",
+      "name": "Бычок-мудрец",
+      "path": "assets/mascots/premium/expedition-bull-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-photo",
+      "name": "Бычок-фотограф",
+      "path": "assets/mascots/premium/expedition-bull-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-winter",
+      "name": "Бычок-полярник",
+      "path": "assets/mascots/premium/expedition-bull-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-magic",
+      "name": "Бычок-звездочёт",
+      "path": "assets/mascots/premium/expedition-bull-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-trail",
+      "name": "Робот-следопыт",
+      "path": "assets/mascots/premium/expedition-robot-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-scholar",
+      "name": "Робот-мудрец",
+      "path": "assets/mascots/premium/expedition-robot-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
