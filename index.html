@@ -3240,15 +3240,15 @@ try {
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gpsBooted){if(yHomeMap)try{yHomeMap.container.fitToViewport()}catch(e){}if(rr.activeScreen==='route'&&yMap)try{yMap.container.fitToViewport()}catch(e){}if(!demoMode)startWatching()}});
   window.addEventListener('beforeunload',saveSession);
   if('serviceWorker' in navigator){
+    let workerWasControlling=!!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      try{
-        if(sessionStorage.getItem('rr_worker_updated_v45')==='1')return;
-        sessionStorage.setItem('rr_worker_updated_v45','1');
-        if(rr.activeScreen!=='route'&&!$('#buildBtn').disabled)location.reload();
-        else toast('Доступно обновление. Обновите страницу после прогулки.');
-      }catch(e){}
+      const hasController=!!navigator.serviceWorker.controller;
+      if(workerWasControlling&&hasController){
+        toast('Доступно обновление. Обновите страницу, когда будет удобно.');
+      }
+      workerWasControlling=hasController;
     });
-    navigator.serviceWorker.register('sw.js?v=57',{updateViaCache:'none'}).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=58',{updateViaCache:'none'}).catch(()=>{});
   }
 })();
 </script>
@@ -3268,7 +3268,7 @@ try {
 <script src="route-ai.js?v=1.0"></script>
 <script src="route-navigation.js?v=1.0"></script>
 <script src="map-viewport.js?v=1.1"></script>
-<script src="mascot-art.js?v=2.0"></script>
+<script src="mascot-art.js?v=3.0"></script>
 <script src="mascot-collection.js?v=2.0"></script>
 <script src="mascot-chests.js?v=2.0"></script>
 <script src="mascot-inventory.js?v=1.0"></script>

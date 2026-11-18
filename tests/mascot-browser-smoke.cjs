@@ -12,7 +12,7 @@ const {chromium}=require('playwright');
    await page.locator('.nav [data-screen="mascots"]').click();
    await page.locator('#mascotCollectionGrid .mascot-card').first().waitFor();
    const portrait=page.locator('[data-mascot-id="traveller-puppy"] .mascot-art-img');
-   assert.match(await portrait.getAttribute('src'),/assets\/mascots\/3d\/wolf\.webp/);
+   assert.equal(await portrait.getAttribute('src'),'assets/mascots/premium/traveller-puppy.webp');
    await portrait.scrollIntoViewIfNeeded();
    await portrait.evaluate(img=>img.decode());
    assert.equal(await portrait.evaluate(img=>img.naturalWidth>100),true,'genuine raster portrait loaded');

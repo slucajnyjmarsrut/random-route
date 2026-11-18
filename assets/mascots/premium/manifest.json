@@ -13,8 +13,8 @@
       "id": "student-cat",
       "name": "Кот-студент",
       "path": "assets/mascots/premium/student-cat.webp",
-      "width": 1254,
-      "height": 1254,
+      "width": 1024,
+      "height": 1024,
       "format": "webp"
     },
     {
@@ -37,16 +37,16 @@
       "id": "scholar-owl",
       "name": "Сова-знаток",
       "path": "assets/mascots/premium/scholar-owl.webp",
-      "width": 1254,
-      "height": 1254,
+      "width": 1024,
+      "height": 1024,
       "format": "webp"
     },
     {
       "id": "collector-raccoon",
       "name": "Енот-собиратель",
       "path": "assets/mascots/premium/collector-raccoon.webp",
-      "width": 1254,
-      "height": 1254,
+      "width": 1024,
+      "height": 1024,
       "format": "webp"
     },
     {
@@ -1072,6 +1072,94 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-moose-magic",
+      "name": "Лось-Звездочёт",
+      "path": "assets/mascots/premium/expedition-moose-magic.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-otter-trail",
+      "name": "Выдра-Следопыт",
+      "path": "assets/mascots/premium/expedition-otter-trail.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-otter-scholar",
+      "name": "Выдра-Мудрец",
+      "path": "assets/mascots/premium/expedition-otter-scholar.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-otter-photo",
+      "name": "Выдра-Фотограф",
+      "path": "assets/mascots/premium/expedition-otter-photo.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-otter-winter",
+      "name": "Выдра-Полярник",
+      "path": "assets/mascots/premium/expedition-otter-winter.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-otter-magic",
+      "name": "Выдра-Звездочёт",
+      "path": "assets/mascots/premium/expedition-otter-magic.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-lynx-trail",
+      "name": "Рысь-Следопыт",
+      "path": "assets/mascots/premium/expedition-lynx-trail.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-lynx-scholar",
+      "name": "Рысь-Мудрец",
+      "path": "assets/mascots/premium/expedition-lynx-scholar.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-lynx-photo",
+      "name": "Рысь-Фотограф",
+      "path": "assets/mascots/premium/expedition-lynx-photo.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-lynx-winter",
+      "name": "Рысь-Полярник",
+      "path": "assets/mascots/premium/expedition-lynx-winter.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-lynx-magic",
+      "name": "Рысь-Звездочёт",
+      "path": "assets/mascots/premium/expedition-lynx-magic.webp",
+      "width": 1024,
+      "height": 1024,
+      "format": "webp"
     }
   ]
 }
