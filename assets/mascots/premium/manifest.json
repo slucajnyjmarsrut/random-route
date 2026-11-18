@@ -360,6 +360,70 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-trail",
+      "name": "Енот-следопыт",
+      "path": "assets/mascots/premium/expedition-raccoon-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-scholar",
+      "name": "Енот-мудрец",
+      "path": "assets/mascots/premium/expedition-raccoon-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-photo",
+      "name": "Енот-фотограф",
+      "path": "assets/mascots/premium/expedition-raccoon-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-winter",
+      "name": "Енот-полярник",
+      "path": "assets/mascots/premium/expedition-raccoon-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-magic",
+      "name": "Енот-звездочёт",
+      "path": "assets/mascots/premium/expedition-raccoon-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-trail",
+      "name": "Лис-следопыт",
+      "path": "assets/mascots/premium/expedition-fox-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-scholar",
+      "name": "Лис-мудрец",
+      "path": "assets/mascots/premium/expedition-fox-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-photo",
+      "name": "Лис-фотограф",
+      "path": "assets/mascots/premium/expedition-fox-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
