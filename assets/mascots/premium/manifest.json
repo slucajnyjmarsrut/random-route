@@ -1008,6 +1008,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-penguin-scholar",
+      "name": "Пингвин-мудрец",
+      "path": "assets/mascots/premium/expedition-penguin-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-photo",
+      "name": "Пингвин-фотограф",
+      "path": "assets/mascots/premium/expedition-penguin-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-winter",
+      "name": "Пингвин-полярник",
+      "path": "assets/mascots/premium/expedition-penguin-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-magic",
+      "name": "Пингвин-звездочёт",
+      "path": "assets/mascots/premium/expedition-penguin-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-trail",
+      "name": "Лось-следопыт",
+      "path": "assets/mascots/premium/expedition-moose-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-scholar",
+      "name": "Лось-мудрец",
+      "path": "assets/mascots/premium/expedition-moose-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-photo",
+      "name": "Лось-фотограф",
+      "path": "assets/mascots/premium/expedition-moose-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-winter",
+      "name": "Лось-полярник",
+      "path": "assets/mascots/premium/expedition-moose-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
