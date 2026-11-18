@@ -528,6 +528,38 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-dino-scholar",
+      "name": "Дино-мудрец",
+      "path": "assets/mascots/premium/expedition-dino-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-photo",
+      "name": "Дино-фотограф",
+      "path": "assets/mascots/premium/expedition-dino-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-winter",
+      "name": "Дино-полярник",
+      "path": "assets/mascots/premium/expedition-dino-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-magic",
+      "name": "Дино-звездочёт",
+      "path": "assets/mascots/premium/expedition-dino-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
