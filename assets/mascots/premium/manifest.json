@@ -816,6 +816,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-robot-photo",
+      "name": "Робот-фотограф",
+      "path": "assets/mascots/premium/expedition-robot-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-winter",
+      "name": "Робот-полярник",
+      "path": "assets/mascots/premium/expedition-robot-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-magic",
+      "name": "Робот-звездочёт",
+      "path": "assets/mascots/premium/expedition-robot-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-trail",
+      "name": "Дух-следопыт",
+      "path": "assets/mascots/premium/expedition-spirit-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-scholar",
+      "name": "Дух-мудрец",
+      "path": "assets/mascots/premium/expedition-spirit-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-photo",
+      "name": "Дух-фотограф",
+      "path": "assets/mascots/premium/expedition-spirit-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-winter",
+      "name": "Дух-полярник",
+      "path": "assets/mascots/premium/expedition-spirit-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-magic",
+      "name": "Дух-звездочёт",
+      "path": "assets/mascots/premium/expedition-spirit-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
