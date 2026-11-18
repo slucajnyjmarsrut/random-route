@@ -1,0 +1,1077 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "runner-rabbit",
+      "name": "Заяц-бегун",
+      "path": "assets/mascots/premium/runner-rabbit.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "student-cat",
+      "name": "Кот-студент",
+      "path": "assets/mascots/premium/student-cat.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "traveller-puppy",
+      "name": "Щенок-путник",
+      "path": "assets/mascots/premium/traveller-puppy.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "tourist-hamster",
+      "name": "Хомяк-турист",
+      "path": "assets/mascots/premium/tourist-hamster.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "scholar-owl",
+      "name": "Сова-знаток",
+      "path": "assets/mascots/premium/scholar-owl.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "collector-raccoon",
+      "name": "Енот-собиратель",
+      "path": "assets/mascots/premium/collector-raccoon.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "explorer-fox",
+      "name": "Лис-исследователь",
+      "path": "assets/mascots/premium/explorer-fox.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "builder-beaver",
+      "name": "Бобр-мастер",
+      "path": "assets/mascots/premium/builder-beaver.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "gamer-cat",
+      "name": "Геймер-кот",
+      "path": "assets/mascots/premium/gamer-cat.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "gourmet-panda",
+      "name": "Панда-гурман",
+      "path": "assets/mascots/premium/gourmet-panda.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "dino-explorer",
+      "name": "Дино-исследователь",
+      "path": "assets/mascots/premium/dino-explorer.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "traveller-seal",
+      "name": "Тюлень-путешественник",
+      "path": "assets/mascots/premium/traveller-seal.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "polar-dog",
+      "name": "Полярный пёс",
+      "path": "assets/mascots/premium/polar-dog.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "photographer-bear",
+      "name": "Фотограф-медведь",
+      "path": "assets/mascots/premium/photographer-bear.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "cartographer-raven",
+      "name": "Картограф-ворон",
+      "path": "assets/mascots/premium/cartographer-raven.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "snow-leopard",
+      "name": "Снежный барс",
+      "path": "assets/mascots/premium/snow-leopard.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "northern-deer",
+      "name": "Северный олень",
+      "path": "assets/mascots/premium/northern-deer.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "yakut-bull",
+      "name": "Якутский бычок",
+      "path": "assets/mascots/premium/yakut-bull.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "robot-tourist",
+      "name": "Робо-турист",
+      "path": "assets/mascots/premium/robot-tourist.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "taiga-spirit",
+      "name": "Дух тайги",
+      "path": "assets/mascots/premium/taiga-spirit.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-trail",
+      "name": "Пёс-следопыт",
+      "path": "assets/mascots/premium/expedition-dog-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-scholar",
+      "name": "Пёс-мудрец",
+      "path": "assets/mascots/premium/expedition-dog-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-photo",
+      "name": "Пёс-фотограф",
+      "path": "assets/mascots/premium/expedition-dog-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-winter",
+      "name": "Пёс-полярник",
+      "path": "assets/mascots/premium/expedition-dog-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-magic",
+      "name": "Пёс-звездочёт",
+      "path": "assets/mascots/premium/expedition-dog-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-trail",
+      "name": "Заяц-следопыт",
+      "path": "assets/mascots/premium/expedition-rabbit-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-scholar",
+      "name": "Заяц-мудрец",
+      "path": "assets/mascots/premium/expedition-rabbit-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-photo",
+      "name": "Заяц-фотограф",
+      "path": "assets/mascots/premium/expedition-rabbit-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-winter",
+      "name": "Заяц-полярник",
+      "path": "assets/mascots/premium/expedition-rabbit-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-rabbit-magic",
+      "name": "Заяц-звездочёт",
+      "path": "assets/mascots/premium/expedition-rabbit-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-trail",
+      "name": "Кот-следопыт",
+      "path": "assets/mascots/premium/expedition-cat-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-scholar",
+      "name": "Кот-мудрец",
+      "path": "assets/mascots/premium/expedition-cat-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-photo",
+      "name": "Кот-фотограф",
+      "path": "assets/mascots/premium/expedition-cat-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-winter",
+      "name": "Кот-полярник",
+      "path": "assets/mascots/premium/expedition-cat-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-cat-magic",
+      "name": "Кот-звездочёт",
+      "path": "assets/mascots/premium/expedition-cat-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-trail",
+      "name": "Хомяк-следопыт",
+      "path": "assets/mascots/premium/expedition-hamster-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-scholar",
+      "name": "Хомяк-мудрец",
+      "path": "assets/mascots/premium/expedition-hamster-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-photo",
+      "name": "Хомяк-фотограф",
+      "path": "assets/mascots/premium/expedition-hamster-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-winter",
+      "name": "Хомяк-полярник",
+      "path": "assets/mascots/premium/expedition-hamster-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-magic",
+      "name": "Хомяк-звездочёт",
+      "path": "assets/mascots/premium/expedition-hamster-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-trail",
+      "name": "Сова-следопыт",
+      "path": "assets/mascots/premium/expedition-owl-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-scholar",
+      "name": "Сова-мудрец",
+      "path": "assets/mascots/premium/expedition-owl-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-photo",
+      "name": "Сова-фотограф",
+      "path": "assets/mascots/premium/expedition-owl-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-winter",
+      "name": "Сова-полярник",
+      "path": "assets/mascots/premium/expedition-owl-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-magic",
+      "name": "Сова-звездочёт",
+      "path": "assets/mascots/premium/expedition-owl-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-trail",
+      "name": "Енот-следопыт",
+      "path": "assets/mascots/premium/expedition-raccoon-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-scholar",
+      "name": "Енот-мудрец",
+      "path": "assets/mascots/premium/expedition-raccoon-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-photo",
+      "name": "Енот-фотограф",
+      "path": "assets/mascots/premium/expedition-raccoon-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-winter",
+      "name": "Енот-полярник",
+      "path": "assets/mascots/premium/expedition-raccoon-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-raccoon-magic",
+      "name": "Енот-звездочёт",
+      "path": "assets/mascots/premium/expedition-raccoon-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-trail",
+      "name": "Лис-следопыт",
+      "path": "assets/mascots/premium/expedition-fox-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-scholar",
+      "name": "Лис-мудрец",
+      "path": "assets/mascots/premium/expedition-fox-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-photo",
+      "name": "Лис-фотограф",
+      "path": "assets/mascots/premium/expedition-fox-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-winter",
+      "name": "Лис-полярник",
+      "path": "assets/mascots/premium/expedition-fox-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-fox-magic",
+      "name": "Лис-звездочёт",
+      "path": "assets/mascots/premium/expedition-fox-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-trail",
+      "name": "Бобр-следопыт",
+      "path": "assets/mascots/premium/expedition-beaver-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-scholar",
+      "name": "Бобр-мудрец",
+      "path": "assets/mascots/premium/expedition-beaver-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-photo",
+      "name": "Бобр-фотограф",
+      "path": "assets/mascots/premium/expedition-beaver-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-winter",
+      "name": "Бобр-полярник",
+      "path": "assets/mascots/premium/expedition-beaver-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-beaver-magic",
+      "name": "Бобр-звездочёт",
+      "path": "assets/mascots/premium/expedition-beaver-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-panda-trail",
+      "name": "Панда-следопыт",
+      "path": "assets/mascots/premium/expedition-panda-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-panda-scholar",
+      "name": "Панда-мудрец",
+      "path": "assets/mascots/premium/expedition-panda-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-panda-photo",
+      "name": "Панда-фотограф",
+      "path": "assets/mascots/premium/expedition-panda-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-panda-winter",
+      "name": "Панда-полярник",
+      "path": "assets/mascots/premium/expedition-panda-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-panda-magic",
+      "name": "Панда-звездочёт",
+      "path": "assets/mascots/premium/expedition-panda-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-trail",
+      "name": "Дино-следопыт",
+      "path": "assets/mascots/premium/expedition-dino-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-scholar",
+      "name": "Дино-мудрец",
+      "path": "assets/mascots/premium/expedition-dino-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-photo",
+      "name": "Дино-фотограф",
+      "path": "assets/mascots/premium/expedition-dino-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-winter",
+      "name": "Дино-полярник",
+      "path": "assets/mascots/premium/expedition-dino-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-magic",
+      "name": "Дино-звездочёт",
+      "path": "assets/mascots/premium/expedition-dino-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-trail",
+      "name": "Тюлень-следопыт",
+      "path": "assets/mascots/premium/expedition-seal-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-scholar",
+      "name": "Тюлень-мудрец",
+      "path": "assets/mascots/premium/expedition-seal-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-photo",
+      "name": "Тюлень-фотограф",
+      "path": "assets/mascots/premium/expedition-seal-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-winter",
+      "name": "Тюлень-полярник",
+      "path": "assets/mascots/premium/expedition-seal-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-magic",
+      "name": "Тюлень-звездочёт",
+      "path": "assets/mascots/premium/expedition-seal-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-trail",
+      "name": "Волк-следопыт",
+      "path": "assets/mascots/premium/expedition-wolf-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-scholar",
+      "name": "Волк-мудрец",
+      "path": "assets/mascots/premium/expedition-wolf-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-photo",
+      "name": "Волк-фотограф",
+      "path": "assets/mascots/premium/expedition-wolf-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-winter",
+      "name": "Волк-полярник",
+      "path": "assets/mascots/premium/expedition-wolf-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-magic",
+      "name": "Волк-звездочёт",
+      "path": "assets/mascots/premium/expedition-wolf-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-trail",
+      "name": "Медведь-следопыт",
+      "path": "assets/mascots/premium/expedition-bear-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-scholar",
+      "name": "Медведь-мудрец",
+      "path": "assets/mascots/premium/expedition-bear-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-photo",
+      "name": "Медведь-фотограф",
+      "path": "assets/mascots/premium/expedition-bear-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-winter",
+      "name": "Медведь-полярник",
+      "path": "assets/mascots/premium/expedition-bear-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-magic",
+      "name": "Медведь-звездочёт",
+      "path": "assets/mascots/premium/expedition-bear-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-trail",
+      "name": "Барс-следопыт",
+      "path": "assets/mascots/premium/expedition-leopard-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-scholar",
+      "name": "Барс-мудрец",
+      "path": "assets/mascots/premium/expedition-leopard-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-photo",
+      "name": "Барс-фотограф",
+      "path": "assets/mascots/premium/expedition-leopard-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-winter",
+      "name": "Барс-полярник",
+      "path": "assets/mascots/premium/expedition-leopard-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-magic",
+      "name": "Барс-звездочёт",
+      "path": "assets/mascots/premium/expedition-leopard-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-trail",
+      "name": "Олень-следопыт",
+      "path": "assets/mascots/premium/expedition-deer-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-scholar",
+      "name": "Олень-мудрец",
+      "path": "assets/mascots/premium/expedition-deer-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-photo",
+      "name": "Олень-фотограф",
+      "path": "assets/mascots/premium/expedition-deer-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-winter",
+      "name": "Олень-полярник",
+      "path": "assets/mascots/premium/expedition-deer-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-magic",
+      "name": "Олень-звездочёт",
+      "path": "assets/mascots/premium/expedition-deer-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-trail",
+      "name": "Бычок-следопыт",
+      "path": "assets/mascots/premium/expedition-bull-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-scholar",
+      "name": "Бычок-мудрец",
+      "path": "assets/mascots/premium/expedition-bull-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-photo",
+      "name": "Бычок-фотограф",
+      "path": "assets/mascots/premium/expedition-bull-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-winter",
+      "name": "Бычок-полярник",
+      "path": "assets/mascots/premium/expedition-bull-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bull-magic",
+      "name": "Бычок-звездочёт",
+      "path": "assets/mascots/premium/expedition-bull-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-trail",
+      "name": "Робот-следопыт",
+      "path": "assets/mascots/premium/expedition-robot-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-scholar",
+      "name": "Робот-мудрец",
+      "path": "assets/mascots/premium/expedition-robot-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-photo",
+      "name": "Робот-фотограф",
+      "path": "assets/mascots/premium/expedition-robot-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-winter",
+      "name": "Робот-полярник",
+      "path": "assets/mascots/premium/expedition-robot-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-robot-magic",
+      "name": "Робот-звездочёт",
+      "path": "assets/mascots/premium/expedition-robot-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-trail",
+      "name": "Дух-следопыт",
+      "path": "assets/mascots/premium/expedition-spirit-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-scholar",
+      "name": "Дух-мудрец",
+      "path": "assets/mascots/premium/expedition-spirit-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-photo",
+      "name": "Дух-фотограф",
+      "path": "assets/mascots/premium/expedition-spirit-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-winter",
+      "name": "Дух-полярник",
+      "path": "assets/mascots/premium/expedition-spirit-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-spirit-magic",
+      "name": "Дух-звездочёт",
+      "path": "assets/mascots/premium/expedition-spirit-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-trail",
+      "name": "Ворон-следопыт",
+      "path": "assets/mascots/premium/expedition-raven-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-scholar",
+      "name": "Ворон-мудрец",
+      "path": "assets/mascots/premium/expedition-raven-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-photo",
+      "name": "Ворон-фотограф",
+      "path": "assets/mascots/premium/expedition-raven-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-winter",
+      "name": "Ворон-полярник",
+      "path": "assets/mascots/premium/expedition-raven-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-magic",
+      "name": "Ворон-звездочёт",
+      "path": "assets/mascots/premium/expedition-raven-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-trail",
+      "name": "Ёж-следопыт",
+      "path": "assets/mascots/premium/expedition-hedgehog-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-scholar",
+      "name": "Ёж-мудрец",
+      "path": "assets/mascots/premium/expedition-hedgehog-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-photo",
+      "name": "Ёж-фотограф",
+      "path": "assets/mascots/premium/expedition-hedgehog-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-winter",
+      "name": "Ёж-полярник",
+      "path": "assets/mascots/premium/expedition-hedgehog-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-magic",
+      "name": "Ёж-звездочёт",
+      "path": "assets/mascots/premium/expedition-hedgehog-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-trail",
+      "name": "Белка-следопыт",
+      "path": "assets/mascots/premium/expedition-squirrel-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-scholar",
+      "name": "Белка-мудрец",
+      "path": "assets/mascots/premium/expedition-squirrel-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-photo",
+      "name": "Белка-фотограф",
+      "path": "assets/mascots/premium/expedition-squirrel-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-winter",
+      "name": "Белка-полярник",
+      "path": "assets/mascots/premium/expedition-squirrel-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-squirrel-magic",
+      "name": "Белка-звездочёт",
+      "path": "assets/mascots/premium/expedition-squirrel-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-trail",
+      "name": "Пингвин-следопыт",
+      "path": "assets/mascots/premium/expedition-penguin-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-scholar",
+      "name": "Пингвин-мудрец",
+      "path": "assets/mascots/premium/expedition-penguin-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-photo",
+      "name": "Пингвин-фотограф",
+      "path": "assets/mascots/premium/expedition-penguin-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-winter",
+      "name": "Пингвин-полярник",
+      "path": "assets/mascots/premium/expedition-penguin-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-penguin-magic",
+      "name": "Пингвин-звездочёт",
+      "path": "assets/mascots/premium/expedition-penguin-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-trail",
+      "name": "Лось-следопыт",
+      "path": "assets/mascots/premium/expedition-moose-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-scholar",
+      "name": "Лось-мудрец",
+      "path": "assets/mascots/premium/expedition-moose-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-photo",
+      "name": "Лось-фотограф",
+      "path": "assets/mascots/premium/expedition-moose-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-moose-winter",
+      "name": "Лось-полярник",
+      "path": "assets/mascots/premium/expedition-moose-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    }
+  ]
+}
