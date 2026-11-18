@@ -296,6 +296,70 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-photo",
+      "name": "Хомяк-фотограф",
+      "path": "assets/mascots/premium/expedition-hamster-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-winter",
+      "name": "Хомяк-полярник",
+      "path": "assets/mascots/premium/expedition-hamster-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-hamster-magic",
+      "name": "Хомяк-звездочёт",
+      "path": "assets/mascots/premium/expedition-hamster-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-trail",
+      "name": "Сова-следопыт",
+      "path": "assets/mascots/premium/expedition-owl-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-scholar",
+      "name": "Сова-мудрец",
+      "path": "assets/mascots/premium/expedition-owl-scholar.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-photo",
+      "name": "Сова-фотограф",
+      "path": "assets/mascots/premium/expedition-owl-photo.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-winter",
+      "name": "Сова-полярник",
+      "path": "assets/mascots/premium/expedition-owl-winter.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-owl-magic",
+      "name": "Сова-звездочёт",
+      "path": "assets/mascots/premium/expedition-owl-magic.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
