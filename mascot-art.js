@@ -6,7 +6,7 @@
 })(typeof window!=='undefined'?window:null,function(){
  'use strict';
  const cache=new Map();
- const premiumPortraits=Object.freeze({'runner-rabbit':'assets/mascots/premium/runner-rabbit.webp','student-cat':'assets/mascots/premium/student-cat.webp','traveller-puppy':'assets/mascots/premium/traveller-puppy.webp','tourist-hamster':'assets/mascots/premium/tourist-hamster.webp','scholar-owl':'assets/mascots/premium/scholar-owl.webp'});
+ const premiumPortraits=Object.freeze({'runner-rabbit':'assets/mascots/premium/runner-rabbit.webp','student-cat':'assets/mascots/premium/student-cat.webp','traveller-puppy':'assets/mascots/premium/traveller-puppy.webp','tourist-hamster':'assets/mascots/premium/tourist-hamster.webp','scholar-owl':'assets/mascots/premium/scholar-owl.webp','collector-raccoon':'assets/mascots/premium/collector-raccoon.webp','explorer-fox':'assets/mascots/premium/explorer-fox.webp','builder-beaver':'assets/mascots/premium/builder-beaver.webp','gamer-cat':'assets/mascots/premium/gamer-cat.webp'});
  const species={
   dog:['#fff0ca','#c97b3b','#5c3424','point'],rabbit:['#fff6fb','#e5a5d0','#8b497f','long'],
   cat:['#d7e8ff','#7582b5','#303956','point'],hamster:['#ffe2a0','#d69e58','#784225','round'],

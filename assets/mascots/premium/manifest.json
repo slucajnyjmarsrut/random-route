@@ -40,6 +40,38 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "collector-raccoon",
+      "name": "Енот-собиратель",
+      "path": "assets/mascots/premium/collector-raccoon.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "explorer-fox",
+      "name": "Лис-исследователь",
+      "path": "assets/mascots/premium/explorer-fox.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "builder-beaver",
+      "name": "Бобр-мастер",
+      "path": "assets/mascots/premium/builder-beaver.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "gamer-cat",
+      "name": "Геймер-кот",
+      "path": "assets/mascots/premium/gamer-cat.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
