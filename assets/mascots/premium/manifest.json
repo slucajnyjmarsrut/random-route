@@ -496,6 +496,38 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-panda-photo",
+      "name": "Панда-фотограф",
+      "path": "assets/mascots/premium/expedition-panda-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-panda-winter",
+      "name": "Панда-полярник",
+      "path": "assets/mascots/premium/expedition-panda-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-panda-magic",
+      "name": "Панда-звездочёт",
+      "path": "assets/mascots/premium/expedition-panda-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-dino-trail",
+      "name": "Дино-следопыт",
+      "path": "assets/mascots/premium/expedition-dino-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
