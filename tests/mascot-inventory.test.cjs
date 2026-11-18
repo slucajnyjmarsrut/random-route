@@ -1,6 +1,7 @@
-const test=require('node:test'),assert=require('node:assert/strict');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const M=require('../mascot-collection.js'),C=require('../mascot-chests.js');
 const I=require('../mascot-inventory.js'),Art=require('../mascot-art.js');
+const artManifest=require('../assets/mascots/premium/manifest.json');
 const stats={routes:0,photos:0,quests:0,streak:0,km:0};
 test('145 unique illustrated mascots',()=>{
  assert.equal(M.mascots.length,145);
@@ -8,9 +9,14 @@ test('145 unique illustrated mascots',()=>{
  assert.equal(new Set(M.mascots.map(x=>x.name)).size,145);
  const sources=new Set(M.mascots.map(x=>Art.avatar(x)));
  assert.ok(sources.size>=55,'distinct premium and fallback character portraits');
- assert.match(Art.avatar(M.mascots.find(x=>x.id==='traveller-puppy')),/^assets\/mascots\/3d\/wolf\.webp$/);
- assert.match(Art.avatar(M.mascots.find(x=>x.id==='gourmet-panda')),/^assets\/mascots\/3d\/panda\.webp$/);
- assert.match(Art.avatar(M.mascots.find(x=>x.id==='runner-rabbit')),/^data:image\/svg\+xml/);
+ assert.equal(artManifest.images.length,134,'manifest lists every newly created unique portrait');
+ for(const entry of artManifest.images){
+  const mascot=M.mascots.find(x=>x.id===entry.id);
+  assert.ok(mascot,'manifest ID exists in the mascot catalog: '+entry.id);
+  assert.equal(Art.avatar(mascot),entry.path,'portrait is connected to its mascot ID: '+entry.id);
+  assert.ok(fs.existsSync(entry.path),'portrait file exists: '+entry.path);
+ }
+ assert.match(Art.avatar(M.mascots.find(x=>x.id==='runner-rabbit')),/^assets\\/mascots\\/premium\\/runner-rabbit\\.webp$/);
 });
 test('duplicate chests keep existing mascots in the drop pool',()=>{
  const id='traveller-puppy',item=M.mascots.find(x=>x.id===id);
