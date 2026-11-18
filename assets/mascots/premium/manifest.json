@@ -104,6 +104,38 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "photographer-bear",
+      "name": "Фотограф-медведь",
+      "path": "assets/mascots/premium/photographer-bear.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "cartographer-raven",
+      "name": "Картограф-ворон",
+      "path": "assets/mascots/premium/cartographer-raven.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "snow-leopard",
+      "name": "Снежный барс",
+      "path": "assets/mascots/premium/snow-leopard.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "northern-deer",
+      "name": "Северный олень",
+      "path": "assets/mascots/premium/northern-deer.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
