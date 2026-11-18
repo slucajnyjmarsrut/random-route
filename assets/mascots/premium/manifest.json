@@ -688,6 +688,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-leopard-scholar",
+      "name": "Барс-мудрец",
+      "path": "assets/mascots/premium/expedition-leopard-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-photo",
+      "name": "Барс-фотограф",
+      "path": "assets/mascots/premium/expedition-leopard-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-winter",
+      "name": "Барс-полярник",
+      "path": "assets/mascots/premium/expedition-leopard-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-magic",
+      "name": "Барс-звездочёт",
+      "path": "assets/mascots/premium/expedition-leopard-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-trail",
+      "name": "Олень-следопыт",
+      "path": "assets/mascots/premium/expedition-deer-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-scholar",
+      "name": "Олень-мудрец",
+      "path": "assets/mascots/premium/expedition-deer-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-photo",
+      "name": "Олень-фотограф",
+      "path": "assets/mascots/premium/expedition-deer-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-deer-winter",
+      "name": "Олень-полярник",
+      "path": "assets/mascots/premium/expedition-deer-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
