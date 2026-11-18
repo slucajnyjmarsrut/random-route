@@ -72,6 +72,38 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "gourmet-panda",
+      "name": "Панда-гурман",
+      "path": "assets/mascots/premium/gourmet-panda.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "dino-explorer",
+      "name": "Дино-исследователь",
+      "path": "assets/mascots/premium/dino-explorer.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "traveller-seal",
+      "name": "Тюлень-путешественник",
+      "path": "assets/mascots/premium/traveller-seal.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "polar-dog",
+      "name": "Полярный пёс",
+      "path": "assets/mascots/premium/polar-dog.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
