@@ -624,6 +624,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-wolf-winter",
+      "name": "Волк-полярник",
+      "path": "assets/mascots/premium/expedition-wolf-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-magic",
+      "name": "Волк-звездочёт",
+      "path": "assets/mascots/premium/expedition-wolf-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-trail",
+      "name": "Медведь-следопыт",
+      "path": "assets/mascots/premium/expedition-bear-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-scholar",
+      "name": "Медведь-мудрец",
+      "path": "assets/mascots/premium/expedition-bear-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-photo",
+      "name": "Медведь-фотограф",
+      "path": "assets/mascots/premium/expedition-bear-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-winter",
+      "name": "Медведь-полярник",
+      "path": "assets/mascots/premium/expedition-bear-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-bear-magic",
+      "name": "Медведь-звездочёт",
+      "path": "assets/mascots/premium/expedition-bear-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-leopard-trail",
+      "name": "Барс-следопыт",
+      "path": "assets/mascots/premium/expedition-leopard-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
