@@ -560,6 +560,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-seal-trail",
+      "name": "Тюлень-следопыт",
+      "path": "assets/mascots/premium/expedition-seal-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-scholar",
+      "name": "Тюлень-мудрец",
+      "path": "assets/mascots/premium/expedition-seal-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-photo",
+      "name": "Тюлень-фотограф",
+      "path": "assets/mascots/premium/expedition-seal-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-winter",
+      "name": "Тюлень-полярник",
+      "path": "assets/mascots/premium/expedition-seal-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-seal-magic",
+      "name": "Тюлень-звездочёт",
+      "path": "assets/mascots/premium/expedition-seal-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-trail",
+      "name": "Волк-следопыт",
+      "path": "assets/mascots/premium/expedition-wolf-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-scholar",
+      "name": "Волк-мудрец",
+      "path": "assets/mascots/premium/expedition-wolf-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-wolf-photo",
+      "name": "Волк-фотограф",
+      "path": "assets/mascots/premium/expedition-wolf-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
