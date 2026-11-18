@@ -136,6 +136,38 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "yakut-bull",
+      "name": "Якутский бычок",
+      "path": "assets/mascots/premium/yakut-bull.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "robot-tourist",
+      "name": "Робо-турист",
+      "path": "assets/mascots/premium/robot-tourist.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "taiga-spirit",
+      "name": "Дух тайги",
+      "path": "assets/mascots/premium/taiga-spirit.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "expedition-dog-trail",
+      "name": "Пёс-следопыт",
+      "path": "assets/mascots/premium/expedition-dog-trail.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
