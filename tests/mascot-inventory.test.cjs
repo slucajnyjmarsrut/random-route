@@ -1,4 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const {createHash}=require('node:crypto'),{resolve}=require('node:path');
 const M=require('../mascot-collection.js'),C=require('../mascot-chests.js');
 const I=require('../mascot-inventory.js'),Art=require('../mascot-art.js');
 const artManifest=require('../assets/mascots/premium/manifest.json');
@@ -8,14 +9,25 @@ test('145 unique illustrated mascots',()=>{
  assert.equal(new Set(M.mascots.map(x=>x.id)).size,145);
  assert.equal(new Set(M.mascots.map(x=>x.name)).size,145);
  const sources=new Set(M.mascots.map(x=>Art.avatar(x)));
- assert.ok(sources.size>=55,'distinct premium and fallback character portraits');
- assert.equal(artManifest.images.length,134,'manifest lists every newly created unique portrait');
+ assert.equal(sources.size,M.mascots.length,'each mascot has a separate portrait');
+ assert.deepEqual(artManifest.images.map(x=>x.id).sort(),M.mascots.map(x=>x.id).sort());
+ const hashes=new Set();
  for(const entry of artManifest.images){
   const mascot=M.mascots.find(x=>x.id===entry.id);
   assert.ok(mascot,'manifest ID exists in the mascot catalog: '+entry.id);
   assert.equal(Art.avatar(mascot),entry.path,'portrait is connected to its mascot ID: '+entry.id);
-  assert.ok(fs.existsSync(entry.path),'portrait file exists: '+entry.path);
+  const image=fs.readFileSync(resolve(__dirname,'..',entry.path));
+  if(entry.format==='webp'){
+   assert.equal(image.toString('ascii',0,4),'RIFF',entry.path);
+   assert.equal(image.toString('ascii',8,12),'WEBP',entry.path);
+   assert.equal(image.readUInt32LE(4)+8,image.length,entry.path);
+  }else{
+   assert.equal(entry.format,'png',entry.path);
+   assert.equal(image.subarray(0,8).toString('hex'),'89504e470d0a1a0a',entry.path);
+  }
+  hashes.add(createHash('sha256').update(image).digest('hex'));
  }
+ assert.equal(hashes.size,M.mascots.length,'portrait files have distinct contents');
 });
 test('duplicate chests keep existing mascots in the drop pool',()=>{
  const id='traveller-puppy',item=M.mascots.find(x=>x.id===id);
