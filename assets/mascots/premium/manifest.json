@@ -488,6 +488,14 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "expedition-panda-scholar",
+      "name": "Панда-мудрец",
+      "path": "assets/mascots/premium/expedition-panda-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
