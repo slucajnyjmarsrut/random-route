@@ -880,6 +880,70 @@
       "width": 1254,
       "height": 1254,
       "format": "png"
+    },
+    {
+      "id": "expedition-raven-trail",
+      "name": "Ворон-следопыт",
+      "path": "assets/mascots/premium/expedition-raven-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-scholar",
+      "name": "Ворон-мудрец",
+      "path": "assets/mascots/premium/expedition-raven-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-photo",
+      "name": "Ворон-фотограф",
+      "path": "assets/mascots/premium/expedition-raven-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-winter",
+      "name": "Ворон-полярник",
+      "path": "assets/mascots/premium/expedition-raven-winter.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-raven-magic",
+      "name": "Ворон-звездочёт",
+      "path": "assets/mascots/premium/expedition-raven-magic.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-trail",
+      "name": "Ёж-следопыт",
+      "path": "assets/mascots/premium/expedition-hedgehog-trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-scholar",
+      "name": "Ёж-мудрец",
+      "path": "assets/mascots/premium/expedition-hedgehog-scholar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
+    },
+    {
+      "id": "expedition-hedgehog-photo",
+      "name": "Ёж-фотограф",
+      "path": "assets/mascots/premium/expedition-hedgehog-photo.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "png"
     }
   ]
 }
