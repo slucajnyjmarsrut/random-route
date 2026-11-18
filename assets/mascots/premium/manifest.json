@@ -8,6 +8,38 @@
       "width": 1254,
       "height": 1254,
       "format": "webp"
+    },
+    {
+      "id": "student-cat",
+      "name": "Кот-студент",
+      "path": "assets/mascots/premium/student-cat.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "traveller-puppy",
+      "name": "Щенок-путник",
+      "path": "assets/mascots/premium/traveller-puppy.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "tourist-hamster",
+      "name": "Хомяк-турист",
+      "path": "assets/mascots/premium/tourist-hamster.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
+    },
+    {
+      "id": "scholar-owl",
+      "name": "Сова-знаток",
+      "path": "assets/mascots/premium/scholar-owl.webp",
+      "width": 1254,
+      "height": 1254,
+      "format": "webp"
     }
   ]
 }
